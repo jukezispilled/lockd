@@ -22,6 +22,31 @@ export default function Home() {
     setMounted(true);
   }, []);
 
+  const fetchBalance = async () => {
+    if (!publicKey) return;
+    setLoading(true);
+    try {
+      const balance = await connection.getBalance(publicKey);
+      setBalance(balance / LAMPORTS_PER_SOL);
+    } catch (error) {
+      console.error('Error fetching balance:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTokenCreationSuccess = () => {
+    fetchBalance();
+  };
+
+  useEffect(() => {
+    if (connected && publicKey) {
+      fetchBalance();
+    } else {
+      setBalance(null);
+    }
+  }, [connected, publicKey]);
+
   if (!mounted) return null;
 
   return (
