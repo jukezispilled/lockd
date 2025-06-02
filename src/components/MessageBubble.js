@@ -1,6 +1,6 @@
-// components/MessageBubble.js
-
 "use client";
+
+import Image from 'next/image'; // Import the Image component
 
 export const MessageBubble = ({ message, isOwn, showAvatar }) => {
   const formatTime = (timestamp) => {
@@ -16,8 +16,17 @@ export const MessageBubble = ({ message, isOwn, showAvatar }) => {
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} items-center space-x-2`}>
       {!isOwn && (
-        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-          {showAvatar ? getSenderName(message.senderPublicKey)[0].toUpperCase() : ''}
+        // Use Next.js Image component for the avatar
+        <div className="flex-shrink-0">
+          {showAvatar && (
+            <Image
+              src="/anon.jpg" // Path to your image in the public folder
+              alt="Avatar"
+              width={32} // Set appropriate width
+              height={32} // Set appropriate height
+              className="rounded-full" // Apply styling for a circular avatar
+            />
+          )}
         </div>
       )}
       
@@ -44,8 +53,18 @@ export const MessageBubble = ({ message, isOwn, showAvatar }) => {
       </div>
 
       {isOwn && (
-        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-          {showAvatar ? getSenderName(message.senderPublicKey)[0].toUpperCase() : ''}
+        // For the "own" message, you can also use anon.jpg or keep the current approach
+        // if you want a different avatar for the sender.
+        <div className="flex-shrink-0">
+          {showAvatar && (
+            <Image
+              src="/anon.jpg" // Path to your image in the public folder
+              alt="Avatar"
+              width={32} // Set appropriate width
+              height={32} // Set appropriate height
+              className="rounded-full" // Apply styling for a circular avatar
+            />
+          )}
         </div>
       )}
     </div>
