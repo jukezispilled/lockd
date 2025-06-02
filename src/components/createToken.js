@@ -448,7 +448,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                 onChange={handleInputChange}
                 placeholder="0.1"
                 step="0.01"
-                min="0.01"
+                min="0.005"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-black"
                 disabled={isCreatingToken}
               />
