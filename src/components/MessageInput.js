@@ -64,15 +64,11 @@ export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
         <button
           type="submit"
           disabled={!message.trim() || disabled || message.length > 1000}
-          className="text-2xl bg-white p-3 rounded-full disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[48px] h-12"
+          className="text-2xl bg-green-300 p-3 rounded-full disabled:bg-red-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[48px] h-12"
         >
             ⬆️
         </button>
       </form>
-      
-      <div className="text-xs text-gray-400 mt-2 text-center">
-        Press Enter to send • Shift+Enter for new line
-      </div>
     </div>
   );
 };
