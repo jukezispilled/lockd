@@ -4,6 +4,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
 import { MessageList } from '@/components/MessageList';
 import { MessageInput } from '@/components/MessageInput';
 import { ChatHeader } from '@/components/ChatHeader';
@@ -64,52 +65,79 @@ export default function ChatPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-gray-600">Loading chat...</p>
-        </div>
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key="loading"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.25 }}
+          className="flex items-center justify-center min-h-screen"
+        >
+          <div className="text-center">
+            <p className="text-gray-600">Loading chat...</p>
+          </div>
+        </motion.div>
+      </AnimatePresence>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Chat Not Found</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={() => window.history.back()}
-            className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800"
-          >
-            Go Back
-          </button>
-        </div>
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key="error"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.25 }}
+          className="flex items-center justify-center min-h-screen"
+        >
+          <div className="text-center">
+            <div className="text-red-500 text-6xl mb-4">⚠️</div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Chat Not Found</h2>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.history.back()}
+              className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800"
+            >
+              Go Back
+            </button>
+          </div>
+        </motion.div>
+      </AnimatePresence>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen">
-      <ChatHeader chatData={chatData} />
-      
-      <div className="flex-1 overflow-hidden flex flex-col justify-center items-center">
-        <div className='h-[85%] w-[75%] border border-gray-300 rounded-xl p-8'>
-          <MessageList 
-            messages={messages} 
-            isLoading={isSendingMessage}
-            error={messageError}
-          />
-        <div ref={messagesEndRef} />
+    <AnimatePresence mode="wait">
+      <motion.div
+        key="chat-page"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.25 }}
+        className="flex flex-col h-screen"
+      >
+        <ChatHeader chatData={chatData} />
+        
+        <div className="flex-1 overflow-hidden flex flex-col justify-center items-center">
+          <div className='h-[85%] w-[75%] border border-gray-300 rounded-xl p-8'>
+            <MessageList 
+              messages={messages} 
+              isLoading={isSendingMessage}
+              error={messageError}
+            />
+          <div ref={messagesEndRef} />
+          </div>
         </div>
-      </div>
 
-      <MessageInput 
-        onSendMessage={sendMessage}
-        disabled={isSendingMessage}
-        chatId={chatId}
-      />
-    </div>
+        <MessageInput 
+          onSendMessage={sendMessage}
+          disabled={isSendingMessage}
+          chatId={chatId}
+        />
+      </motion.div>
+    </AnimatePresence>
   );
 }
