@@ -57,7 +57,7 @@ export default function ChatPage() {
 
     const interval = setInterval(() => {
       refreshMessages();
-    }, 3000);
+    }, 9000);
 
     return () => clearInterval(interval);
   }, [chatId, refreshMessages]);

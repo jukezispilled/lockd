@@ -1,13 +1,21 @@
 // hooks/useChatMessages.js
 
 import { useState, useEffect, useCallback } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
 
 export const useChatMessages = (chatId) => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { publicKey: userPublicKey } = useWallet(); // Get user's public key from useWallet
+
+  // Get user's wallet public key (you'll need to adapt this to your wallet connection)
+  const getCurrentUserPublicKey = () => {
+    // This should return the current user's wallet public key
+    // You'll need to integrate this with your wallet connection logic
+    if (typeof window !== 'undefined' && window.solana && window.solana.publicKey) {
+      return window.solana.publicKey.toString();
+    }
+    return null;
+  };
 
   const fetchMessages = useCallback(async () => {
     if (!chatId) return;
@@ -19,11 +27,12 @@ export const useChatMessages = (chatId) => {
       }
       
       const data = await response.json();
+      const currentUserPK = getCurrentUserPublicKey();
       
       // Mark messages as own if they belong to current user
       const messagesWithOwnership = data.messages.map(msg => ({
         ...msg,
-        isOwn: userPublicKey && msg.senderPublicKey === userPublicKey.toString()
+        isOwn: msg.senderPublicKey === currentUserPK
       }));
       
       setMessages(messagesWithOwnership);
@@ -32,7 +41,7 @@ export const useChatMessages = (chatId) => {
       console.error('Error fetching messages:', err);
       setError(err.message);
     }
-  }, [chatId, userPublicKey]); // Add userPublicKey to dependencies
+  }, [chatId]);
 
   const sendMessage = async (content) => {
     if (!chatId || !content.trim()) return;
@@ -41,6 +50,7 @@ export const useChatMessages = (chatId) => {
     setError(null);
 
     try {
+      const userPublicKey = getCurrentUserPublicKey();
       if (!userPublicKey) {
         throw new Error('Please connect your wallet to send messages');
       }
@@ -52,7 +62,7 @@ export const useChatMessages = (chatId) => {
         },
         body: JSON.stringify({
           content: content.trim(),
-          senderPublicKey: userPublicKey.toString() // Use userPublicKey directly
+          senderPublicKey: userPublicKey
         }),
       });
 
