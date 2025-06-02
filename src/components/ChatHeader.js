@@ -18,7 +18,7 @@ export const ChatHeader = ({ chatData }) => {
               onClick={() => window.history.back()}
               className="text-gray-600 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100"
             >
-              ←
+              ⬅️
             </button>
             <div>
               <h1 className="text-xl font-bold text-gray-800">{chatData.name}</h1>
