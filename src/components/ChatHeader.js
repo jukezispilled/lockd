@@ -29,10 +29,6 @@ export const ChatHeader = ({ chatData }) => {
           </div>
           
           <div className="flex items-center space-x-2">
-            <div className="flex items-center space-x-1 text-sm text-gray-500">
-              <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-              <span>Active</span>
-            </div>
             <button
               onClick={() => setShowDetails(!showDetails)}
               className="text-gray-600 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100"
