@@ -58,7 +58,7 @@ export const MessageBubble = ({ message, isOwn, showAvatar }) => {
         <div className="flex-shrink-0">
           {showAvatar && (
             <Image
-              src="/anon.jpg"
+              src="/anon1.jpg"
               alt="Avatar"
               width={36}
               height={36}
