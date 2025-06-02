@@ -1,24 +1,25 @@
 // app/api/chat/create/route.js
 import { MongoClient, ObjectId } from 'mongodb';
 
+// If you want to use Edge Runtime, add this:
+// export const runtime = 'edge';
+
 const uri = process.env.MONGODB_URI;
 
 if (!uri) {
   throw new Error('Please add your MongoDB URI to .env.local');
 }
 
-// Create a single client instance and reuse connections
-let client;
-let clientPromise;
-
-if (!client) {
-  client = new MongoClient(uri);
-  clientPromise = client.connect();
-}
-
 export async function POST(request) {
-  let db;
-  
+  // Create connection inside the function for Edge compatibility
+  const client = new MongoClient(uri, {
+    // Edge-optimized connection options
+    maxPoolSize: 1, // Keep pool small for Edge
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 3000,
+    connectTimeoutMS: 5000,
+  });
+
   try {
     console.log('Starting chat creation request...');
     
@@ -37,9 +38,9 @@ export async function POST(request) {
       );
     }
 
-    // Connect to MongoDB
-    await clientPromise;
-    db = client.db('tokenchat');
+    // Connect to MongoDB (fresh connection for each request in Edge)
+    await client.connect();
+    const db = client.db('tokenchat');
     const chatsCollection = db.collection('groupchats');
 
     console.log('Connected to MongoDB');
@@ -50,7 +51,7 @@ export async function POST(request) {
       console.log('Chat already exists for token:', tokenMint);
       return Response.json({
         success: true,
-        chatId: existingChat._id,
+        chatId: existingChat._id.toString(),
         chatName: existingChat.name,
         message: 'Chat already exists'
       });
@@ -115,7 +116,8 @@ export async function POST(request) {
       },
       { status: 500 }
     );
+  } finally {
+    // Always close connection in Edge runtime
+    await client.close();
   }
-  // Note: Don't close the client connection here for better performance
-  // The connection will be reused for subsequent requests
 }
