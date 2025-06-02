@@ -43,7 +43,6 @@ export const MessageList = ({ messages, isLoading, error }) => {
       {isLoading && (
         <div className="flex justify-center">
           <div className="flex items-center space-x-2 text-gray-500">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
             <span className="text-sm">Sending...</span>
           </div>
         </div>
