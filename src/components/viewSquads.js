@@ -37,7 +37,7 @@ export default function Squad() {
   const handleChatClick = (chatId) => {
     // Assuming your chat page route is something like /chat/[chatId]
     // For example, if chatId is '65b4c1a2e7c9d0b7f8e3a2b1', it navigates to /chat/65b4c1a2e7c9d0b7f8e3a2b1
-    router.push(`/chat/${chatId}`);
+    router.push(`/${chatId}`);
   };
 
   if (loading) {
