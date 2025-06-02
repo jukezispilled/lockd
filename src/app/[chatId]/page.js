@@ -94,8 +94,8 @@ export default function ChatPage() {
     <div className="flex flex-col h-screen">
       <ChatHeader chatData={chatData} />
       
-      <div className="flex-1 overflow-hidden flex flex-col">
-        <div className='h-[75%] w-[85%] border rounded-xl p-8'>
+      <div className="flex-1 overflow-hidden flex flex-col justify-center items-center">
+        <div className='h-[75%] w-[85%] border border-gray-300 rounded-xl p-8'>
           <MessageList 
             messages={messages} 
             isLoading={isSendingMessage}
