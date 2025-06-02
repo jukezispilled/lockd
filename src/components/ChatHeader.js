@@ -11,7 +11,7 @@ export const ChatHeader = ({ chatData }) => {
 
   return (
     <>
-      <div className="bg-white border-b border-gray-200 p-4 shadow-sm">
+      <div className="bg-white p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <button

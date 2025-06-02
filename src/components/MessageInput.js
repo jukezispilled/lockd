@@ -39,7 +39,7 @@ export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
   }, [message]);
 
   return (
-    <div className="bg-white border-t border-gray-200 p-4">
+    <div className="bg-white p-4">
       <form onSubmit={handleSubmit} className="flex items-end space-x-3">
         <div className="flex-1 relative">
           <textarea
