@@ -15,7 +15,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
     twitter: '',
     telegram: '',
     website: '',
-    devBuyAmount: '0.01', // SOL amount for dev buy
+    devBuyAmount: '0.005', // SOL amount for dev buy
     image: null // This will store the File object
   });
 
