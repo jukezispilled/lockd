@@ -92,7 +92,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen">
       <ChatHeader chatData={chatData} />
       
       <div className="flex-1 overflow-hidden flex flex-col">
