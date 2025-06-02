@@ -15,20 +15,23 @@ export const MessageBubble = ({ message, isOwn, showAvatar }) => {
 
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} items-start gap-2`}>
-      {/* Conditionally render avatar on the left for others' messages */}
-      {!isOwn && showAvatar && (
+      {/* Avatar for other users (left side) */}
+      {!isOwn && (
         <div className="flex-shrink-0">
-          <Image
-            src="/anon.jpg" // Path to your image in the public folder
-            alt="Avatar"
-            width={36} // Set appropriate width
-            height={36} // Set appropriate height
-            className="rounded-full" // Apply styling for a circular avatar
-          />
+          {showAvatar && (
+            <Image
+              src="/anon.jpg"
+              alt="Avatar"
+              width={36}
+              height={36}
+              className="rounded-full"
+            />
+          )}
         </div>
       )}
       
-      <div className={`max-w-xs lg:max-w-md ${isOwn ? 'order-1' : 'order-2'}`}>
+      {/* Message content */}
+      <div className="max-w-xs lg:max-w-md">
         {!isOwn && showAvatar && (
           <div className="text-xs text-gray-500 mb-1 px-2">
             {getSenderName(message.senderPublicKey)}
@@ -50,16 +53,18 @@ export const MessageBubble = ({ message, isOwn, showAvatar }) => {
         </div>
       </div>
 
-      {/* Conditionally render avatar on the right for own messages */}
-      {isOwn && showAvatar && (
+      {/* Avatar for own messages (right side) */}
+      {isOwn && (
         <div className="flex-shrink-0">
-          <Image
-            src="/anon.jpg" // Path to your image in the public folder
-            alt="Avatar"
-            width={36} // Set appropriate width
-            height={36} // Set appropriate height
-            className="rounded-full" // Apply styling for a circular avatar
-          />
+          {showAvatar && (
+            <Image
+              src="/anon.jpg"
+              alt="Avatar"
+              width={36}
+              height={36}
+              className="rounded-full"
+            />
+          )}
         </div>
       )}
     </div>
