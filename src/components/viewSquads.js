@@ -45,7 +45,7 @@ export default function Squad() {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.25 }}
-        className="flex justify-center items-center min-h-screen"
+        className="flex justify-center items-center"
       >
         Loading group chats...
       </motion.div>
