@@ -33,10 +33,7 @@ export default function Squad() {
     fetchGroupChats();
   }, []); // The empty dependency array ensures this runs once on mount
 
-  // Function to handle click and navigate
   const handleChatClick = (chatId) => {
-    // Assuming your chat page route is something like /chat/[chatId]
-    // For example, if chatId is '65b4c1a2e7c9d0b7f8e3a2b1', it navigates to /chat/65b4c1a2e7c9d0b7f8e3a2b1
     router.push(`/${chatId}`);
   };
 
@@ -109,6 +106,9 @@ export default function Squad() {
                     <h3 className="text-white text-lg font-semibold truncate">
                         {chat.name || "Untitled Group Chat"}
                     </h3>
+                    <p className="text-gray-400 text-sm mt-1 line-clamp-2">
+                        {chat.tokenMint || "No description provided."}
+                    </p>
                     <p className="text-gray-400 text-sm mt-1 line-clamp-2">
                         {chat.description || "No description provided."}
                     </p>
