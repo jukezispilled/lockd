@@ -14,7 +14,7 @@ export const MessageBubble = ({ message, isOwn, showAvatar }) => {
   };
 
   return (
-    <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} items-end space-x-2`}>
+    <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} items-center space-x-2`}>
       {!isOwn && (
         <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
           {showAvatar ? getSenderName(message.senderPublicKey)[0].toUpperCase() : ''}
