@@ -2,16 +2,21 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation'; // Import useRouter from next/navigation
 
 export default function Squad() {
   const [groupChats, setGroupChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const router = useRouter(); // Initialize the useRouter hook
 
   useEffect(() => {
     async function fetchGroupChats() {
       try {
-        const response = await fetch('/api/chat/view'); // Assuming your API route is /api/groupchats
+        // IMPORTANT: Ensure your API route for getting ALL group chats is correct.
+        // If it's /api/chat/view as in your code, that's fine.
+        // If it was meant to be /api/groupchats as in the previous example, adjust it.
+        const response = await fetch('/api/chat/view');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -27,6 +32,13 @@ export default function Squad() {
 
     fetchGroupChats();
   }, []); // The empty dependency array ensures this runs once on mount
+
+  // Function to handle click and navigate
+  const handleChatClick = (chatId) => {
+    // Assuming your chat page route is something like /chat/[chatId]
+    // For example, if chatId is '65b4c1a2e7c9d0b7f8e3a2b1', it navigates to /chat/65b4c1a2e7c9d0b7f8e3a2b1
+    router.push(`/chat/${chatId}`);
+  };
 
   if (loading) {
     return (
@@ -85,12 +97,13 @@ export default function Squad() {
         <AnimatePresence>
             {groupChats.map((chat) => (
             <motion.div
-                key={chat._id} // Use a unique ID from your chat data
+                key={chat._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
                 className="h-[200px] w-full max-w-[250px] border rounded-2xl hover:scale-[102%] transition duration-250 ease-in-out bg-black shadow-lg p-4 flex flex-col justify-between"
+                onClick={() => handleChatClick(chat._id)} // Add the onClick handler here
             >
                 <div>
                     <h3 className="text-white text-lg font-semibold truncate">
