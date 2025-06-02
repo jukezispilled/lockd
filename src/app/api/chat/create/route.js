@@ -1,8 +1,7 @@
 // app/api/chat/create/route.js
 import { MongoClient, ObjectId } from 'mongodb';
 
-// If you want to use Edge Runtime, add this:
-// export const runtime = 'edge';
+export const runtime = 'edge';
 
 const uri = process.env.MONGODB_URI;
 
