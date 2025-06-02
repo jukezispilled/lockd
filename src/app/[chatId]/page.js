@@ -95,12 +95,14 @@ export default function ChatPage() {
       <ChatHeader chatData={chatData} />
       
       <div className="flex-1 overflow-hidden flex flex-col">
-        <MessageList 
-          messages={messages} 
-          isLoading={isSendingMessage}
-          error={messageError}
-        />
+        <div className='h-[75%] w-[85%] border rounded-xl p-8'>
+          <MessageList 
+            messages={messages} 
+            isLoading={isSendingMessage}
+            error={messageError}
+          />
         <div ref={messagesEndRef} />
+        </div>
       </div>
 
       <MessageInput 
