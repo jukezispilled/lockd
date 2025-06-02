@@ -22,8 +22,8 @@ export const MessageBubble = ({ message, isOwn, showAvatar }) => {
             <Image
               src="/anon.jpg" // Path to your image in the public folder
               alt="Avatar"
-              width={32} // Set appropriate width
-              height={32} // Set appropriate height
+              width={36} // Set appropriate width
+              height={36} // Set appropriate height
               className="rounded-full" // Apply styling for a circular avatar
             />
           )}
@@ -60,8 +60,8 @@ export const MessageBubble = ({ message, isOwn, showAvatar }) => {
             <Image
               src="/anon.jpg" // Path to your image in the public folder
               alt="Avatar"
-              width={32} // Set appropriate width
-              height={32} // Set appropriate height
+              width={36} // Set appropriate width
+              height={36} // Set appropriate height
               className="rounded-full" // Apply styling for a circular avatar
             />
           )}
