@@ -102,7 +102,7 @@ export default function Squad() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className="h-[200px] w-full max-w-[250px] border rounded-2xl hover:scale-[102%] transition duration-250 ease-in-out bg-black shadow-lg p-4 flex flex-col justify-between"
+                className="h-[200px] w-full max-w-[250px] border rounded-2xl bg-black shadow-lg p-4 flex flex-col justify-between"
                 onClick={() => handleChatClick(chat._id)} // Add the onClick handler here
             >
                 <div>
