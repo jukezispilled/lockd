@@ -14,7 +14,7 @@ export const MessageBubble = ({ message, isOwn, showAvatar }) => {
   };
 
   return (
-    <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} items-center space-x-2`}>
+    <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} items-start gap-2`}>
       {!isOwn && (
         // Use Next.js Image component for the avatar
         <div className="flex-shrink-0">
