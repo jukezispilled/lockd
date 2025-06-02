@@ -41,9 +41,9 @@ export default function Squad() {
     return (
       <motion.div
         key="loading-comp"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.25 }}
         className="flex justify-center items-center h-screen"
       >
