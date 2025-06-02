@@ -106,7 +106,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
 
       setCreationStatus('Uploading metadata to IPFS...');
 
-      const metadataResponse = await fetch('https://pump.fun/api/ipfs', {
+      const metadataResponse = await fetch('/api/upload-metadata', {
         method: 'POST',
         body: formDataForIpfs,
       });
