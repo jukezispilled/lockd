@@ -1,0 +1,69 @@
+// components/ChatHeader.js
+
+"use client";
+
+import { useState } from 'react';
+
+export const ChatHeader = ({ chatData }) => {
+  const [showDetails, setShowDetails] = useState(false);
+
+  if (!chatData) return null;
+
+  return (
+    <>
+      <div className="bg-white border-b border-gray-200 p-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => window.history.back()}
+              className="text-gray-600 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100"
+            >
+              ←
+            </button>
+            <div>
+              <h1 className="text-xl font-bold text-gray-800">{chatData.name}</h1>
+              <p className="text-sm text-gray-500">
+                {chatData.members?.length || 0} members • Token: {chatData.tokenName}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 text-sm text-gray-500">
+              <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+              <span>Active</span>
+            </div>
+            <button
+              onClick={() => setShowDetails(!showDetails)}
+              className="text-gray-600 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100"
+            >
+              ⋮
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Chat Details Dropdown */}
+      {showDetails && (
+        <div className="bg-white border-b border-gray-200 p-4">
+          <div className="space-y-2 text-sm">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <span className="font-medium text-gray-600">Token Mint:</span>
+                <p className="font-mono text-xs break-all">{chatData.tokenMint}</p>
+              </div>
+              <div>
+                <span className="font-medium text-gray-600">Created:</span>
+                <p>{new Date(chatData.createdAt).toLocaleDateString()}</p>
+              </div>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">Creator:</span>
+              <p className="font-mono text-xs">{chatData.creatorPublicKey}</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
