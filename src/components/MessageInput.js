@@ -41,7 +41,7 @@ export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
   return (
     <div className="bg-white p-4">
       <form onSubmit={handleSubmit} className="flex items-end space-x-3">
-        <div className="flex-1 relative">
+        <div className="flex-1 relative w-[75%]">
           <textarea
             ref={textareaRef}
             value={message}
