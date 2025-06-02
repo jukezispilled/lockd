@@ -16,7 +16,7 @@ export const ChatHeader = ({ chatData }) => {
           <div className="flex items-center space-x-3">
             <button
               onClick={() => window.history.back()}
-              className="text-gray-600 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100"
+              className="text-gray-600 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100 text-xl"
             >
               ⬅️
             </button>
