@@ -66,13 +66,7 @@ export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
           disabled={!message.trim() || disabled || message.length > 1000}
           className="bg-black text-white p-3 rounded-full hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[48px] h-12"
         >
-          {disabled ? (
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-          ) : (
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-          )}
+            ⬆️
         </button>
       </form>
       
