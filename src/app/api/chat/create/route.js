@@ -1,8 +1,6 @@
 // app/api/chat/create/route.js
 import { MongoClient, ObjectId } from 'mongodb';
 
-export const runtime = 'edge';
-
 const uri = process.env.MONGODB_URI;
 
 if (!uri) {
