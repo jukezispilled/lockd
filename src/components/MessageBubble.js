@@ -15,18 +15,16 @@ export const MessageBubble = ({ message, isOwn, showAvatar }) => {
 
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} items-start gap-2`}>
-      {!isOwn && (
-        // Use Next.js Image component for the avatar
+      {/* Conditionally render avatar on the left for others' messages */}
+      {!isOwn && showAvatar && (
         <div className="flex-shrink-0">
-          {showAvatar && (
-            <Image
-              src="/anon.jpg" // Path to your image in the public folder
-              alt="Avatar"
-              width={36} // Set appropriate width
-              height={36} // Set appropriate height
-              className="rounded-full" // Apply styling for a circular avatar
-            />
-          )}
+          <Image
+            src="/anon.jpg" // Path to your image in the public folder
+            alt="Avatar"
+            width={36} // Set appropriate width
+            height={36} // Set appropriate height
+            className="rounded-full" // Apply styling for a circular avatar
+          />
         </div>
       )}
       
@@ -52,19 +50,16 @@ export const MessageBubble = ({ message, isOwn, showAvatar }) => {
         </div>
       </div>
 
-      {isOwn && (
-        // For the "own" message, you can also use anon.jpg or keep the current approach
-        // if you want a different avatar for the sender.
+      {/* Conditionally render avatar on the right for own messages */}
+      {isOwn && showAvatar && (
         <div className="flex-shrink-0">
-          {showAvatar && (
-            <Image
-              src="/anon.jpg" // Path to your image in the public folder
-              alt="Avatar"
-              width={36} // Set appropriate width
-              height={36} // Set appropriate height
-              className="rounded-full" // Apply styling for a circular avatar
-            />
-          )}
+          <Image
+            src="/anon.jpg" // Path to your image in the public folder
+            alt="Avatar"
+            width={36} // Set appropriate width
+            height={36} // Set appropriate height
+            className="rounded-full" // Apply styling for a circular avatar
+          />
         </div>
       )}
     </div>
