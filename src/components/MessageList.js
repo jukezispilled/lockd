@@ -23,7 +23,7 @@ export const MessageList = ({ messages, isLoading, error }) => {
         <div className="text-center">
           <div className="text-6xl mb-4">💬</div>
           <h3 className="text-xl font-semibold text-gray-700 mb-2">No messages yet</h3>
-          <p className="text-gray-500">y'all need to get lockd in</p>
+          <p className="text-gray-500">ffs get lockd in</p>
         </div>
       </div>
     );
