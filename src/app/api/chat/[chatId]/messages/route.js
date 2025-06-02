@@ -20,12 +20,23 @@ export async function GET(request, { params }) {
       );
     }
 
+    let objectChatId;
+    try {
+      objectChatId = new ObjectId(chatId);
+    } catch (error) {
+      return Response.json(
+        { error: 'Invalid chat ID format' },
+        { status: 400 }
+      );
+    }
+
     await client.connect();
     const db = client.db('tokenchat');
     const messagesCollection = db.collection('messages');
 
+    // Assuming messages collection also stores chatId as ObjectId if it links to groupchats _id
     const messages = await messagesCollection
-      .find({ chatId })
+      .find({ chatId: objectChatId }) 
       .sort({ timestamp: 1 })
       .skip(skip)
       .limit(limit)
@@ -65,13 +76,23 @@ export async function POST(request, { params }) {
       );
     }
 
+    let objectChatId;
+    try {
+      objectChatId = new ObjectId(chatId);
+    } catch (error) {
+      return Response.json(
+        { error: 'Invalid chat ID format' },
+        { status: 400 }
+      );
+    }
+
     await client.connect();
     const db = client.db('tokenchat');
     const messagesCollection = db.collection('messages');
     const chatsCollection = db.collection('groupchats');
 
-    // Verify chat exists
-    const chat = await chatsCollection.findOne({ _id: chatId });
+    // Verify chat exists using the ObjectId
+    const chat = await chatsCollection.findOne({ _id: objectChatId });
     if (!chat) {
       return Response.json(
         { error: 'Chat not found' },
@@ -81,8 +102,8 @@ export async function POST(request, { params }) {
 
     // Create message
     const message = {
-      _id: new ObjectId().toString(),
-      chatId,
+      _id: new ObjectId(), // Store _id as ObjectId, not string
+      chatId: objectChatId, // Store chatId as ObjectId
       content: content.trim(),
       senderPublicKey,
       timestamp: new Date(),
@@ -94,7 +115,7 @@ export async function POST(request, { params }) {
 
     // Update chat's message count and last activity
     await chatsCollection.updateOne(
-      { _id: chatId },
+      { _id: objectChatId }, // Use ObjectId for update query
       { 
         $inc: { messageCount: 1 },
         $set: { lastActivity: new Date() },
@@ -106,7 +127,7 @@ export async function POST(request, { params }) {
       success: true, 
       message: {
         ...message,
-        _id: message._id
+        _id: message._id.toString() // Convert _id back to string for the response if desired by the client
       }
     });
 
