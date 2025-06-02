@@ -65,7 +65,7 @@ function TokenImage({ mintAddress }) {
             alt={`Image for token ${mintAddress}`}
             width={64} // Small size for the bottom-left corner
             height={64}
-            className="rounded-full" // Tailwind classes for styling
+            className="rounded-xl" // Tailwind classes for styling
         />
     );
 }
