@@ -4,10 +4,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
-import { MessageList } from '../../../components/MessageList';
-import { MessageInput } from '../../../components/MessageInput';
-import { ChatHeader } from '../../../components/ChatHeader';
-import { useChatMessages } from '../../../hooks/useChatMessages';
+import { MessageList } from '@/components/MessageList';
+import { MessageInput } from '@/components/MessageInput';
+import { ChatHeader } from '@/components/ChatHeader';
+import { useChatMessages } from '../hooks/useChatMessages';
 
 export default function ChatPage() {
   const { chatId } = useParams();

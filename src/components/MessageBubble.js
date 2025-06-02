@@ -1,51 +1,51 @@
-// components/MessageList.js
+// components/MessageBubble.js
 
 "use client";
 
-import { MessageBubble } from './MessageBubble';
+export const MessageBubble = ({ message, isOwn, showAvatar }) => {
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
 
-export const MessageList = ({ messages, isLoading, error }) => {
-  if (error) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-500 text-4xl mb-2">⚠️</div>
-          <p className="text-red-600">Error loading messages</p>
-          <p className="text-sm text-gray-500">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!messages || messages.length === 0) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl mb-4">💬</div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">No messages yet</h3>
-          <p className="text-gray-500">Be the first to start the conversation!</p>
-        </div>
-      </div>
-    );
-  }
+  const getSenderName = (publicKey) => {
+    if (!publicKey) return 'Unknown';
+    return `${publicKey.slice(0, 4)}...${publicKey.slice(-4)}`;
+  };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4">
-      {messages.map((message, index) => (
-        <MessageBubble
-          key={message._id || index}
-          message={message}
-          isOwn={message.isOwn}
-          showAvatar={index === 0 || messages[index - 1]?.senderPublicKey !== message.senderPublicKey}
-        />
-      ))}
+    <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} items-end space-x-2`}>
+      {!isOwn && (
+        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+          {showAvatar ? getSenderName(message.senderPublicKey)[0].toUpperCase() : ''}
+        </div>
+      )}
       
-      {isLoading && (
-        <div className="flex justify-center">
-          <div className="flex items-center space-x-2 text-gray-500">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
-            <span className="text-sm">Sending...</span>
+      <div className={`max-w-xs lg:max-w-md ${isOwn ? 'order-1' : 'order-2'}`}>
+        {!isOwn && showAvatar && (
+          <div className="text-xs text-gray-500 mb-1 px-2">
+            {getSenderName(message.senderPublicKey)}
           </div>
+        )}
+        
+        <div
+          className={`px-4 py-2 rounded-2xl ${
+            isOwn
+              ? 'bg-black text-white rounded-br-none'
+              : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
+          }`}
+        >
+          <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+        </div>
+        
+        <div className={`text-xs text-gray-400 mt-1 px-2 ${isOwn ? 'text-right' : 'text-left'}`}>
+          {formatTime(message.timestamp)}
+        </div>
+      </div>
+
+      {isOwn && (
+        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+          {showAvatar ? getSenderName(message.senderPublicKey)[0].toUpperCase() : ''}
         </div>
       )}
     </div>
