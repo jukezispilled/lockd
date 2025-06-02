@@ -2,21 +2,84 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation'; // Import useRouter from next/navigation
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+
+// Component to fetch and display the token image
+function TokenImage({ mintAddress }) {
+    const [imageUrl, setImageUrl] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        if (!mintAddress) {
+            setLoading(false);
+            return;
+        }
+
+        async function fetchTokenImage() {
+            setLoading(true);
+            setError(null);
+            try {
+                const response = await fetch('/api/token-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ mintAddress }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to fetch token image.');
+                }
+
+                const data = await response.json();
+                setImageUrl(data.imageUrl);
+            } catch (err) {
+                console.error("Error fetching token image for", mintAddress, ":", err);
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchTokenImage();
+    }, [mintAddress]); // Re-fetch when mintAddress changes
+
+    if (loading) {
+        return <div className="text-gray-500 text-xs">Loading image...</div>;
+    }
+
+    if (error) {
+        return <div className="text-red-500 text-xs">Image error.</div>;
+    }
+
+    if (!imageUrl) {
+        return null; // No image found or mint address was not provided
+    }
+
+    return (
+        <Image
+            src={imageUrl}
+            alt={`Image for token ${mintAddress}`}
+            width={32} // Small size for the bottom-left corner
+            height={32}
+            className="rounded-full border border-gray-600" // Tailwind classes for styling
+        />
+    );
+}
 
 export default function Squad() {
   const [groupChats, setGroupChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const router = useRouter(); // Initialize the useRouter hook
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchGroupChats() {
       try {
-        // IMPORTANT: Ensure your API route for getting ALL group chats is correct.
-        // If it's /api/chat/view as in your code, that's fine.
-        // If it was meant to be /api/groupchats as in the previous example, adjust it.
-        const response = await fetch('/api/chat/view');
+        const response = await fetch('/api/chat/view'); // Your API route for group chats
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -31,7 +94,7 @@ export default function Squad() {
     }
 
     fetchGroupChats();
-  }, []); // The empty dependency array ensures this runs once on mount
+  }, []);
 
   const handleChatClick = (chatId) => {
     router.push(`/${chatId}`);
@@ -99,17 +162,18 @@ export default function Squad() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.25 }}
-                className="h-[200px] w-full max-w-[250px] border rounded-2xl bg-black shadow-lg p-4 flex flex-col justify-between"
-                onClick={() => handleChatClick(chat._id)} // Add the onClick handler here
+                className="h-[200px] w-full max-w-[250px] border rounded-2xl bg-black shadow-lg p-4 flex flex-col justify-between relative"
+                onClick={() => handleChatClick(chat._id)}
             >
                 <div>
                     <h3 className="text-white text-lg font-semibold truncate">
                         {chat.name || "Untitled Group Chat"}
                     </h3>
+                    {/* Display abbreviated tokenMint here */}
                     <p className="text-gray-400 text-sm mt-1 line-clamp-2">
                     {chat.tokenMint
-                        ? `${chat.tokenMint.slice(0, 4)}...${chat.tokenMint.slice(-4)}`
-                        : "No description provided."}
+                        ? `Token: ${chat.tokenMint.slice(0, 4)}...${chat.tokenMint.slice(-4)}`
+                        : "No associated token."}
                     </p>
                     <p className="text-gray-400 text-sm mt-1 line-clamp-2">
                         {chat.description || "No description provided."}
@@ -119,6 +183,11 @@ export default function Squad() {
                     <span className="text-gray-500 text-xs">
                         Members: {chat.members ? chat.members.length : 0}
                     </span>
+                </div>
+                {/* The empty div where the image will be rendered */}
+                <div className='absolute bottom-2 left-2 z-10'>
+                    {/* Render the TokenImage component if tokenMint exists */}
+                    {chat.tokenMint && <TokenImage mintAddress={chat.tokenMint} />}
                 </div>
             </motion.div>
             ))}
