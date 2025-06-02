@@ -45,7 +45,7 @@ export default function Squad() {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.25 }}
-        className="flex justify-center items-center"
+        className="flex justify-center items-center text-gray-600"
       >
         Loading group chats...
       </motion.div>
@@ -60,7 +60,7 @@ export default function Squad() {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.25 }}
-        className="flex justify-center items-center h-screen text-red-500"
+        className="flex justify-center items-center text-red-500"
       >
         Error: {error}
       </motion.div>
@@ -75,7 +75,7 @@ export default function Squad() {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.25 }}
-        className="flex justify-center items-center h-screen"
+        className="flex justify-center items-center"
       >
         No group chats found.
       </motion.div>
