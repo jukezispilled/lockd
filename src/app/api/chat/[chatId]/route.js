@@ -1,6 +1,4 @@
-// app/api/chat/[chatId]/route.js
-
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
@@ -9,18 +7,21 @@ export async function GET(request, { params }) {
   try {
     const { chatId } = params;
 
-    if (!chatId) {
+    // Validate chatId
+    if (!chatId || typeof chatId !== 'string' || !ObjectId.isValid(chatId)) {
       return Response.json(
-        { error: 'Chat ID is required' },
+        { error: 'Valid Chat ID is required' },
         { status: 400 }
       );
     }
+
+    const objectChatId = new ObjectId(chatId);
 
     await client.connect();
     const db = client.db('tokenchat');
     const chatsCollection = db.collection('groupchats');
 
-    const chat = await chatsCollection.findOne({ _id: chatId });
+    const chat = await chatsCollection.findOne({ _id: objectChatId });
 
     if (!chat) {
       return Response.json(

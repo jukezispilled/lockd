@@ -1,5 +1,3 @@
-// app/api/chat/[chatId]/messages/route.js
-
 import { MongoClient, ObjectId } from 'mongodb';
 
 const uri = process.env.MONGODB_URI;
@@ -13,19 +11,9 @@ export async function GET(request, { params }) {
     const limit = parseInt(searchParams.get('limit')) || 50;
     const skip = parseInt(searchParams.get('skip')) || 0;
 
-    if (!chatId) {
+    if (!chatId || !ObjectId.isValid(chatId)) {
       return Response.json(
-        { error: 'Chat ID is required' },
-        { status: 400 }
-      );
-    }
-
-    let objectChatId;
-    try {
-      objectChatId = new ObjectId(chatId);
-    } catch (error) {
-      return Response.json(
-        { error: 'Invalid chat ID format' },
+        { error: 'Valid Chat ID is required' },
         { status: 400 }
       );
     }
@@ -34,9 +22,8 @@ export async function GET(request, { params }) {
     const db = client.db('tokenchat');
     const messagesCollection = db.collection('messages');
 
-    // Assuming messages collection also stores chatId as ObjectId if it links to groupchats _id
     const messages = await messagesCollection
-      .find({ chatId: objectChatId }) 
+      .find({ chatId: new ObjectId(chatId) })
       .sort({ timestamp: 1 })
       .skip(skip)
       .limit(limit)
@@ -61,14 +48,20 @@ export async function POST(request, { params }) {
     const { chatId } = params;
     const { content, senderPublicKey } = await request.json();
 
-    if (!chatId || !content || !senderPublicKey) {
+    if (!chatId || !ObjectId.isValid(chatId)) {
       return Response.json(
-        { error: 'Chat ID, content, and sender public key are required' },
+        { error: 'Valid Chat ID is required' },
         { status: 400 }
       );
     }
 
-    // Validate content length
+    if (!content || !senderPublicKey) {
+      return Response.json(
+        { error: 'Content and sender public key are required' },
+        { status: 400 }
+      );
+    }
+
     if (content.length > 1000) {
       return Response.json(
         { error: 'Message too long (max 1000 characters)' },
@@ -76,22 +69,14 @@ export async function POST(request, { params }) {
       );
     }
 
-    let objectChatId;
-    try {
-      objectChatId = new ObjectId(chatId);
-    } catch (error) {
-      return Response.json(
-        { error: 'Invalid chat ID format' },
-        { status: 400 }
-      );
-    }
+    const objectChatId = new ObjectId(chatId);
 
     await client.connect();
     const db = client.db('tokenchat');
     const messagesCollection = db.collection('messages');
     const chatsCollection = db.collection('groupchats');
 
-    // Verify chat exists using the ObjectId
+    // Verify chat exists
     const chat = await chatsCollection.findOne({ _id: objectChatId });
     if (!chat) {
       return Response.json(
@@ -102,8 +87,8 @@ export async function POST(request, { params }) {
 
     // Create message
     const message = {
-      _id: new ObjectId(), // Store _id as ObjectId, not string
-      chatId: objectChatId, // Store chatId as ObjectId
+      _id: new ObjectId().toString(),
+      chatId: objectChatId,
       content: content.trim(),
       senderPublicKey,
       timestamp: new Date(),
@@ -115,19 +100,19 @@ export async function POST(request, { params }) {
 
     // Update chat's message count and last activity
     await chatsCollection.updateOne(
-      { _id: objectChatId }, // Use ObjectId for update query
-      { 
+      { _id: objectChatId },
+      {
         $inc: { messageCount: 1 },
         $set: { lastActivity: new Date() },
-        $addToSet: { members: senderPublicKey } // Add sender to members if not already there
+        $addToSet: { members: senderPublicKey }
       }
     );
 
-    return Response.json({ 
-      success: true, 
+    return Response.json({
+      success: true,
       message: {
         ...message,
-        _id: message._id.toString() // Convert _id back to string for the response if desired by the client
+        _id: message._id
       }
     });
 
