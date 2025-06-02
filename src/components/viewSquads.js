@@ -176,7 +176,7 @@ export default function Squad() {
                         : "No associated token."}
                     </p>
                     <p className="text-gray-400 text-sm mt-1 line-clamp-2">
-                        {chat.description || "No description provided."}
+                        {chat.description || ""}
                     </p>
                 </div>
                 <div className="mt-2 text-right">
