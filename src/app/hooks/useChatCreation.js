@@ -1,5 +1,4 @@
 // hooks/useChatCreation.js
-
 import { useState } from 'react';
 
 export const useChatCreation = () => {
@@ -7,8 +6,11 @@ export const useChatCreation = () => {
   const [chatCreationStatus, setChatCreationStatus] = useState('');
 
   const createGroupChat = async (tokenData, publicKey) => {
-    if (!tokenData.name || !tokenData.mint || !publicKey) {
-      setChatCreationStatus('Error: Missing required data for chat creation');
+    // Validate input data
+    if (!tokenData?.name || !tokenData?.mint || !publicKey) {
+      const errorMsg = 'Error: Missing required data for chat creation';
+      setChatCreationStatus(errorMsg);
+      console.error('Validation failed:', { tokenData, publicKey });
       return null;
     }
 
@@ -16,6 +18,12 @@ export const useChatCreation = () => {
     setChatCreationStatus('Creating group chat...');
 
     try {
+      console.log('Creating chat with data:', {
+        tokenName: tokenData.name,
+        tokenMint: tokenData.mint,
+        creatorPublicKey: publicKey.toString()
+      });
+
       const response = await fetch('/api/chat/create', {
         method: 'POST',
         headers: {
@@ -28,12 +36,17 @@ export const useChatCreation = () => {
         }),
       });
 
+      console.log('Response status:', response.status);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create group chat');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('API error response:', errorData);
+        throw new Error(errorData.error || `HTTP ${response.status}: Failed to create group chat`);
       }
 
       const result = await response.json();
+      console.log('Success result:', result);
+      
       setChatCreationStatus(`Group chat created: ${result.chatName}`);
       
       return {

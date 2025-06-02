@@ -1,5 +1,4 @@
 // app/api/chat/create/route.js
-
 import { MongoClient, ObjectId } from 'mongodb';
 
 const uri = process.env.MONGODB_URI;
@@ -8,49 +7,60 @@ if (!uri) {
   throw new Error('Please add your MongoDB URI to .env.local');
 }
 
-let cachedClient = null;
+// Create a single client instance and reuse connections
+let client;
+let clientPromise;
 
-async function connectToDatabase(debugLogs) {
-  if (cachedClient) {
-    debugLogs.push('Using cached MongoDB client');
-    return cachedClient;
-  }
-
-  debugLogs.push('Connecting to MongoDB...');
-  const client = new MongoClient(uri);
-  await client.connect();
-  cachedClient = client;
-  debugLogs.push('MongoDB connected');
-  return client;
+if (!client) {
+  client = new MongoClient(uri);
+  clientPromise = client.connect();
 }
 
 export async function POST(request) {
-  const debugLogs = ['POST request received at /api/chat/create'];
-
+  let db;
+  
   try {
+    console.log('Starting chat creation request...');
+    
+    // Parse request body
     const body = await request.json();
-    debugLogs.push('Request body parsed');
-    debugLogs.push(JSON.stringify(body));
-
+    console.log('Request body:', body);
+    
     const { tokenName, tokenMint, creatorPublicKey } = body;
 
+    // Validate required fields
     if (!tokenName || !tokenMint || !creatorPublicKey) {
-      debugLogs.push('Missing required fields');
+      console.error('Missing required fields:', { tokenName, tokenMint, creatorPublicKey });
       return Response.json(
-        {
-          error: 'Token name, mint, and creator public key are required',
-          debug: debugLogs
-        },
+        { error: 'Token name, mint, and creator public key are required' },
         { status: 400 }
       );
     }
 
-    const client = await connectToDatabase(debugLogs);
-    const db = client.db('tokenchat');
+    // Connect to MongoDB
+    await clientPromise;
+    db = client.db('tokenchat');
     const chatsCollection = db.collection('groupchats');
-    debugLogs.push('Connected to DB and got collection');
 
+    console.log('Connected to MongoDB');
+
+    // Check if chat already exists for this token
+    const existingChat = await chatsCollection.findOne({ tokenMint });
+    if (existingChat) {
+      console.log('Chat already exists for token:', tokenMint);
+      return Response.json({
+        success: true,
+        chatId: existingChat._id,
+        chatName: existingChat.name,
+        message: 'Chat already exists'
+      });
+    }
+
+    // Create new ObjectId for the chat
+    const chatObjectId = new ObjectId();
+    
     const chatData = {
+      _id: chatObjectId,
       name: `${tokenName} Community`,
       tokenName,
       tokenMint,
@@ -61,27 +71,51 @@ export async function POST(request) {
       isActive: true
     };
 
-    debugLogs.push('Inserting chat data');
+    console.log('Inserting chat data:', chatData);
+
+    // Insert the chat document
     const result = await chatsCollection.insertOne(chatData);
-    debugLogs.push(`Insert result: ${JSON.stringify(result)}`);
+    
+    console.log('Insert result:', result);
 
     return Response.json({
       success: true,
-      chatId: result.insertedId,
-      chatName: chatData.name,
-      debug: debugLogs
+      chatId: chatObjectId.toString(),
+      chatName: chatData.name
     });
 
   } catch (error) {
-    debugLogs.push('Error occurred');
-    debugLogs.push(error.message);
-    return new Response(
-      JSON.stringify({
+    console.error('Detailed error in chat creation:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+
+    // Handle specific MongoDB errors
+    if (error.name === 'MongoServerError') {
+      return Response.json(
+        { error: 'Database operation failed', details: error.message },
+        { status: 500 }
+      );
+    }
+
+    // Handle JSON parsing errors
+    if (error instanceof SyntaxError) {
+      return Response.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
+
+    // Generic error response
+    return Response.json(
+      { 
         error: 'Failed to create group chat',
-        details: error.message,
-        debug: debugLogs
-      }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
+      { status: 500 }
     );
   }
+  // Note: Don't close the client connection here for better performance
+  // The connection will be reused for subsequent requests
 }
