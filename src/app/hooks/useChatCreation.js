@@ -16,7 +16,7 @@ export const useChatCreation = () => {
     setChatCreationStatus('Creating group chat...');
 
     try {
-      const response = await fetch('/api/chat/create', {
+      const response = await fetch('https://lockd-one.vercel.app/api/chat/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
