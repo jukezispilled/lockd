@@ -198,6 +198,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
         // Create group chat after successful token creation
         const chatResult = await createGroupChat({
             name: tokenData.name,
+            symbol: tokenData.symbol,
             mint: mintKeypair.publicKey.toString()
         }, publicKey);
         

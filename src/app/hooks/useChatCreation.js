@@ -7,7 +7,7 @@ export const useChatCreation = () => {
 
   const createGroupChat = async (tokenData, publicKey) => {
     // Validate input data
-    if (!tokenData?.name || !tokenData?.mint || !publicKey) {
+    if (!tokenData?.name || !tokenData?.symbol ||  !tokenData?.mint || !publicKey) {
       const errorMsg = 'Error: Missing required data for chat creation';
       setChatCreationStatus(errorMsg);
       console.error('Validation failed:', { tokenData, publicKey });
