@@ -165,8 +165,8 @@ export default function Squad() {
                 className="h-[200px] w-full max-w-[250px] border rounded-2xl bg-black shadow-lg p-2 flex flex-col justify-between relative"
                 onClick={() => handleChatClick(chat._id)}
             >
-                <div>
-                    <div className='absolute top-0 left-2'>
+                <div className='absolute top-2 left-2 right-2 flex justify-between items-start'>
+                    <div>
                         <p className="text-white text-3xl font-semibold truncate">
                             {chat.name || "Untitled Group Chat"}
                         </p>
@@ -179,9 +179,6 @@ export default function Squad() {
                         {chat.tokenMint
                             ? `${chat.tokenMint.slice(0, 3)}...${chat.tokenMint.slice(-4)}`
                             : "No associated token."}
-                    </p>
-                    <p className="text-gray-400 text-sm mt-1 line-clamp-2">
-                        {chat.description || ""}
                     </p>
                 </div>
                 {/* The empty div where the image will be rendered */}
