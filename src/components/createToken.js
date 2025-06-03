@@ -195,6 +195,13 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
         setCreatedTokens(prev => [newToken, ...prev]);
         setCreationStatus(`Token created successfully! Mint: ${mintKeypair.publicKey.toString()}`);
 
+        // In your createToken function, right before calling createGroupChat:
+        console.log('About to create chat with tokenData:', {
+            name: tokenData.name,
+            symbol: tokenData.symbol,
+            mint: mintKeypair.publicKey.toString()
+        });
+
         // Create group chat after successful token creation
         const chatResult = await createGroupChat({
             name: tokenData.name,
