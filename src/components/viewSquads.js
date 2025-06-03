@@ -166,10 +166,10 @@ export default function Squad() {
                 onClick={() => handleChatClick(chat._id)}
             >
                 <div>
-                    <h3 className="text-white text-lg font-semibold truncate">
+                    <h3 className="text-white text-2xl font-semibold truncate">
                         {chat.name || "Untitled Group Chat"}
                     </h3>
-                    <p className="text-gray-400 text-sm mt-1 line-clamp-2">
+                    <p className="text-gray-400 text-base mt-1 line-clamp-2">
                         {`(${chat.tokenSym})` || ""}
                     </p>
                     {/* Display abbreviated tokenMint here */}
@@ -184,7 +184,7 @@ export default function Squad() {
                 </div>
                 <div className="mt-2 text-right">
                     <span className="text-gray-500 text-xs">
-                        Mmbrs: {chat.members ? chat.members.length : 0}
+                        
                     </span>
                 </div>
                 {/* The empty div where the image will be rendered */}
