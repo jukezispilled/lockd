@@ -24,13 +24,13 @@ export async function POST(request) {
     const body = await request.json();
     console.log('Request body:', body);
     
-    const { tokenName, tokenMint, creatorPublicKey } = body;
+    const { tokenName, tokenSym, tokenMint, creatorPublicKey } = body;
 
     // Validate required fields
-    if (!tokenName || !tokenMint || !creatorPublicKey) {
-      console.error('Missing required fields:', { tokenName, tokenMint, creatorPublicKey });
+    if (!tokenName || !tokenSym || !tokenMint || !creatorPublicKey) {
+      console.error('Missing required fields:', { tokenName, tokenSym, tokenMint, creatorPublicKey });
       return Response.json(
-        { error: 'Token name, mint, and creator public key are required' },
+        { error: 'Token name, symbol, mint, and creator public key are required' },
         { status: 400 }
       );
     }
@@ -59,8 +59,9 @@ export async function POST(request) {
     
     const chatData = {
       _id: chatObjectId,
-      name: `${tokenName} Community`,
+      name: `${tokenName}`,
       tokenName,
+      tokenSym,
       tokenMint,
       creatorPublicKey,
       createdAt: new Date(),

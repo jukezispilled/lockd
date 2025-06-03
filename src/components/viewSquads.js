@@ -169,10 +169,13 @@ export default function Squad() {
                     <h3 className="text-white text-lg font-semibold truncate">
                         {chat.name || "Untitled Group Chat"}
                     </h3>
+                    <p className="text-gray-400 text-sm mt-1 line-clamp-2">
+                        {`(${chat.tokenSym})` || ""}
+                    </p>
                     {/* Display abbreviated tokenMint here */}
                     <p className="text-gray-400 text-sm mt-1 line-clamp-2">
                     {chat.tokenMint
-                        ? `Token: ${chat.tokenMint.slice(0, 4)}...${chat.tokenMint.slice(-4)}`
+                        ? `${chat.tokenMint.slice(0, 4)}...${chat.tokenMint.slice(-4)}`
                         : "No associated token."}
                     </p>
                     <p className="text-gray-400 text-sm mt-1 line-clamp-2">

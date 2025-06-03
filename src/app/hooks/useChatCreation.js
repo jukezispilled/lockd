@@ -20,6 +20,7 @@ export const useChatCreation = () => {
     try {
       console.log('Creating chat with data:', {
         tokenName: tokenData.name,
+        tokenSym: tokenData.symbol,
         tokenMint: tokenData.mint,
         creatorPublicKey: publicKey.toString()
       });
@@ -31,6 +32,7 @@ export const useChatCreation = () => {
         },
         body: JSON.stringify({
           tokenName: tokenData.name,
+          tokenSym: tokenData.symbol,
           tokenMint: tokenData.mint,
           creatorPublicKey: publicKey.toString()
         }),
