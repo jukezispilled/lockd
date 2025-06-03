@@ -63,9 +63,9 @@ function TokenImage({ mintAddress }) {
         <Image
             src={imageUrl}
             alt={`Image for token ${mintAddress}`}
-            width={32} // Small size for the bottom-left corner
-            height={32}
-            className="rounded-full border border-gray-600" // Tailwind classes for styling
+            width={96} // Small size for the bottom-left corner
+            height={96}
+            className="rounded-xl" // Tailwind classes for styling
         />
     );
 }
@@ -84,7 +84,7 @@ export default function Squad() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setGroupChats(data);
+        setGroupChats(Array.isArray(data) ? data : []);        
       } catch (e) {
         console.error("Failed to fetch group chats:", e);
         setError(e.message);
@@ -162,34 +162,27 @@ export default function Squad() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.25 }}
-                className="h-[200px] w-full max-w-[250px] border rounded-2xl bg-black shadow-lg p-4 flex flex-col justify-between relative"
+                className="h-[200px] w-full max-w-[250px] border rounded-2xl bg-black shadow-lg p-2 flex flex-col justify-between relative"
                 onClick={() => handleChatClick(chat._id)}
             >
-                {/* START OF THE FIX: New flex container for the top content */}
-                <div className="absolute top-2 left-2 right-2 flex justify-between items-start z-10 pr-4"> {/* Added pr-4 for right padding */}
-                    <h3 className="text-white text-lg font-semibold truncate">
-                        {chat.name || "Untitled Group Chat"}
-                    </h3>
-                    <p className="text-gray-400 text-sm">
+                <div>
+                    <div className='absolute top-2 left-2'>
+                        <p className="text-white text-3xl font-semibold truncate flex items-start">
+                            {chat.name || "Untitled Group Chat"}
+                        </p>
+                        <p className="text-gray-400 text-base mt-[2px] line-clamp-2">
+                            {`(${chat.tokenSym})` || ""}
+                        </p>
+                    </div>
+                    {/* Display abbreviated tokenMint here */}
+                    <p className="text-gray-400 text-xs line-clamp-2 absolute top-2 right-2 flex items-start">
                         {chat.tokenMint
                             ? `${chat.tokenMint.slice(0, 3)}...${chat.tokenMint.slice(-4)}`
-                            : ""} {/* Removed "No description..." as it's for token mint now */}
+                            : "No associated token."}
                     </p>
-                </div>
-                {/* END OF THE FIX */}
-
-                {/* Original description, now placed below the new header structure */}
-                <div className="mt-10"> {/* Adjusted margin-top to clear the absolute header */}
-                    <p className="text-gray-400 text-sm line-clamp-2">
-                        {chat.description || "No description provided."}
+                    <p className="text-gray-400 text-sm mt-1 line-clamp-2">
+                        {chat.description || ""}
                     </p>
-                </div>
-
-
-                <div className="mt-2 text-right">
-                    <span className="text-gray-500 text-xs">
-                        Members: {chat.members ? chat.members.length : 0}
-                    </span>
                 </div>
                 {/* The empty div where the image will be rendered */}
                 <div className='absolute bottom-2 left-2 z-10'>
