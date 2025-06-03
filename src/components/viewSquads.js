@@ -167,7 +167,7 @@ export default function Squad() {
             >
                 <div>
                     <div className='absolute top-2 left-2'>
-                        <p className="text-white text-3xl font-semibold truncate leading-none mt-0">
+                        <p className="text-white text-3xl font-semibold truncate flex items-start">
                             {chat.name || "Untitled Group Chat"}
                         </p>
                         <p className="text-gray-400 text-base mt-[2px] line-clamp-2">
@@ -175,10 +175,10 @@ export default function Squad() {
                         </p>
                     </div>
                     {/* Display abbreviated tokenMint here */}
-                    <p className="text-gray-400 text-xs line-clamp-2 absolute top-2 right-2">
-                    {chat.tokenMint
-                        ? `${chat.tokenMint.slice(0, 3)}...${chat.tokenMint.slice(-4)}`
-                        : "No associated token."}
+                    <p className="text-gray-400 text-xs line-clamp-2 absolute top-2 right-2 flex items-start">
+                        {chat.tokenMint
+                            ? `${chat.tokenMint.slice(0, 3)}...${chat.tokenMint.slice(-4)}`
+                            : "No associated token."}
                     </p>
                     <p className="text-gray-400 text-sm mt-1 line-clamp-2">
                         {chat.description || ""}
