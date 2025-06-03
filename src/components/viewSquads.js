@@ -167,9 +167,9 @@ export default function Squad() {
             >
                 <div>
                     <div className='absolute top-2 left-2'>
-                        <div className="text-white text-3xl font-semibold truncate">
+                        <p className="text-white text-3xl font-semibold truncate">
                             {chat.name || "Untitled Group Chat"}
-                        </div>
+                        </p>
                         <p className="text-gray-400 text-base mt-[2px] line-clamp-2">
                             {`(${chat.tokenSym})` || ""}
                         </p>
