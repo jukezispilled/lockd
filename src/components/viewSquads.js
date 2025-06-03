@@ -162,11 +162,11 @@ export default function Squad() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.25 }}
-                className="h-[200px] w-full max-w-[250px] border rounded-2xl bg-black shadow-lg p-4 flex flex-col justify-between relative"
+                className="h-[200px] w-full max-w-[250px] border rounded-2xl bg-black shadow-lg p-2 flex flex-col justify-between relative"
                 onClick={() => handleChatClick(chat._id)}
             >
                 <div>
-                    <h3 className="text-white text-2xl font-semibold truncate">
+                    <h3 className="text-white text-3xl font-semibold truncate">
                         {chat.name || "Untitled Group Chat"}
                     </h3>
                     <p className="text-gray-400 text-base mt-[2px] line-clamp-2">
