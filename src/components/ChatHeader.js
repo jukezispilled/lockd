@@ -23,7 +23,7 @@ export const ChatHeader = ({ chatData }) => {
             <div>
               <h1 className="text-xl font-bold text-gray-800">{chatData.name}</h1>
               <p className="text-sm text-gray-500">
-                ({chatData.symbol})
+                ({chatData.tokenSym}) • {chatData.tokenMint}
               </p>
             </div>
           </div>
