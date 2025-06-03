@@ -166,16 +166,18 @@ export default function Squad() {
                 onClick={() => handleChatClick(chat._id)}
             >
                 <div>
-                    <h3 className="text-white text-3xl font-semibold truncate">
-                        {chat.name || "Untitled Group Chat"}
-                    </h3>
-                    <p className="text-gray-400 text-base mt-[2px] line-clamp-2">
-                        {`(${chat.tokenSym})` || ""}
-                    </p>
+                    <div className='absolute top-2 right-2'>
+                        <h3 className="text-white text-3xl font-semibold truncate">
+                            {chat.name || "Untitled Group Chat"}
+                        </h3>
+                        <p className="text-gray-400 text-base mt-[2px] line-clamp-2">
+                            {`(${chat.tokenSym})` || ""}
+                        </p>
+                    </div>
                     {/* Display abbreviated tokenMint here */}
-                    <p className="text-gray-400 text-xs mt-[2px] line-clamp-2 absolute top-2 right-2">
+                    <p className="text-gray-400 text-xs line-clamp-2 absolute top-2 right-2">
                     {chat.tokenMint
-                        ? `${chat.tokenMint.slice(0, 3)}...${chat.tokenMint.slice(-3)}`
+                        ? `${chat.tokenMint.slice(0, 3)}...${chat.tokenMint.slice(-4)}`
                         : "No associated token."}
                     </p>
                     <p className="text-gray-400 text-sm mt-1 line-clamp-2">
