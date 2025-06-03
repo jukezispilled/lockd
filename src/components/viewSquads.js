@@ -84,7 +84,7 @@ export default function Squad() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setGroupChats(data);
+        setGroupChats(Array.isArray(data) ? data : []);        
       } catch (e) {
         console.error("Failed to fetch group chats:", e);
         setError(e.message);
