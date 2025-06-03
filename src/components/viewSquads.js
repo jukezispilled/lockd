@@ -166,7 +166,7 @@ export default function Squad() {
                 onClick={() => handleChatClick(chat._id)}
             >
                 <div>
-                    <div className='absolute top-2 left-2'>
+                    <div className='absolute top-1 left-2'>
                         <p className="text-white text-3xl font-semibold truncate flex items-start">
                             {chat.name || "Untitled Group Chat"}
                         </p>
