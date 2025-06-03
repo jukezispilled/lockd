@@ -63,8 +63,8 @@ function TokenImage({ mintAddress }) {
         <Image
             src={imageUrl}
             alt={`Image for token ${mintAddress}`}
-            width={64} // Small size for the bottom-left corner
-            height={64}
+            width={82} // Small size for the bottom-left corner
+            height={82}
             className="rounded-xl" // Tailwind classes for styling
         />
     );
@@ -181,7 +181,7 @@ export default function Squad() {
                 </div>
                 <div className="mt-2 text-right">
                     <span className="text-gray-500 text-xs">
-                        Members: {chat.members ? chat.members.length : 0}
+                        Mmbrs: {chat.members ? chat.members.length : 0}
                     </span>
                 </div>
                 {/* The empty div where the image will be rendered */}
