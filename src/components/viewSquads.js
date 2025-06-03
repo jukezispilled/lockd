@@ -166,7 +166,7 @@ export default function Squad() {
                 onClick={() => handleChatClick(chat._id)}
             >
                 <div>
-                    <div className='absolute top-2 right-2'>
+                    <div className='absolute top-2 left-2'>
                         <h3 className="text-white text-3xl font-semibold truncate">
                             {chat.name || "Untitled Group Chat"}
                         </h3>
@@ -183,11 +183,6 @@ export default function Squad() {
                     <p className="text-gray-400 text-sm mt-1 line-clamp-2">
                         {chat.description || ""}
                     </p>
-                </div>
-                <div className="mt-2 text-right">
-                    <span className="text-gray-500 text-xs">
-                        
-                    </span>
                 </div>
                 {/* The empty div where the image will be rendered */}
                 <div className='absolute bottom-2 left-2 z-10'>
