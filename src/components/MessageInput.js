@@ -64,7 +64,7 @@ export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
         <button
           type="submit"
           disabled={!message.trim() || disabled || message.length > 1000}
-          className="text-2xl bg-green-300 p-3 rounded-full disabled:bg-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[48px] h-12"
+          className="text-2xl bg-green-300 p-4 rounded-full disabled:bg-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[48px] h-12"
         >
             ⬆️
         </button>
