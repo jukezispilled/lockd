@@ -40,8 +40,8 @@ export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
 
   return (
     <div className="bg-white p-4 flex justify-center">
-      <form onSubmit={handleSubmit} className="flex items-center space-x-3 md:w-[75%]">
-        <div className="flex-1 relative items-center">
+      <form onSubmit={handleSubmit} className="flex items-center md:w-[80%]">
+        <div className="flex-1 relative flex items-center">
           <textarea
             ref={textareaRef}
             value={message}
@@ -52,22 +52,15 @@ export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
             rows={1}
             disabled={disabled}
           />
-          
-          {/* Character count */}
-          {message.length > 0 && (
-            <div className="absolute bottom-2 right-3 text-xs text-gray-400">
-              {message.length}/1000
-            </div>
-          )}
-        </div>
-        
-        <button
-          type="submit"
-          disabled={!message.trim() || disabled || message.length > 1000}
-          className="text-2xl bg-green-300 p-3 rounded-full disabled:bg-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[48px] h-12"
-        >
+
+          <button
+            type="submit"
+            disabled={!message.trim() || disabled || message.length > 1000}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-2xl bg-green-300 p-2 rounded-full disabled:bg-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[44px] h-11"
+          >
             ⬆️
-        </button>
+          </button>
+        </div>
       </form>
     </div>
   );
