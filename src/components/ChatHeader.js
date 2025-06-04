@@ -126,14 +126,14 @@ export const ChatHeader = ({ chatData }) => {
             <div>
               <h1 className="text-xl font-bold text-gray-800">{chatData.name} • ({chatData.tokenSym})</h1>
               <motion.div 
-                className="flex items-center"
+                className="flex items-center cursor-pointer"
                 whileTap={{ scale: 0.75 }} // Scale down on tap
                 transition={{ duration: 0.1 }}
-                onClick={(e) => handleCopyClick(e, chat.tokenMint)}
+                onClick={(e) => handleCopyClick(e, chatData.tokenMint)}
               >
-                {chat.tokenMint && (
+                {chatData.tokenMint && (
                   <div
-                    className="cursor-pointer mr-[2px]" // Add margin-right for spacing
+                    className="mr-[2px]" // Add margin-right for spacing
                   >
                     {copiedMint === chat.tokenMint ? (
                       <FiCheck className="text-gray-400" size={10} />
@@ -142,9 +142,9 @@ export const ChatHeader = ({ chatData }) => {
                     )}
                   </div>
                 )}
-                <p className="text-gray-400 text-sm line-clamp-2">
+                <p className="text-gray-400 text-[9px] line-clamp-2">
                   {chat.tokenMint
-                    ? `${chat.tokenMint.slice(0, 3)}...${chat.tokenMint.slice(-4)}`
+                    ? `${chatData.tokenMint.slice(0, 3)}...${chatData.tokenMint.slice(-4)}`
                     : "No associated token."}
                 </p>
               </motion.div>
