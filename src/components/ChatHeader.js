@@ -3,6 +3,72 @@
 "use client";
 
 import { useState } from 'react';
+import Image from 'next/image';
+
+// Component to fetch and display the token image
+function TokenImage({ mintAddress }) {
+    const [imageUrl, setImageUrl] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        if (!mintAddress) {
+            setLoading(false);
+            return;
+        }
+
+        async function fetchTokenImage() {
+            setLoading(true);
+            setError(null);
+            try {
+                const response = await fetch('/api/token-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ mintAddress }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to fetch token image.');
+                }
+
+                const data = await response.json();
+                setImageUrl(data.imageUrl);
+            } catch (err) {
+                console.error("Error fetching token image for", mintAddress, ":", err);
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchTokenImage();
+    }, [mintAddress]); // Re-fetch when mintAddress changes
+
+    if (loading) {
+        return <div className="text-gray-500 text-xs">Loading image...</div>;
+    }
+
+    if (error) {
+        return <div className="text-red-500 text-xs">Image error.</div>;
+    }
+
+    if (!imageUrl) {
+        return null; // No image found or mint address was not provided
+    }
+
+    return (
+        <Image
+            src={imageUrl}
+            alt={`Image for token ${mintAddress}`}
+            width={96} // Small size for the bottom-left corner
+            height={96}
+            className="rounded-xl" // Tailwind classes for styling
+        />
+    );
+}
 
 export const ChatHeader = ({ chatData }) => {
   const [showDetails, setShowDetails] = useState(false);
@@ -29,12 +95,7 @@ export const ChatHeader = ({ chatData }) => {
           </div>
           
           <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setShowDetails(!showDetails)}
-              className="text-gray-600 hover:text-gray-800 p-2 rounded-full"
-            >
-              ⋮
-            </button>
+            {chatData.tokenMint && <TokenImage mintAddress={chatData.tokenMint} />}
           </div>
         </div>
       </div>
