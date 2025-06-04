@@ -84,7 +84,7 @@ export default function Home() {
                   <button
                     onClick={() => setShowTokenz(!showTokenz)}
                     disabled={loading}
-                    className="rounded-2xl border border-black text-lg font-semibold px-4 py-2 transition-all duration-300 cursor-pointer hover:scale-[102%] ease-in-out"
+                    className="rounded-2xl bg-black text-white text-lg font-semibold px-4 py-2 transition-all duration-300 border-0 cursor-pointer hover:scale-[102%] ease-in-out"
                   >
                     {loading ? 'loading...' : (
                       <div className="flex justify-center items-center gap-2">
