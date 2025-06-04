@@ -47,7 +47,7 @@ export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="What's up"
+            placeholder="What's up?"
             className="w-full p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-none min-h-[48px] max-h-32"
             rows={1}
             disabled={disabled}
@@ -55,7 +55,7 @@ export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
           
           {/* Character count */}
           {message.length > 0 && (
-            <div className="absolute bottom-1 right-3 text-xs text-gray-400">
+            <div className="absolute bottom-2 right-3 text-xs text-gray-400">
               {message.length}/1000
             </div>
           )}
