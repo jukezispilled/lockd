@@ -95,11 +95,11 @@ export default function ChatPage() {
         >
           <div className="text-center">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Chat Not Found</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Bro is not lockd in</h2>
             <p className="text-gray-600 mb-4">{error}</p>
             <button
               onClick={() => window.history.back()}
-              className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800"
+              className="bg-black text-white px-6 py-2 rounded-lg"
             >
               Go Back
             </button>
