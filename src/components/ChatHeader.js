@@ -2,6 +2,7 @@
 
 "use client";
 
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
@@ -60,13 +61,20 @@ function TokenImage({ mintAddress }) {
     }
 
     return (
-        <Image
-            src={imageUrl}
-            alt={`Image for token ${mintAddress}`}
-            width={96} // Small size for the bottom-left corner
-            height={96}
-            className="rounded-xl" // Tailwind classes for styling
-        />
+        <AnimatePresence>
+            <motion.Image
+                key="image"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.25 }}
+                src={imageUrl}
+                alt={`Image for token ${mintAddress}`}
+                width={82} // Small size for the bottom-left corner
+                height={82}
+                className="rounded-xl" // Tailwind classes for styling
+            />
+        </AnimatePresence>
     );
 }
 
