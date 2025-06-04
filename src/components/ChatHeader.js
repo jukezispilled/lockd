@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
+import { FiCopy, FiCheck } from 'react-icons/fi'; // Example using react-icons
+
 // Component to fetch and display the token image
 function TokenImage({ mintAddress }) {
   const [imageUrl, setImageUrl] = useState(null);
@@ -93,6 +95,20 @@ function TokenImage({ mintAddress }) {
 
 export const ChatHeader = ({ chatData }) => {
   const [showDetails, setShowDetails] = useState(false);
+  const [copiedMint, setCopiedMint] = useState(null);
+
+  const handleCopyClick = useCallback(async (event, tokenMint) => {
+    event.stopPropagation(); // Prevent the card's onClick from firing
+    try {
+      await navigator.clipboard.writeText(tokenMint);
+      setCopiedMint(tokenMint);
+      setTimeout(() => {
+        setCopiedMint(null); // Reset the icon after a short delay
+      }, 1500); // 1.5 seconds
+    } catch (err) {
+      console.error("Failed to copy token mint:", err);
+    }
+  }, []);
 
   if (!chatData) return null;
 
@@ -109,7 +125,29 @@ export const ChatHeader = ({ chatData }) => {
             </button>
             <div>
               <h1 className="text-xl font-bold text-gray-800">{chatData.name} • ({chatData.tokenSym})</h1>
-              <p className="text-sm text-gray-500">{chatData.tokenMint.slice(0, 3)}...{chatData.tokenMint.slice(-4)}</p>
+              <motion.div 
+                className="flex items-center"
+                whileTap={{ scale: 0.75 }} // Scale down on tap
+                transition={{ duration: 0.1 }}
+                onClick={(e) => handleCopyClick(e, chat.tokenMint)}
+              >
+                {chat.tokenMint && (
+                  <div
+                    className="cursor-pointer mr-[2px]" // Add margin-right for spacing
+                  >
+                    {copiedMint === chat.tokenMint ? (
+                      <FiCheck className="text-gray-400" size={10} />
+                    ) : (
+                      <FiCopy className="text-gray-400" size={10} />
+                    )}
+                  </div>
+                )}
+                <p className="text-gray-400 text-sm line-clamp-2">
+                  {chat.tokenMint
+                    ? `${chat.tokenMint.slice(0, 3)}...${chat.tokenMint.slice(-4)}`
+                    : "No associated token."}
+                </p>
+              </motion.div>
             </div>
           </div>
 
