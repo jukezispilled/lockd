@@ -49,8 +49,10 @@ function TokenImage({ mintAddress }) {
     }, [mintAddress]); // Re-fetch when mintAddress changes
 
     if (loading) {
-        return <div className="text-gray-500 text-xs">Loading image...</div>;
-    }
+        return (
+            <div className="w-[82px] h-[82px] rounded-xl bg-gray-300 animate-pulse" />
+        );
+    }    
 
     if (error) {
         return <div className="text-red-500 text-xs">Image error.</div>;
