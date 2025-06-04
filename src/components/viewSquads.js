@@ -1,9 +1,12 @@
 "use client";
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect, useCallback } from 'react'; // Import useCallback
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+
+// Import icons (you might need to install a library like 'react-icons' or use SVG directly)
+import { FiCopy, FiCheck } from 'react-icons/fi'; // Example using react-icons
 
 // TokenImage component now receives imageUrl directly
 function TokenImage({ imageUrl, mintAddress }) { // Added mintAddress for alt text
@@ -34,9 +37,10 @@ export default function Squad() {
   const [groupChats, setGroupChats] = useState([]);
   const [tokenImages, setTokenImages] = useState({}); // Stores mintAddress -> imageUrl map
   const [loadingChats, setLoadingChats] = useState(true);
-  const [loadingImages, setLoadingImages] = useState(false); // New loading state for images
+  const [loadingImages, setLoadingImages] = useState(false);
   const [error, setError] = useState(null);
   const router = useRouter();
+  const [copiedMint, setCopiedMint] = useState(null); // State to track which mint was copied
 
   // Fetch group chats
   useEffect(() => {
@@ -98,11 +102,24 @@ export default function Squad() {
         fetchAllTokenImages();
       }
     }
-  }, [loadingChats, groupChats]); // Depend on loadingChats and groupChats
+  }, [loadingChats, groupChats]);
 
-  const handleChatClick = useCallback((chatId) => { // Use useCallback for handleChatClick
+  const handleChatClick = useCallback((chatId) => {
     router.push(`/${chatId}`);
   }, [router]);
+
+  const handleCopyClick = useCallback(async (event, tokenMint) => {
+    event.stopPropagation(); // Prevent the card's onClick from firing
+    try {
+      await navigator.clipboard.writeText(tokenMint);
+      setCopiedMint(tokenMint);
+      setTimeout(() => {
+        setCopiedMint(null); // Reset the icon after a short delay
+      }, 1500); // 1.5 seconds
+    } catch (err) {
+      console.error("Failed to copy token mint:", err);
+    }
+  }, []);
 
   if (loadingChats) {
     return (
@@ -178,11 +195,27 @@ export default function Squad() {
                   {`(${chat.tokenSym})` || ""}
                 </p>
               </div>
-              <p className="text-gray-400 text-[11px] line-clamp-2 absolute top-2 right-2">
-                {chat.tokenMint
-                  ? `${chat.tokenMint.slice(0, 3)}...${chat.tokenMint.slice(-4)}`
-                  : "No associated token."}
-              </p>
+              <div className="absolute top-2 right-2 flex items-center">
+                {chat.tokenMint && (
+                  <motion.div
+                    className="cursor-pointer mr-1" // Add margin-right for spacing
+                    whileTap={{ scale: 0.75 }} // Scale down on tap
+                    transition={{ duration: 0.1 }}
+                    onClick={(e) => handleCopyClick(e, chat.tokenMint)}
+                  >
+                    {copiedMint === chat.tokenMint ? (
+                      <FiCheck className="text-green-500" size={16} />
+                    ) : (
+                      <FiCopy className="text-gray-400" size={16} />
+                    )}
+                  </motion.div>
+                )}
+                <p className="text-gray-400 text-[11px] line-clamp-2">
+                  {chat.tokenMint
+                    ? `${chat.tokenMint.slice(0, 3)}...${chat.tokenMint.slice(-4)}`
+                    : "No associated token."}
+                </p>
+              </div>
               <p className="text-gray-400 text-sm mt-1 line-clamp-2">
                 {chat.description || ""}
               </p>
