@@ -134,7 +134,7 @@ export const ChatHeader = ({ chatData }) => {
                 >
                     {chatData.tokenMint && (
                     <div
-                        className="mr-[2px]" // Add margin-right for spacing
+                        className="mr-1" // Add margin-right for spacing
                     >
                         {copiedMint === chat.tokenMint ? (
                         <FiCheck className="text-gray-400" size={16} />
