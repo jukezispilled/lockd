@@ -203,16 +203,16 @@ export default function Squad() {
               >
                 {chat.tokenMint && (
                   <div
-                    className="cursor-pointer mr-1" // Add margin-right for spacing
+                    className="cursor-pointer mr-[2px]" // Add margin-right for spacing
                   >
                     {copiedMint === chat.tokenMint ? (
-                      <FiCheck className="text-gray-400" size={12} />
+                      <FiCheck className="text-gray-400" size={10} />
                     ) : (
-                      <FiCopy className="text-gray-400" size={12} />
+                      <FiCopy className="text-gray-400" size={10} />
                     )}
                   </div>
                 )}
-                <p className="text-gray-400 text-[10px] line-clamp-2">
+                <p className="text-gray-400 text-[9px] line-clamp-2">
                   {chat.tokenMint
                     ? `${chat.tokenMint.slice(0, 3)}...${chat.tokenMint.slice(-4)}`
                     : "No associated token."}
