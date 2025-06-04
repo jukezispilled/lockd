@@ -22,14 +22,12 @@ function TokenImage({ mintAddress }) {
             setLoading(true);
             setError(null);
             try {
-                // *** IMPORTANT CHANGE HERE ***
-                // Send mintAddress inside an array as per the new API route
                 const response = await fetch('/api/token-image', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ mintAddresses: [mintAddress] }), // Now sending an array
+                    body: JSON.stringify({ mintAddress }),
                 });
 
                 if (!response.ok) {
@@ -38,16 +36,7 @@ function TokenImage({ mintAddress }) {
                 }
 
                 const data = await response.json();
-                // *** IMPORTANT CHANGE HERE ***
-                // The API now returns an object with a 'results' array
-                // and each result has 'imageUrl' and 'mintAddress'
-                if (data.results && data.results.length > 0) {
-                    const tokenData = data.results[0]; // Get the first (and only) result
-                    setImageUrl(tokenData.imageUrl);
-                } else {
-                    setImageUrl(null); // No image found for this mint
-                    setError('Image URL not found for this token.');
-                }
+                setImageUrl(data.imageUrl);
             } catch (err) {
                 console.error("Error fetching token image for", mintAddress, ":", err);
                 setError(err.message);
@@ -117,7 +106,6 @@ export const ChatHeader = ({ chatData }) => {
           </div>
           
           <div className="flex items-center space-x-2">
-            {/* The TokenImage component will now send an array to the API and parse the results correctly */}
             {chatData.tokenMint && <TokenImage mintAddress={chatData.tokenMint} />}
           </div>
         </div>
