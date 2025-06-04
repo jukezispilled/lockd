@@ -25,7 +25,7 @@ function TokenImage({ mintAddress }) {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ mintAddress }),
+          body: JSON.stringify({ mintAddress }), // Sending a single mint address
         });
 
         if (!response.ok) {
@@ -33,8 +33,18 @@ function TokenImage({ mintAddress }) {
           throw new Error(errorData.error || 'Failed to fetch token image.');
         }
 
-        const data = await response.json();
-        setImageUrl(data.imageUrl);
+        const data = await response.json(); // data will be an object: { "mintAddress": "imageUrl" }
+        console.log("TokenImage received data:", data); // Debugging log
+
+        // Extract the imageUrl for the specific mintAddress
+        if (data && typeof data === 'object' && data[mintAddress]) {
+          setImageUrl(data[mintAddress]);
+        } else {
+          // Handle cases where mintAddress is not found in the response object
+          console.warn(`Image URL not found in response for mint: ${mintAddress}`, data);
+          setImageUrl(null);
+        }
+
       } catch (err) {
         console.error("Error fetching token image for", mintAddress, ":", err);
         setError(err.message);
@@ -57,7 +67,7 @@ function TokenImage({ mintAddress }) {
   }
 
   if (!imageUrl) {
-    return null; // No image found or mint address was not provided
+    return null; // No image found or mint address was not provided, or image not found in response
   }
 
   return (
