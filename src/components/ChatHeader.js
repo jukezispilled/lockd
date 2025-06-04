@@ -101,7 +101,7 @@ export const ChatHeader = ({ chatData }) => {
             </button>
             <div>
               <h1 className="text-xl font-bold text-gray-800">{chatData.name} • ({chatData.tokenSym})</h1>
-              <p className="text-sm text-gray-500">{chatData.tokenMint.slice(0, 3)}...${chatData.tokenMint.slice(-4)}</p>
+              <p className="text-sm text-gray-500">{chatData.tokenMint.slice(0, 3)}...{chatData.tokenMint.slice(-4)}</p>
             </div>
           </div>
           
