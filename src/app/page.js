@@ -60,21 +60,23 @@ export default function Home() {
               <div>
                 <AnimatePresence mode="wait">
                   {showTokenz ? (
-                    <motion.div
-                      key="tokenz-comp"
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.25 }}
-                    >
-                      <Tokenz
-                        publicKey={publicKey}
-                        connected={connected}
-                        signTransaction={signTransaction}
-                        connection={connection}
-                        onTokenCreationSuccess={handleTokenCreationSuccess}
-                      />
-                    </motion.div>
+                    <div className='w-full flex justify-center'>
+                      <motion.div
+                        key="tokenz-comp"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.25 }}
+                      >
+                        <Tokenz
+                          publicKey={publicKey}
+                          connected={connected}
+                          signTransaction={signTransaction}
+                          connection={connection}
+                          onTokenCreationSuccess={handleTokenCreationSuccess}
+                        />
+                      </motion.div>
+                    </div>
                   ) : (
                     <Squad />
                   )}
