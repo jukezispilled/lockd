@@ -26,5 +26,5 @@ body {
 }
 
 button.wallet-adapter-button-trigger {
-  @apply rounded-2xl bg-white border border-black text-black text-lg font-semibold px-4 py-2 transition-all duration-300;
+  @apply rounded-2xl bg-black text-white text-lg font-semibold px-4 py-2 transition-all duration-300 border-0;
 }
