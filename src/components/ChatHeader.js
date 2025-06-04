@@ -62,7 +62,7 @@ function TokenImage({ mintAddress }) {
 
     return (
         <AnimatePresence>
-            <div
+            <motion.div
                 key="image-area"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -76,7 +76,7 @@ function TokenImage({ mintAddress }) {
                     height={82}
                     className="rounded-xl" // Tailwind classes for styling
                 />
-            </div>
+            </motion.div>
         </AnimatePresence>
     );
 }
