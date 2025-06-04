@@ -62,18 +62,21 @@ function TokenImage({ mintAddress }) {
 
     return (
         <AnimatePresence>
-            <motion.Image
-                key="image"
+            <div
+                key="image-area"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.25 }}
-                src={imageUrl}
-                alt={`Image for token ${mintAddress}`}
-                width={82} // Small size for the bottom-left corner
-                height={82}
-                className="rounded-xl" // Tailwind classes for styling
-            />
+            >
+                <Image
+                    src={imageUrl}
+                    alt={`Image for token ${mintAddress}`}
+                    width={82} // Small size for the bottom-left corner
+                    height={82}
+                    className="rounded-xl" // Tailwind classes for styling
+                />
+            </div>
         </AnimatePresence>
     );
 }
