@@ -8,56 +8,71 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Mint address(es) is required.' }, { status: 400 });
     }
 
-    let mintAccountsToFetch;
+    let mintAccountsToProcess;
 
-    // Check if mintAddress is an array or a single string
+    // Ensure mintAccountsToProcess is always an array
     if (Array.isArray(mintAddress)) {
-      mintAccountsToFetch = mintAddress;
+      mintAccountsToProcess = mintAddress;
     } else if (typeof mintAddress === 'string') {
-      mintAccountsToFetch = [mintAddress];
+      mintAccountsToProcess = [mintAddress];
     } else {
       return NextResponse.json({ error: 'Invalid mint address format. Must be a string or an array of strings.' }, { status: 400 });
     }
 
-    if (mintAccountsToFetch.length === 0) {
+    if (mintAccountsToProcess.length === 0) {
       return NextResponse.json({ error: 'Mint address(es) cannot be empty.' }, { status: 400 });
     }
 
-    const url = `https://api.helius.xyz/v0/token-metadata?api-key=530b3b75-39b9-4fc8-a12c-4fb4250eab6d`;
+    const heliusApiKey = '530b3b75-39b9-4fc8-a12c-4fb4250eab6d';
+    const heliusUrl = `https://api.helius.xyz/v0/token-metadata?api-key=${heliusApiKey}`;
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        mintAccounts: mintAccountsToFetch, // Use the dynamically determined array
-        includeOffChain: true,
-      }),
-    });
+    const allResults = {}; // Object to store all fetched image URLs
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Helius API error: ${response.status} - ${errorData.message || response.statusText}`);
-    }
+    // Iterate over each mint address and make a separate Helius request
+    for (const mintAccount of mintAccountsToProcess) {
+      try {
+        const response = await fetch(heliusUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            mintAccounts: [mintAccount], // Send only ONE mint account at a time
+            includeOffChain: true,
+          }),
+        });
 
-    const data = await response.json();
-
-    // If you're expecting an array of results, you'll likely want to return an object mapping mint addresses to their image URLs
-    const results = {};
-    if (data && data.length > 0) {
-      data.forEach(tokenMetadata => {
-        if (tokenMetadata.mint) { // Helius response includes the mint address
-          const imageUrl = tokenMetadata.offChainMetadata?.metadata?.image;
-          results[tokenMetadata.mint] = imageUrl || null; // Store null if no image found
+        if (!response.ok) {
+          const errorData = await response.json();
+          // Log specific errors for individual mints but don't stop the whole process
+          console.warn(`Helius API error for mint ${mintAccount}: ${response.status} - ${errorData.message || response.statusText}`);
+          allResults[mintAccount] = null; // Mark as null if an error occurred for this specific mint
+          continue; // Move to the next mint address
         }
-      });
-      return NextResponse.json(results);
-    } else {
-      return NextResponse.json({ error: 'No token metadata found for the given address(es).' }, { status: 404 });
+
+        const data = await response.json();
+
+        // Process the single token metadata from the response
+        if (data && data.length > 0) {
+          const tokenMetadata = data[0]; // Get the first (and only) item in the array
+          const imageUrl = tokenMetadata.offChainMetadata?.metadata?.image;
+          allResults[mintAccount] = imageUrl || null; // Store the URL or null
+        } else {
+          // No metadata found for this specific mint
+          console.warn(`No token metadata found for mint: ${mintAccount}`);
+          allResults[mintAccount] = null;
+        }
+      } catch (error) {
+        console.error(`Error fetching token image for mint ${mintAccount}:`, error);
+        allResults[mintAccount] = null; // Mark as null if a network/parsing error occurred
+      }
     }
+
+    // Return the aggregated results
+    return NextResponse.json(allResults);
+
   } catch (error) {
-    console.error("Error in API route:", error);
+    console.error("Overall error in API route:", error);
     return NextResponse.json({ error: error.message || 'Failed to fetch token image(s).' }, { status: 500 });
   }
 }
