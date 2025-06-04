@@ -49,7 +49,7 @@ function TokenImage({ mintAddress }) {
 
     if (loading) {
         return (
-            <div className="w-[82px] h-[82px] rounded-xl bg-gray-100 animate-pulse" />
+            <div className="w-[96px] h-[96px] rounded-xl bg-gray-100 animate-pulse" />
         );
     }    
 
