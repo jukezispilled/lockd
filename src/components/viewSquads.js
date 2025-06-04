@@ -1,64 +1,14 @@
 "use client";
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react'; // Import useCallback
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
-// Component to fetch and display the token image
-function TokenImage({ mintAddress }) {
-  const [imageUrl, setImageUrl] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (!mintAddress) {
-      setLoading(false);
-      return;
-    }
-
-    async function fetchTokenImage() {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch('/api/token-image', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ mintAddress }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to fetch token image.');
-        }
-
-        const data = await response.json();
-        setImageUrl(data.imageUrl);
-      } catch (err) {
-        console.error("Error fetching token image for", mintAddress, ":", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchTokenImage();
-  }, [mintAddress]); // Re-fetch when mintAddress changes
-
-  if (loading) {
-    return (
-      <div className="w-[96px] h-[96px] rounded-xl bg-gray-100 animate-pulse" />
-    );
-  }
-
-  if (error) {
-    return <div className="text-red-500 text-xs">Image error.</div>;
-  }
-
+// TokenImage component now receives imageUrl directly
+function TokenImage({ imageUrl, mintAddress }) { // Added mintAddress for alt text
   if (!imageUrl) {
-    return null; // No image found or mint address was not provided
+    return null; // No image found
   }
 
   return (
@@ -72,9 +22,9 @@ function TokenImage({ mintAddress }) {
       <Image
         src={imageUrl}
         alt={`Image for token ${mintAddress}`}
-        width={96} // Small size for the bottom-left corner
+        width={96}
         height={96}
-        className="rounded-xl" // Tailwind classes for styling
+        className="rounded-xl"
       />
     </motion.div>
   );
@@ -82,14 +32,19 @@ function TokenImage({ mintAddress }) {
 
 export default function Squad() {
   const [groupChats, setGroupChats] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [tokenImages, setTokenImages] = useState({}); // Stores mintAddress -> imageUrl map
+  const [loadingChats, setLoadingChats] = useState(true);
+  const [loadingImages, setLoadingImages] = useState(false); // New loading state for images
   const [error, setError] = useState(null);
   const router = useRouter();
 
+  // Fetch group chats
   useEffect(() => {
     async function fetchGroupChats() {
+      setLoadingChats(true);
+      setError(null);
       try {
-        const response = await fetch('/api/chat/view'); // Your API route for group chats
+        const response = await fetch('/api/chat/view');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -99,18 +54,57 @@ export default function Squad() {
         console.error("Failed to fetch group chats:", e);
         setError(e.message);
       } finally {
-        setLoading(false);
+        setLoadingChats(false);
       }
     }
 
     fetchGroupChats();
   }, []);
 
-  const handleChatClick = (chatId) => {
-    router.push(`/${chatId}`);
-  };
+  // Fetch token images once group chats are loaded
+  useEffect(() => {
+    if (!loadingChats && groupChats.length > 0) {
+      const mintAddresses = groupChats
+        .map(chat => chat.tokenMint)
+        .filter(Boolean); // Filter out null/undefined values
 
-  if (loading) {
+      if (mintAddresses.length > 0) {
+        async function fetchAllTokenImages() {
+          setLoadingImages(true);
+          try {
+            const response = await fetch('/api/token-image', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ mintAddress: mintAddresses }), // Send array of mint addresses
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || 'Failed to fetch token images.');
+            }
+
+            const data = await response.json();
+            setTokenImages(data); // `data` should be the map: { mintAddress: imageUrl, ... }
+          } catch (err) {
+            console.error("Error fetching all token images:", err);
+            // Decide how to handle errors for multiple images.
+            // For now, individual errors will just result in no image being shown.
+          } finally {
+            setLoadingImages(false);
+          }
+        }
+        fetchAllTokenImages();
+      }
+    }
+  }, [loadingChats, groupChats]); // Depend on loadingChats and groupChats
+
+  const handleChatClick = useCallback((chatId) => { // Use useCallback for handleChatClick
+    router.push(`/${chatId}`);
+  }, [router]);
+
+  if (loadingChats) {
     return (
       <motion.div
         key="loading-comp"
@@ -184,7 +178,6 @@ export default function Squad() {
                   {`(${chat.tokenSym})` || ""}
                 </p>
               </div>
-              {/* Display abbreviated tokenMint here */}
               <p className="text-gray-400 text-[11px] line-clamp-2 absolute top-2 right-2">
                 {chat.tokenMint
                   ? `${chat.tokenMint.slice(0, 3)}...${chat.tokenMint.slice(-4)}`
@@ -194,10 +187,18 @@ export default function Squad() {
                 {chat.description || ""}
               </p>
             </div>
-            {/* The empty div where the image will be rendered */}
             <div className='absolute bottom-2 left-2 z-10'>
-              {/* Render the TokenImage component if tokenMint exists */}
-              {chat.tokenMint && <TokenImage mintAddress={chat.tokenMint} />}
+              {/* Only render TokenImage if tokenMint exists and image data is loaded */}
+              {chat.tokenMint && !loadingImages && tokenImages[chat.tokenMint] && (
+                <TokenImage imageUrl={tokenImages[chat.tokenMint]} mintAddress={chat.tokenMint} />
+              )}
+              {/* Show loading state for images */}
+              {chat.tokenMint && loadingImages && (
+                 <div className="w-[96px] h-[96px] rounded-xl bg-gray-100 animate-pulse" />
+              )}
+               {chat.tokenMint && !loadingImages && !tokenImages[chat.tokenMint] && (
+                 <div className="text-red-500 text-xs">Image not found.</div>
+              )}
             </div>
           </motion.div>
         ))}
