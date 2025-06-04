@@ -144,7 +144,7 @@ export const ChatHeader = ({ chatData }) => {
                     </div>
                     )}
                     <p className="text-gray-400 text-sm line-clamp-2">
-                    {chat.tokenMint
+                    {chatData.tokenMint
                         ? `${chatData.tokenMint.slice(0, 3)}...${chatData.tokenMint.slice(-4)}`
                         : "No associated token."}
                     </p>
