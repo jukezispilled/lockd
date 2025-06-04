@@ -48,8 +48,10 @@ function TokenImage({ mintAddress }) {
     }, [mintAddress]); // Re-fetch when mintAddress changes
 
     if (loading) {
-        return <div className="text-gray-500 text-xs">Loading image...</div>;
-    }
+        return (
+            <div className="w-[82px] h-[82px] rounded-xl bg-gray-100 animate-pulse" />
+        );
+    }    
 
     if (error) {
         return <div className="text-red-500 text-xs">Image error.</div>;
@@ -60,13 +62,21 @@ function TokenImage({ mintAddress }) {
     }
 
     return (
-        <Image
-            src={imageUrl}
-            alt={`Image for token ${mintAddress}`}
-            width={96} // Small size for the bottom-left corner
-            height={96}
-            className="rounded-xl" // Tailwind classes for styling
-        />
+        <motion.div
+            key="image-area"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.25 }}
+        >
+            <Image
+                src={imageUrl}
+                alt={`Image for token ${mintAddress}`}
+                width={96} // Small size for the bottom-left corner
+                height={96}
+                className="rounded-xl" // Tailwind classes for styling
+            />
+        </motion.div>
     );
 }
 
