@@ -187,7 +187,7 @@ export default function Squad() {
             onClick={() => handleChatClick(chat._id)}
           >
             <div>
-              <div className='absolute top-2 left-2 w-[60%]'>
+              <div className='absolute top-2 left-2 w-[55%]'>
                 <p className="text-white text-xl font-semibold break-words line-clamp-2">
                   {chat.name || "Untitled Group Chat"}
                 </p>
@@ -212,7 +212,7 @@ export default function Squad() {
                     )}
                   </div>
                 )}
-                <p className="text-gray-400 text-[11px] line-clamp-2">
+                <p className="text-gray-400 text-[10px] line-clamp-2">
                   {chat.tokenMint
                     ? `${chat.tokenMint.slice(0, 3)}...${chat.tokenMint.slice(-4)}`
                     : "No associated token."}
