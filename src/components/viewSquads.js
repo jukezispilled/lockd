@@ -195,27 +195,29 @@ export default function Squad() {
                   {`(${chat.tokenSym})` || ""}
                 </p>
               </div>
-              <div className="absolute top-2 right-2 flex items-center">
+              <motion.div 
+                className="absolute top-2 right-2 flex items-center"
+                whileTap={{ scale: 0.75 }} // Scale down on tap
+                transition={{ duration: 0.1 }}
+                onClick={(e) => handleCopyClick(e, chat.tokenMint)}
+              >
                 {chat.tokenMint && (
-                  <motion.div
+                  <div
                     className="cursor-pointer mr-1" // Add margin-right for spacing
-                    whileTap={{ scale: 0.75 }} // Scale down on tap
-                    transition={{ duration: 0.1 }}
-                    onClick={(e) => handleCopyClick(e, chat.tokenMint)}
                   >
                     {copiedMint === chat.tokenMint ? (
-                      <FiCheck className="text-green-500" size={16} />
+                      <FiCheck className="text-gray-400" size={12} />
                     ) : (
-                      <FiCopy className="text-gray-400" size={16} />
+                      <FiCopy className="text-gray-400" size={12} />
                     )}
-                  </motion.div>
+                  </div>
                 )}
                 <p className="text-gray-400 text-[11px] line-clamp-2">
                   {chat.tokenMint
                     ? `${chat.tokenMint.slice(0, 3)}...${chat.tokenMint.slice(-4)}`
                     : "No associated token."}
                 </p>
-              </div>
+              </motion.div>
               <p className="text-gray-400 text-sm mt-1 line-clamp-2">
                 {chat.description || ""}
               </p>
