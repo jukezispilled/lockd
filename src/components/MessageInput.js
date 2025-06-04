@@ -40,7 +40,7 @@ export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
 
   return (
     <div className="bg-white p-4 flex justify-center">
-      <form onSubmit={handleSubmit} className="flex items-start space-x-3 md:w-[75%]">
+      <form onSubmit={handleSubmit} className="flex items-center space-x-3 md:w-[75%]">
         <div className="flex-1 relative">
           <textarea
             ref={textareaRef}
@@ -48,7 +48,7 @@ export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="What's up?"
-            className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-none min-h-[48px] max-h-32"
+            className="w-full p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-none min-h-[48px] max-h-32"
             rows={1}
             disabled={disabled}
           />
