@@ -167,7 +167,7 @@ export default function Squad() {
             >
                 <div>
                     <div className='absolute top-2 left-2 w-[60%]'>
-                        <p className="text-white text-2xl font-semibold break-words line-clamp-2">
+                        <p className="text-white text-xl font-semibold break-words line-clamp-2">
                             {chat.name || "Untitled Group Chat"}
                         </p>
                         <p className="text-gray-400 text-base line-clamp-2">
