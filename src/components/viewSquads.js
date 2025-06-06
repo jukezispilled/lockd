@@ -183,7 +183,7 @@ export default function Squad() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.25 }}
-            className="h-[200px] w-full max-w-[250px] rounded-2xl bg-gray-300 shadow-lg p-2 flex flex-col justify-between relative"
+            className="h-[200px] w-full max-w-[250px] rounded-2xl bg-gray-300 shadow-sm p-2 flex flex-col justify-between relative"
             onClick={() => handleChatClick(chat._id)}
           >
             <div>
@@ -191,7 +191,7 @@ export default function Squad() {
                 <p className="text-gray-700 text-xl font-semibold break-words line-clamp-2">
                   {chat.name || "Untitled Group Chat"}
                 </p>
-                <p className="text-gray-400 text-base line-clamp-2">
+                <p className="text-gray-500 text-base line-clamp-2">
                   {`(${chat.tokenSym})` || ""}
                 </p>
               </div>
