@@ -26,5 +26,5 @@ body {
 }
 
 button.wallet-adapter-button-trigger {
-  @apply rounded-2xl bg-gray-300 text-gray-700 hover:bg-gray-300 text-lg font-semibold px-4 py-2 transition-all duration-300 border-0;
+  @apply rounded-2xl bg-gray-300 text-gray-700 hover:bg-gray-300 focus:bg-gray-300 text-lg font-semibold px-4 py-2 transition-all duration-300 border-0;
 }
