@@ -17,10 +17,10 @@ export const useChatCreation = () => {
     }
 
     setIsCreatingChat(true);
-    setChatCreationStatus('Creating group chat...');
+    setChatCreationStatus('Creating squad...');
 
     try {
-      console.log('Creating chat with data:', {
+      console.log('Creating squad with data:', {
         tokenName: tokenData.name,
         tokenSym: tokenData.symbol,
         tokenMint: tokenData.mint,
@@ -45,13 +45,13 @@ export const useChatCreation = () => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         console.error('API error response:', errorData);
-        throw new Error(errorData.error || `HTTP ${response.status}: Failed to create group chat`);
+        throw new Error(errorData.error || `HTTP ${response.status}: Failed to create squad`);
       }
 
       const result = await response.json();
       console.log('Success result:', result);
       
-      setChatCreationStatus(`Group chat created: ${result.chatName}`);
+      setChatCreationStatus(`Squad created: ${result.chatName}`);
       
       return {
         chatId: result.chatId,
@@ -59,7 +59,7 @@ export const useChatCreation = () => {
       };
 
     } catch (error) {
-      console.error('Error creating group chat:', error);
+      console.error('Error creating sqaud:', error);
       setChatCreationStatus(`Error: ${error.message}`);
       return null;
     } finally {

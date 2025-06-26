@@ -7,7 +7,7 @@ export const ChatSuccessNotification = ({ chatData, onViewChat, onDismiss }) => 
       <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="text-green-800 font-semibold">Group Chat Created! 🎉</h4>
+            <h4 className="text-green-800 font-semibold">Squad Created! 🎉</h4>
             <p className="text-green-700 text-sm">
               {chatData.chatName} is ready for your community
             </p>

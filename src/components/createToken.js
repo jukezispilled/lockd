@@ -199,7 +199,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
         setCreatedTokens(prev => [newToken, ...prev]);
         setCreationStatus(`Token created successfully! Mint: ${mintKeypair.publicKey.toString()}`);
 
-        console.log('About to create chat with tokenData:', {
+        console.log('About to create squad with tokenData:', {
             name: tokenData.name,
             symbol: tokenData.symbol,
             mint: mintKeypair.publicKey.toString()
@@ -312,7 +312,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
   const handleImportSuccess = (chatData) => {
     setCreatedChatData(chatData);
     setShowImportForm(false);
-    setCreationStatus('Token imported and chat created successfully!');
+    setCreationStatus('Token imported and squad created successfully!');
   };
 
   return (
@@ -506,7 +506,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
               onImportSuccess={handleImportSuccess}
             />
             <div
-              className='flex justify-center mb-4 text-sm underline text-zinc-400 cursor-pointer'
+              className='flex justify-center mb-4 text-sm underline text-zinc-400 cursor-pointer invisible md:visible'
               onClick={() => setShowImportForm(false)}
             >
               or create a new token

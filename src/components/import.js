@@ -101,7 +101,7 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey }) {
 
       console.log('Fetched token data:', { name, symbol, mint: tokenAddress });
 
-      setChatCreationStatus('Creating group chat...');
+      setChatCreationStatus('Creating squad...');
       const chatResult = await createGroupChat({
         name: name,
         symbol: symbol,
@@ -109,13 +109,13 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey }) {
       }, publicKey);
 
       if (chatResult) {
-        setSuccessMessage('Group chat created successfully!');
+        setSuccessMessage('Squad created successfully!');
         if (onImportSuccess) {
           onImportSuccess(chatResult);
         }
         setTokenAddress(''); // Clear the input field
       } else {
-        setError('Failed to create group chat for the imported token.');
+        setError('Failed to create squad for the imported token.');
       }
 
     } catch (err) {
