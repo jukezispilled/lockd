@@ -1,102 +1,184 @@
+// app/api/token-image/route.js
 import { NextResponse } from 'next/server';
+import { MongoClient } from 'mongodb';
+
+// Helius API key from environment variables
+const HELIUS_API_KEY = process.env.HELIUS_API_KEY;
+// MongoDB URI from environment variables
+const MONGODB_URI = process.env.MONGODB_URI;
 
 export async function POST(req) {
+  // --- 1. Initial Setup and Environment Variable Checks ---
+  if (!HELIUS_API_KEY) {
+    console.error("HELIUS_API_KEY is not defined in environment variables.");
+    return NextResponse.json({ error: "Server configuration error: Helius API key missing." }, { status: 500 });
+  }
+  if (!MONGODB_URI) {
+    console.error("MONGODB_URI is not defined in environment variables.");
+    return NextResponse.json({ error: "Server configuration error: MongoDB URI missing." }, { status: 500 });
+  }
+
+  let client; // Declare client variable to be accessible in finally block
   try {
+    // --- 2. Establish MongoDB Connection for this Request ---
+    console.log("Attempting to connect to MongoDB...");
+    client = new MongoClient(MONGODB_URI);
+    await client.connect();
+    console.log("Successfully connected to MongoDB.");
+
+    const db = client.db('tokenchat'); // <<< IMPORTANT: Use your actual database name here
+    const tokenImagesCollection = db.collection('tokenimages'); // <<< IMPORTANT: Use your actual collection name
+
+    // Ensure indexes are created (idempotent operation, safe to call on every request)
+    await tokenImagesCollection.createIndex({ mintAddress: 1 }, { unique: true });
+    await tokenImagesCollection.createIndex({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 7 }); // 7 days
+    console.log("MongoDB indexes ensured.");
+
+    // --- 3. Parse Request Body and Validate Input ---
     const { mintAddress } = await req.json();
+    console.log("Received request for mint addresses:", mintAddress);
 
     if (!mintAddress) {
+      console.log("Invalid request: Mint address(es) is required.");
       return NextResponse.json({ error: 'Mint address(es) is required.' }, { status: 400 });
     }
 
     let mintAccountsToProcess;
-
-    // Ensure mintAccountsToProcess is always an array
     if (Array.isArray(mintAddress)) {
       mintAccountsToProcess = mintAddress;
     } else if (typeof mintAddress === 'string') {
       mintAccountsToProcess = [mintAddress];
     } else {
+      console.log("Invalid request: Invalid mint address format.");
       return NextResponse.json({ error: 'Invalid mint address format. Must be a string or an array of strings.' }, { status: 400 });
     }
 
     if (mintAccountsToProcess.length === 0) {
+      console.log("Invalid request: Mint address(es) cannot be empty.");
       return NextResponse.json({ error: 'Mint address(es) cannot be empty.' }, { status: 400 });
     }
 
-    const heliusApiKey = '530b3b75-39b9-4fc8-a12c-4fb4250eab6d';
-    const heliusUrl = `https://mainnet.helius-rpc.com/?api-key=${heliusApiKey}`;
+    const heliusUrl = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}`;
 
-    // Get unique addresses for the API call to avoid unnecessary duplicate requests
-    const uniqueAddresses = [...new Set(mintAccountsToProcess)];
+    const results = {}; // Object to hold all final mintAddress -> imageUrl mappings
+    const mintsToFetchFromHelius = []; // Array of mints not found in cache
+    const mintsFromCache = []; // Array of mints found in cache
 
-    // Use DAS API getAssetBatch method for batch requests
-    try {
-      const response = await fetch(heliusUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 'batch-request',
-          method: 'getAssetBatch',
-          params: {
-            ids: uniqueAddresses, // Send only unique addresses to API
-          },
-        }),
-      });
+    // --- 4. Check Cache (MongoDB) for existing images ---
+    console.log(`Checking cache for ${mintAccountsToProcess.length} mints...`);
+    const cachedImages = await tokenImagesCollection.find({
+      mintAddress: { $in: mintAccountsToProcess }
+    }).toArray();
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error(`Helius DAS API error: ${response.status} - ${errorData.error?.message || response.statusText}`);
-        return NextResponse.json({ error: 'Failed to fetch token metadata from Helius.' }, { status: 500 });
-      }
+    const cachedMintMap = new Map(cachedImages.map(img => [img.mintAddress, img.imageUrl]));
 
-      const data = await response.json();
-      const allResults = {};
-
-      // Process the batch response
-      if (data && data.result && Array.isArray(data.result)) {
-        // Create a map of successful results from unique addresses
-        const successfulResults = new Map();
-        data.result.forEach(asset => {
-          if (asset && asset.id) {
-            const imageUrl = asset.content?.metadata?.image || asset.content?.files?.[0]?.uri;
-            successfulResults.set(asset.id, imageUrl || null);
-          }
-        });
-
-        // Map results back to ALL original addresses (including duplicates)
-        mintAccountsToProcess.forEach(mintAccount => {
-          if (successfulResults.has(mintAccount)) {
-            allResults[mintAccount] = successfulResults.get(mintAccount);
-          } else {
-            // No metadata found for this mint
-            console.warn(`No asset data found for mint: ${mintAccount}`);
-            allResults[mintAccount] = null;
-          }
-        });
-      } else if (data && data.error) {
-        // Handle JSON-RPC error
-        console.error('Helius DAS API error:', data.error);
-        return NextResponse.json({ error: `API error: ${data.error.message}` }, { status: 500 });
+    mintAccountsToProcess.forEach(mint => {
+      if (cachedMintMap.has(mint)) {
+        results[mint] = cachedMintMap.get(mint);
+        mintsFromCache.push(mint);
       } else {
-        // No metadata found for any mints
-        console.warn('No asset data found for any of the provided mints');
-        mintAccountsToProcess.forEach(mintAccount => {
-          allResults[mintAccount] = null;
-        });
+        mintsToFetchFromHelius.push(mint);
       }
+    });
 
-      return NextResponse.json(allResults);
-
-    } catch (error) {
-      console.error('Error fetching asset data from Helius DAS API:', error);
-      return NextResponse.json({ error: 'Network error while fetching asset metadata.' }, { status: 500 });
+    if (mintsFromCache.length > 0) {
+      console.log(`Cache HIT for ${mintsFromCache.length} mints:`, mintsFromCache);
+    } else {
+      console.log("Cache MISS: No mints found in cache.");
     }
 
+    // Filter for unique addresses to send to Helius to avoid redundant API calls
+    const uniqueMintsToFetchFromHelius = [...new Set(mintsToFetchFromHelius)];
+
+    // --- 5. If there are uncached mints, fetch them from Helius ---
+    if (uniqueMintsToFetchFromHelius.length > 0) {
+      console.log(`Cache MISS: Fetching ${uniqueMintsToFetchFromHelius.length} new mints from Helius:`, uniqueMintsToFetchFromHelius);
+      try {
+        const response = await fetch(heliusUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 'batch-request',
+            method: 'getAssetBatch',
+            params: {
+              ids: uniqueMintsToFetchFromHelius,
+            },
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error(`Helius DAS API error: ${response.status} - ${errorData.error?.message || response.statusText}`);
+          // Do not throw here; allow the request to proceed with cached data + no image for failed fetches
+        } else {
+          const data = await response.json();
+          const newImagesToCache = [];
+
+          if (data && data.result && Array.isArray(data.result)) {
+            data.result.forEach(asset => {
+              if (asset && asset.id) {
+                const imageUrl = asset.content?.metadata?.image || asset.content?.files?.[0]?.uri;
+                
+                results[asset.id] = imageUrl || null;
+                
+                newImagesToCache.push({
+                  mintAddress: asset.id,
+                  imageUrl: imageUrl || null,
+                  createdAt: new Date(),
+                });
+              }
+            });
+          } else if (data && data.error) {
+            console.error('Helius DAS API error (batch response):', data.error);
+          } else {
+            console.warn('No asset data or unexpected response format for batch from Helius');
+          }
+
+          // --- 6. Save newly fetched images to MongoDB cache ---
+          if (newImagesToCache.length > 0) {
+            try {
+              console.log(`Attempting to cache ${newImagesToCache.length} new token images to MongoDB...`);
+              await tokenImagesCollection.insertMany(newImagesToCache, { ordered: false });
+              console.log(`Successfully cached ${newImagesToCache.length} new token images.`);
+            } catch (dbErr) {
+              if (dbErr.code === 11000) {
+                console.warn('MongoDB cache warning: Attempted to insert duplicate mint address, likely concurrent request.');
+              } else {
+                console.error('Error saving new token images to MongoDB:', dbErr);
+              }
+            }
+          } else {
+              console.log("No new images to cache from Helius API response.");
+          }
+        }
+
+      } catch (error) {
+        console.error('Network error during Helius API call:', error);
+      }
+    } else {
+      console.log("No new mints needed from Helius API. All data came from cache.");
+    }
+
+    // --- 7. Return the combined results to the client ---
+    console.log("Returning combined results to client.");
+    return NextResponse.json(results);
+
   } catch (error) {
+    // --- 8. General Error Handling for the API Route ---
     console.error("Overall error in API route:", error);
-    return NextResponse.json({ error: error.message || 'Failed to fetch token image(s).' }, { status: 500 });
+    if (error.message.includes("MongoServerSelectionError")) {
+      console.error("Database connection failed. Check MongoDB server and URI.");
+      return NextResponse.json({ error: 'Database connection error. Please ensure MongoDB is running and URI is correct.' }, { status: 500 });
+    }
+    return NextResponse.json({ error: error.message || 'Failed to process token image request.' }, { status: 500 });
+  } finally {
+    // --- 9. Close MongoDB Connection ---
+    if (client) {
+      await client.close();
+      console.log("MongoDB client closed for this request.");
+    }
   }
 }
