@@ -26,11 +26,11 @@ body {
 }
 
 button.wallet-adapter-button-trigger {
-  @apply rounded-xl bg-[#69FCFF] text-gray-700 hover:bg-[#69FCFF] focus:bg-[#69FCFF] text-lg font-semibold px-2 py-1 transition-all duration-300 border-0;
+  @apply rounded-xl bg-zinc-950 text-gray-100 hover:bg-zinc-950 focus:bg-zinc-950 text-lg font-semibold px-2 py-1 transition-all duration-300 border-0;
 }
 
 button.wallet-adapter-button-trigger:hover {
-  background-color: #69FCFF !important;
+  background-color: #09090b !important;
 }
 
 @theme inline {
