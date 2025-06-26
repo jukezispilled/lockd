@@ -14,6 +14,13 @@ export default function Home() {
   const { publicKey, connected, signTransaction } = useWallet();
 
   const [showTokenz, setShowTokenz] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <div className="min-h-screen flex items-center bg-white">
