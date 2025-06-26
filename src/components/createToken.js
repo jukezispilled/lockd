@@ -32,7 +32,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
   const { createGroupChat, isCreatingChat, chatCreationStatus, setChatCreationStatus } = useChatCreation();
 
   // New state to toggle between token creation form and token import form
-  const [showImportForm, setShowImportForm] = useState(false);
+  const [showImportForm, setShowImportForm] = useState(true);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
