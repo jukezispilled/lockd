@@ -20,7 +20,7 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+  }, [fetchBalance]);
 
   const fetchBalance = async () => {
     if (!publicKey) return;
