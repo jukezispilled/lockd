@@ -42,18 +42,6 @@ export async function POST(request) {
 
     console.log('Connected to MongoDB');
 
-    // Check if chat already exists for this token
-    const existingChat = await chatsCollection.findOne({ tokenMint });
-    if (existingChat) {
-      console.log('Chat already exists for token:', tokenMint);
-      return Response.json({
-        success: true,
-        chatId: existingChat._id.toString(),
-        chatName: existingChat.name,
-        message: 'Chat already exists'
-      });
-    }
-
     // Create new ObjectId for the chat
     const chatObjectId = new ObjectId();
     

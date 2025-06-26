@@ -26,6 +26,9 @@ export async function POST(req) {
     const heliusApiKey = '530b3b75-39b9-4fc8-a12c-4fb4250eab6d';
     const heliusUrl = `https://mainnet.helius-rpc.com/?api-key=${heliusApiKey}`;
 
+    // Get unique addresses for the API call to avoid unnecessary duplicate requests
+    const uniqueAddresses = [...new Set(mintAccountsToProcess)];
+
     // Use DAS API getAssetBatch method for batch requests
     try {
       const response = await fetch(heliusUrl, {
@@ -38,7 +41,7 @@ export async function POST(req) {
           id: 'batch-request',
           method: 'getAssetBatch',
           params: {
-            ids: mintAccountsToProcess, // Send all mint addresses at once
+            ids: uniqueAddresses, // Send only unique addresses to API
           },
         }),
       });
@@ -54,7 +57,7 @@ export async function POST(req) {
 
       // Process the batch response
       if (data && data.result && Array.isArray(data.result)) {
-        // Create a map of successful results
+        // Create a map of successful results from unique addresses
         const successfulResults = new Map();
         data.result.forEach(asset => {
           if (asset && asset.id) {
@@ -63,7 +66,7 @@ export async function POST(req) {
           }
         });
 
-        // Ensure all requested mint addresses are included in the response
+        // Map results back to ALL original addresses (including duplicates)
         mintAccountsToProcess.forEach(mintAccount => {
           if (successfulResults.has(mintAccount)) {
             allResults[mintAccount] = successfulResults.get(mintAccount);
