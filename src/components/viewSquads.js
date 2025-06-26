@@ -167,77 +167,81 @@ export default function Squad() {
   }
 
   return (
-    <motion.div
-      key="tokenz-comp"
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.25 }}
-      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-center items-center cursor-pointer p-4"
-    >
-      <AnimatePresence>
-        {groupChats.map((chat) => (
-          <motion.div
-            key={chat._id}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.25 }}
-            className="h-[200px] w-full max-w-[250px] rounded-2xl bg-gray-300 shadow-sm p-2 flex flex-col justify-between relative hover:scale-[104%] transition duration-200 ease-in-out"
-            onClick={() => handleChatClick(chat._id)}
-          >
-            <div>
-              <div className='absolute top-2 left-2 w-[55%]'>
-                <p className="text-gray-700 text-xl font-semibold break-words line-clamp-2">
-                  {chat.name || "Untitled Group Chat"}
-                </p>
-                <p className="text-gray-500 text-base line-clamp-2">
-                  {`(${chat.tokenSym})` || ""}
+    <>
+      <div className="text-3xl md:text-6xl font-bold text-center mb-2">Find Your Squad.</div>
+      <div className="text-sm md:text-lg font-bold text-center mb-4 text-gray-600">it's time to get lockd in</div>
+      <motion.div
+        key="tokenz-comp"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.25 }}
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-center items-start cursor-pointer p-4 h-[70dvh]"
+      >
+        <AnimatePresence>
+          {groupChats.map((chat) => (
+            <motion.div
+              key={chat._id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.25 }}
+              className="h-[200px] w-full max-w-[250px] rounded-2xl bg-zinc-950 shadow-sm p-2 flex flex-col justify-between relative"
+              onClick={() => handleChatClick(chat._id)}
+            >
+              <div>
+                <div className='absolute top-2 left-2 w-[55%]'>
+                  <p className="text-gray-100 text-xl font-semibold break-words line-clamp-2">
+                    {chat.name || "Untitled Group Chat"}
+                  </p>
+                  <p className="text-gray-500 text-sm line-clamp-2">
+                    {`(${chat.tokenSym})` || ""}
+                  </p>
+                </div>
+                <motion.div 
+                  className="absolute top-2 right-2 flex items-center"
+                  whileTap={{ scale: 0.75 }} // Scale down on tap
+                  transition={{ duration: 0.1 }}
+                  onClick={(e) => handleCopyClick(e, chat.tokenMint)}
+                >
+                  {chat.tokenMint && (
+                    <div
+                      className="cursor-pointer mr-[2px]" // Add margin-right for spacing
+                    >
+                      {copiedMint === chat.tokenMint ? (
+                        <FiCheck className="text-gray-400" size={10} />
+                      ) : (
+                        <FiCopy className="text-gray-400" size={10} />
+                      )}
+                    </div>
+                  )}
+                  <p className="text-gray-400 text-[9px] line-clamp-2">
+                    {chat.tokenMint
+                      ? `${chat.tokenMint.slice(0, 3)}...${chat.tokenMint.slice(-4)}`
+                      : "No associated token."}
+                  </p>
+                </motion.div>
+                <p className="text-gray-400 text-sm mt-1 line-clamp-2">
+                  {chat.description || ""}
                 </p>
               </div>
-              <motion.div 
-                className="absolute top-2 right-2 flex items-center"
-                whileTap={{ scale: 0.75 }} // Scale down on tap
-                transition={{ duration: 0.1 }}
-                onClick={(e) => handleCopyClick(e, chat.tokenMint)}
-              >
-                {chat.tokenMint && (
-                  <div
-                    className="cursor-pointer mr-[2px]" // Add margin-right for spacing
-                  >
-                    {copiedMint === chat.tokenMint ? (
-                      <FiCheck className="text-gray-400" size={10} />
-                    ) : (
-                      <FiCopy className="text-gray-400" size={10} />
-                    )}
-                  </div>
+              <div className='absolute bottom-2 left-2 z-10'>
+                {/* Only render TokenImage if tokenMint exists and image data is loaded */}
+                {chat.tokenMint && !loadingImages && tokenImages[chat.tokenMint] && (
+                  <TokenImage imageUrl={tokenImages[chat.tokenMint]} mintAddress={chat.tokenMint} />
                 )}
-                <p className="text-gray-400 text-[9px] line-clamp-2">
-                  {chat.tokenMint
-                    ? `${chat.tokenMint.slice(0, 3)}...${chat.tokenMint.slice(-4)}`
-                    : "No associated token."}
-                </p>
-              </motion.div>
-              <p className="text-gray-400 text-sm mt-1 line-clamp-2">
-                {chat.description || ""}
-              </p>
-            </div>
-            <div className='absolute bottom-2 left-2 z-10'>
-              {/* Only render TokenImage if tokenMint exists and image data is loaded */}
-              {chat.tokenMint && !loadingImages && tokenImages[chat.tokenMint] && (
-                <TokenImage imageUrl={tokenImages[chat.tokenMint]} mintAddress={chat.tokenMint} />
-              )}
-              {/* Show loading state for images */}
-              {chat.tokenMint && loadingImages && (
-                 <div className="w-[96px] h-[96px] rounded-xl bg-gray-100 animate-pulse" />
-              )}
-               {chat.tokenMint && !loadingImages && !tokenImages[chat.tokenMint] && (
-                 <div className="text-red-500 text-xs">Image not found.</div>
-              )}
-            </div>
-          </motion.div>
-        ))}
-      </AnimatePresence>
-    </motion.div>
+                {/* Show loading state for images */}
+                {chat.tokenMint && loadingImages && (
+                   <div className="w-[96px] h-[96px] rounded-xl bg-gray-100 animate-pulse" />
+                )}
+                 {chat.tokenMint && !loadingImages && !tokenImages[chat.tokenMint] && (
+                   <div className="text-red-500 text-xs">Image not found.</div>
+                )}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
+    </>
   );
 }

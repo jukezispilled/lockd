@@ -52,7 +52,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex items-center bg-white">
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="p-8">
               <div className="text-center absolute top-5 right-5">
                 <WalletMultiButton>{connected ? 'Disconnect' : 'Connect'}</WalletMultiButton>
@@ -86,13 +86,11 @@ export default function Home() {
                   <button
                     onClick={() => setShowTokenz(!showTokenz)}
                     disabled={loading}
-                    className="rounded-2xl bg-gray-300 text-gray-700 text-lg font-semibold px-4 py-2 transition-all duration-300 border-0 cursor-pointer hover:scale-[102%] ease-in-out"
+                    className="text-gray-700 text-lg font-semibold px-4 py-2 transition-all duration-300 border-0 cursor-pointer hover:scale-[102%] ease-in-out"
                   >
-                    {loading ? 'loading...' : (
-                      <div className="flex justify-center items-center gap-2">
-                        <span className="text-xl">{showTokenz ? 'NVM' : 'Create +'}</span>
-                      </div>
-                    )}
+                    <div className="flex justify-center items-center gap-2">
+                      <span className="text-lg">{showTokenz ? 'NVM' : '[ Create + ]'}</span>
+                    </div>
                   </button>
                 </div>
               </div>
