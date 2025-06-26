@@ -35,7 +35,7 @@ export default function Home() {
               <div>
                 <AnimatePresence mode="wait">
                   {showTokenz ? (
-                    <div className='w-full flex justify-center'>
+                    <div className='w-full flex justify-center relative z-20'>
                       <motion.div
                         key="tokenz-comp"
                         initial={{ opacity: 0, scale: 0.95 }}
