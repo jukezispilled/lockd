@@ -27,7 +27,7 @@ export default function Home() {
     <div className="min-h-screen flex items-center bg-white">
       <RetroGrid />
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="p-8">
               <div className="text-center absolute top-5 right-5">
                 <WalletMultiButton>{connected ? 'Disconnect' : 'Connect'}</WalletMultiButton>
