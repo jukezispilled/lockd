@@ -5,6 +5,7 @@ import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { motion, AnimatePresence } from 'framer-motion';
+import { RetroGrid } from '@/components/magicui/RetroGrid';
 
 import Tokenz from '@/components/createToken';
 import Squad from '@/components/viewSquads';
@@ -24,6 +25,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex items-center bg-white">
+      <RetroGrid />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
           <div className="p-8">

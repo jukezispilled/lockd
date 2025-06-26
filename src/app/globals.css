@@ -32,3 +32,16 @@ button.wallet-adapter-button-trigger {
 button.wallet-adapter-button-trigger:hover {
   background-color: #e5e7eb !important;
 }
+
+@theme inline {
+  --animate-grid: grid 15s linear infinite;
+ 
+  @keyframes grid {
+    0% {
+      transform: translateY(-50%);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+}

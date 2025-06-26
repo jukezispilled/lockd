@@ -131,7 +131,7 @@ export default function Squad() {
         transition={{ duration: 0.25 }}
         className="flex justify-center items-center text-gray-600"
       >
-        Loading group chats...
+        Loading squads...
       </motion.div>
     );
   }
@@ -161,7 +161,7 @@ export default function Squad() {
         transition={{ duration: 0.25 }}
         className="flex justify-center items-center"
       >
-        No group chats found.
+        No squads found.
       </motion.div>
     );
   }
