@@ -129,7 +129,7 @@ export default function Squad() {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.25 }}
-        className="flex justify-center items-center text-gray-600"
+        className="flex h-[80dvh] justify-center items-center text-gray-600"
       >
         Loading squads...
       </motion.div>

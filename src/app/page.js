@@ -24,7 +24,7 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen flex items-center bg-white">
+    <div className="min-h-screen bg-white">
       <RetroGrid />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
@@ -35,7 +35,7 @@ export default function Home() {
               <div>
                 <AnimatePresence mode="wait">
                   {showTokenz ? (
-                    <div className='w-full flex justify-center relative z-20'>
+                    <div className='w-full h-[80dvh] flex items-center justify-center relative z-20'>
                       <motion.div
                         key="tokenz-comp"
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -52,7 +52,9 @@ export default function Home() {
                       </motion.div>
                     </div>
                   ) : (
-                    <Squad />
+                    <div className='self-start'>
+                      <Squad />
+                    </div>
                   )}
                 </AnimatePresence>
 
