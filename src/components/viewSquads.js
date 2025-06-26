@@ -168,7 +168,7 @@ export default function Squad() {
 
   return (
     <>
-      <div className="text-3xl md:text-6xl font-bold text-center mb-2">Find Your Squad.</div>
+      <div className="text-3xl md:text-6xl font-bold text-center mb-1">Find Your Squad.</div>
       <div className="text-sm md:text-lg font-bold text-center mb-4 text-gray-600">it's time to get lockd in</div>
       <motion.div
         key="tokenz-comp"
