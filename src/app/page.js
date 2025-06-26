@@ -13,41 +13,7 @@ export default function Home() {
   const { connection } = useConnection();  // Get shared connection from provider
   const { publicKey, connected, signTransaction } = useWallet();
 
-  const [balance, setBalance] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [showTokenz, setShowTokenz] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const fetchBalance = async () => {
-    if (!publicKey) return;
-    setLoading(true);
-    try {
-      const balance = await connection.getBalance(publicKey);
-      setBalance(balance / LAMPORTS_PER_SOL);
-    } catch (error) {
-      console.error('Error fetching balance:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleTokenCreationSuccess = () => {
-    fetchBalance();
-  };
-
-  useEffect(() => {
-    if (connected && publicKey) {
-      fetchBalance();
-    } else {
-      setBalance(null);
-    }
-  }, [connected, publicKey]);
-
-  if (!mounted) return null;
 
   return (
     <div className="min-h-screen flex items-center bg-white">
@@ -73,7 +39,6 @@ export default function Home() {
                           connected={connected}
                           signTransaction={signTransaction}
                           connection={connection}
-                          onTokenCreationSuccess={handleTokenCreationSuccess}
                         />
                       </motion.div>
                     </div>
@@ -85,7 +50,6 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center absolute top-5 left-5">
                   <button
                     onClick={() => setShowTokenz(!showTokenz)}
-                    disabled={loading}
                     className="text-gray-700 text-lg font-semibold px-4 py-2 transition-all duration-300 border-0 cursor-pointer hover:scale-[102%] ease-in-out"
                   >
                     <div className="flex justify-center items-center gap-2">
