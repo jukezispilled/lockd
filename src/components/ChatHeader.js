@@ -1,13 +1,13 @@
 "use client";
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react'; // Import memo
 import Image from 'next/image';
 
 import { FiCopy, FiCheck } from 'react-icons/fi'; // Example using react-icons
 
 // Component to fetch and display the token image
-function TokenImage({ mintAddress }) {
+const TokenImage = memo(function TokenImage({ mintAddress }) { // Wrapped with memo
   const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,6 +18,10 @@ function TokenImage({ mintAddress }) {
       return;
     }
 
+    // Use AbortController for robust fetching and cleanup
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
     async function fetchTokenImage() {
       setLoading(true);
       setError(null);
@@ -27,7 +31,8 @@ function TokenImage({ mintAddress }) {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ mintAddress }), // Sending a single mint address
+          body: JSON.stringify({ mintAddress }),
+          signal: signal, // Pass the signal to the fetch request
         });
 
         if (!response.ok) {
@@ -35,27 +40,39 @@ function TokenImage({ mintAddress }) {
           throw new Error(errorData.error || 'Failed to fetch token image.');
         }
 
-        const data = await response.json(); // data will be an object: { "mintAddress": "imageUrl" }
-        console.log("TokenImage received data:", data); // Debugging log
-
-        // Extract the imageUrl for the specific mintAddress
-        if (data && typeof data === 'object' && data[mintAddress]) {
-          setImageUrl(data[mintAddress]);
-        } else {
-          // Handle cases where mintAddress is not found in the response object
-          console.warn(`Image URL not found in response for mint: ${mintAddress}`, data);
-          setImageUrl(null);
+        const data = await response.json();
+        // Only update state if the request hasn't been aborted
+        if (!signal.aborted) {
+          if (data && typeof data === 'object' && data[mintAddress]) {
+            setImageUrl(data[mintAddress]);
+          } else {
+            console.warn(`Image URL not found in response for mint: ${mintAddress}`, data);
+            setImageUrl(null);
+          }
         }
-
       } catch (err) {
-        console.error("Error fetching token image for", mintAddress, ":", err);
-        setError(err.message);
+        // Handle abort error gracefully, preventing state updates on unmounted component
+        if (err.name === 'AbortError') {
+          console.log('Fetch aborted for', mintAddress);
+        } else {
+          console.error("Error fetching token image for", mintAddress, ":", err);
+          setError(err.message);
+        }
       } finally {
-        setLoading(false);
+        // Only set loading to false if the request wasn't aborted
+        if (!signal.aborted) {
+          setLoading(false);
+        }
       }
     }
 
     fetchTokenImage();
+
+    // Cleanup function: abort the fetch request if the component unmounts
+    // or if mintAddress changes before the current fetch completes
+    return () => {
+      abortController.abort();
+    };
   }, [mintAddress]); // Re-fetch when mintAddress changes
 
   if (loading) {
@@ -91,7 +108,7 @@ function TokenImage({ mintAddress }) {
       </motion.div>
     </AnimatePresence>
   );
-}
+});
 
 export const ChatHeader = ({ chatData }) => {
   const [showDetails, setShowDetails] = useState(false);
@@ -125,11 +142,8 @@ export const ChatHeader = ({ chatData }) => {
             </button>
             <div>
               <h1 className="text-xl font-bold text-gray-800">{chatData.name} • ({chatData.tokenSym})</h1>
-              <AnimatePresence>
-                <motion.div 
+                <div
                     className="flex items-center cursor-pointer"
-                    whileTap={{ scale: 0.75 }} // Scale down on tap
-                    transition={{ duration: 0.1 }}
                     onClick={(e) => handleCopyClick(e, chatData.tokenMint)}
                 >
                     {chatData.tokenMint && (
@@ -148,8 +162,7 @@ export const ChatHeader = ({ chatData }) => {
                         ? `${chatData.tokenMint.slice(0, 3)}...${chatData.tokenMint.slice(-4)}`
                         : "No associated token."}
                     </p>
-                </motion.div>
-              </AnimatePresence>
+                </div>
             </div>
           </div>
 

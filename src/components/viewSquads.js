@@ -167,8 +167,8 @@ export default function Squad() {
   }
 
   return (
-    <>
-      <div className="text-3xl md:text-6xl font-bold text-center mb-1">Find Your Squad.</div>
+    <div className='mt-[10%] md:-mt-[20%]'>
+      <div className="text-4xl md:text-6xl font-bold text-center mb-1">Find Your Squad.</div>
       <div className="text-sm md:text-lg font-bold text-center mb-4 text-gray-600">it&apos;s time to get lockd in</div>
       <motion.div
         key="tokenz-comp"
@@ -176,7 +176,7 @@ export default function Squad() {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.25 }}
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-center items-start cursor-pointer p-4 h-[70dvh]"
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-start cursor-pointer p-4 justify-items-center"
       >
         <AnimatePresence>
           {groupChats.map((chat) => (
@@ -242,6 +242,6 @@ export default function Squad() {
           ))}
         </AnimatePresence>
       </motion.div>
-    </>
+    </div>
   );
 }
