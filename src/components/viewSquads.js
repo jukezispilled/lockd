@@ -183,7 +183,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
 
   return (
     <div className='mt-[10%] md:mt-[7%]'>
-      <div className="text-4xl md:text-7xl font-bold text-center mb-1">Find Your Squad.</div>
+      <div className="text-4xl md:text-7xl font-bold text-center mb-1 text-black">Find Your Squad.</div>
       <div className="text-sm md:text-lg font-bold text-center mb-4 text-gray-600">it&apos;s time to get lockd in</div>
       <motion.div
         key="tokenz-comp"
