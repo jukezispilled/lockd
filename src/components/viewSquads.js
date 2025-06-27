@@ -222,7 +222,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
           </div>
           <input
             type="text"
-            placeholder="Search by name, symbol, or CA..."
+            placeholder="Search by name, ticker, or CA..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-zinc-500 focus:border-transparent outline-none transition-all duration-200 bg-white shadow-sm"
