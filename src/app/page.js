@@ -74,7 +74,7 @@ export default function Home() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ duration: 0.25 }}
-                      className="w-full h-[80dvh] flex items-center justify-center relative z-20"
+                      className="w-full min-h-[80dvh] mt-[7%] md:mt-[0%] flex items-center justify-center relative z-20"
                     >
                       <Tokenz
                         publicKey={publicKey}

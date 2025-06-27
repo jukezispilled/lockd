@@ -324,7 +324,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
   };
 
   return (
-    <>
+    <div className='grid'>
       <AnimatePresence mode="wait"> {/* Use AnimatePresence here */}
         {!showImportForm ? (
           <motion.div
@@ -454,7 +454,6 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                         onChange={handleImageChange}
                         className="hidden"
                         disabled={isCreatingToken}
-                        required // Mark as required
                       />
                       <label
                         htmlFor="token-image-upload"
@@ -581,6 +580,6 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
