@@ -320,7 +320,6 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
 
   const handleImportSuccess = (chatData) => {
     setCreatedChatData(chatData);
-    setShowImportForm(false);
     setCreationStatus('Token imported and squad created successfully!');
   };
 
@@ -496,7 +495,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       : 'bg-black text-white cursor-pointer'
                   }`}
                 >
-                  {isCreatingToken ? 'Creating Token...' : isCreatingChat ? 'Setting up Chat...' : 'Create +'}
+                  {isCreatingToken ? 'Creating Token...' : isCreatingChat ? 'Setting up Squad...' : 'Create +'}
                 </button>
               </form>
             </div>
@@ -531,7 +530,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
 
       {/* Status and Notification components remain outside AnimatePresence if you want them always visible */}
       {creationStatus && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mb-6">
           <p className="text-blue-800">{creationStatus}</p>
         </div>
       )}
@@ -547,7 +546,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
       )}
 
       {chatCreationStatus && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mb-4">
           <p className="text-blue-800">{chatCreationStatus}</p>
         </div>
       )}

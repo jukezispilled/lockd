@@ -48,7 +48,7 @@ export default function Home() {
           <div className="p-8">
             {/* Wallet connection button positioned at top right */}
             <div className="text-center absolute top-5 right-5 z-20"> {/* Added z-20 to ensure it's above RetroGrid */}
-              <WalletMultiButton>{connected ? 'Disconnect' : 'Connect'}</WalletMultiButton>
+              <WalletMultiButton>{connected ? 'Sign-Out' : 'Sign-In'}</WalletMultiButton>
             </div>
             <div>
               {/* AnimatePresence for smooth transitions between Tokenz and Squad components */}
