@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Import useEffect
 import { Connection, LAMPORTS_PER_SOL, Keypair } from '@solana/web3.js';
 import { useChatCreation } from '@/app/hooks/useChatCreation';
 import { ChatSuccessNotification } from './ChatSuccessNotification';
@@ -33,6 +33,15 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
 
   // New state to toggle between token creation form and token import form
   const [showImportForm, setShowImportForm] = useState(true);
+
+  // State to track if all necessary fields are filled
+  const [formIsValid, setFormIsValid] = useState(false);
+
+  // Effect to re-evaluate form validity whenever formData changes
+  useEffect(() => {
+    const { name, symbol, description, image } = formData;
+    setFormIsValid(!!name && !!symbol && !!description && !!image);
+  }, [formData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -301,9 +310,9 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.symbol || !formData.description) {
-      console.error('Please fill in required fields (Name, Symbol, Description)');
-      setCreationStatus('Error: Please fill in required fields (Name, Symbol, Description).');
+    if (!formIsValid) { // Use the formIsValid state here
+      console.error('Please fill in all required fields.');
+      setCreationStatus('Error: Please fill in all required fields (Name, Ticker, Description, Image).');
       return;
     }
     createToken(formData);
@@ -446,6 +455,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                         onChange={handleImageChange}
                         className="hidden"
                         disabled={isCreatingToken}
+                        required // Mark as required
                       />
                       <label
                         htmlFor="token-image-upload"
@@ -479,8 +489,12 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
 
                 <button
                   type="submit"
-                  disabled={isCreatingToken || isCreatingChat}
-                  className="w-full bg-black text-white py-3 px-6 rounded-lg font-semibold disabled:cursor-not-allowed cursor-pointer"
+                  disabled={isCreatingToken || isCreatingChat || !formIsValid} // Disabled when creating or if form is not valid
+                  className={`w-full py-3 px-6 rounded-lg font-semibold ${
+                    isCreatingToken || isCreatingChat || !formIsValid
+                      ? 'bg-black text-white cursor-not-allowed'
+                      : 'bg-black text-white cursor-pointer'
+                  }`}
                 >
                   {isCreatingToken ? 'Creating Token...' : isCreatingChat ? 'Setting up Chat...' : 'Create +'}
                 </button>

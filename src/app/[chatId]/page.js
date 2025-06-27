@@ -117,7 +117,7 @@ export default function ChatPage() {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.25 }}
-        className="flex flex-col h-screen"
+        className="flex flex-col h-[calc(100dvh-20px)]"
       >
         <ChatHeader chatData={chatData} />
         

@@ -10,7 +10,6 @@ const Banner = () => {
   const handleCopyClick = async () => {
     try {
       await navigator.clipboard.writeText(textToCopy);
-      alert("Text copied: " + textToCopy); // Added an alert for user feedback
     } catch (err) {
       console.error("Failed to copy text: ", err);
     }
@@ -25,7 +24,7 @@ const Banner = () => {
   }
 
   return (
-    <div className="bg-gray-200 py-0.25 px-2 text-center relative flex items-center justify-center gap-2.5 border-b border-gray-300">
+    <div className="bg-gray-200 py-0.25 px-2 text-center relative flex items-center justify-center gap-2.5 border-b border-gray-300 h-5">
       <span
         onClick={handleCopyClick}
         className="cursor-pointer font-bold text-xs md:text-xs text-gray-700 flex-grow"
