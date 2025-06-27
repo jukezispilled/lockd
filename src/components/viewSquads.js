@@ -33,7 +33,7 @@ function TokenImage({ imageUrl, mintAddress }) { // Added mintAddress for alt te
   );
 }
 
-export default function Squad() {
+export default function Squad({ refreshTrigger, isRefreshing }) {
   const [groupChats, setGroupChats] = useState([]);
   const [tokenImages, setTokenImages] = useState({}); // Stores mintAddress -> imageUrl map
   const [loadingChats, setLoadingChats] = useState(true);
@@ -42,67 +42,79 @@ export default function Squad() {
   const router = useRouter();
   const [copiedMint, setCopiedMint] = useState(null); // State to track which mint was copied
 
-  // Fetch group chats
-  useEffect(() => {
-    async function fetchGroupChats() {
-      setLoadingChats(true);
-      setError(null);
+  // Function to fetch group chats
+  const fetchGroupChats = useCallback(async () => {
+    setLoadingChats(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/chat/view');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setGroupChats(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error("Failed to fetch group chats:", e);
+      setError(e.message);
+    } finally {
+      setLoadingChats(false);
+    }
+  }, []);
+
+  // Function to fetch token images
+  const fetchTokenImages = useCallback(async (chats) => {
+    const mintAddresses = chats
+      .map(chat => chat.tokenMint)
+      .filter(Boolean); // Filter out null/undefined values
+
+    if (mintAddresses.length > 0) {
+      setLoadingImages(true);
       try {
-        const response = await fetch('/api/chat/view');
+        const response = await fetch('/api/token-image', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ mintAddress: mintAddresses }), // Send array of mint addresses
+        });
+
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch token images.');
         }
+
         const data = await response.json();
-        setGroupChats(Array.isArray(data) ? data : []);
-      } catch (e) {
-        console.error("Failed to fetch group chats:", e);
-        setError(e.message);
+        setTokenImages(data); // `data` should be the map: { mintAddress: imageUrl, ... }
+      } catch (err) {
+        console.error("Error fetching all token images:", err);
+        // Decide how to handle errors for multiple images.
+        // For now, individual errors will just result in no image being shown.
       } finally {
-        setLoadingChats(false);
+        setLoadingImages(false);
       }
     }
-
-    fetchGroupChats();
   }, []);
+
+  // Initial load
+  useEffect(() => {
+    fetchGroupChats();
+  }, [fetchGroupChats]);
 
   // Fetch token images once group chats are loaded
   useEffect(() => {
     if (!loadingChats && groupChats.length > 0) {
-      const mintAddresses = groupChats
-        .map(chat => chat.tokenMint)
-        .filter(Boolean); // Filter out null/undefined values
-
-      if (mintAddresses.length > 0) {
-        async function fetchAllTokenImages() {
-          setLoadingImages(true);
-          try {
-            const response = await fetch('/api/token-image', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ mintAddress: mintAddresses }), // Send array of mint addresses
-            });
-
-            if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(errorData.error || 'Failed to fetch token images.');
-            }
-
-            const data = await response.json();
-            setTokenImages(data); // `data` should be the map: { mintAddress: imageUrl, ... }
-          } catch (err) {
-            console.error("Error fetching all token images:", err);
-            // Decide how to handle errors for multiple images.
-            // For now, individual errors will just result in no image being shown.
-          } finally {
-            setLoadingImages(false);
-          }
-        }
-        fetchAllTokenImages();
-      }
+      fetchTokenImages(groupChats);
     }
-  }, [loadingChats, groupChats]);
+  }, [loadingChats, groupChats, fetchTokenImages]);
+
+  // Handle refresh trigger from parent
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      // Clear existing data first for better UX
+      setTokenImages({});
+      fetchGroupChats();
+    }
+  }, [refreshTrigger, fetchGroupChats]);
 
   const handleChatClick = useCallback((chatId) => {
     router.push(`/${chatId}`);
@@ -121,7 +133,10 @@ export default function Squad() {
     }
   }, []);
 
-  if (loadingChats) {
+  // Show loading state when refreshing or initially loading
+  const showLoading = loadingChats || isRefreshing;
+
+  if (showLoading) {
     return (
       <motion.div
         key="loading-comp"
@@ -131,7 +146,7 @@ export default function Squad() {
         transition={{ duration: 0.25 }}
         className="flex h-[80dvh] justify-center items-center text-gray-600"
       >
-        Loading squads...
+        {isRefreshing ? 'Refreshing squads...' : 'Loading squads...'}
       </motion.div>
     );
   }
@@ -176,7 +191,9 @@ export default function Squad() {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.25 }}
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-start cursor-pointer p-4 justify-items-center"
+        className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-start cursor-pointer p-4 justify-items-center ${
+          isRefreshing ? 'opacity-70 pointer-events-none' : ''
+        }`}
       >
         <AnimatePresence>
           {groupChats.map((chat) => (

@@ -6,6 +6,7 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RetroGrid } from '@/components/magicui/RetroGrid';
+import { BiRefresh } from "react-icons/bi";
 
 import Tokenz from '@/components/createToken';
 import Squad from '@/components/viewSquads';
@@ -16,10 +17,21 @@ export default function Home() {
 
   const [showTokenz, setShowTokenz] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    // Trigger refresh in Squad component
+    setRefreshTrigger(prev => prev + 1);
+    // Add a small delay to show the refresh animation
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setIsRefreshing(false);
+  };
 
   if (!mounted) return null;
 
@@ -53,36 +65,58 @@ export default function Home() {
                     </div>
                   ) : (
                     <div className='self-start'>
-                      <Squad />
+                      <Squad 
+                        refreshTrigger={refreshTrigger}
+                        isRefreshing={isRefreshing}
+                      />
                     </div>
                   )}
                 </AnimatePresence>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center absolute top-5 left-5">
-                  <button
-                    onClick={() => setShowTokenz(!showTokenz)}
-                    className="text-gray-700 text-lg font-semibold px-4 py-2 transition-all duration-300 border-0 cursor-pointer hover:scale-[102%] ease-in-out"
-                  >
-                    <div className="flex justify-center items-center gap-2">
-                      {showTokenz ? (
-                        <span className="text-lg">NVM</span>
-                      ) : (
-                        <motion.span
-                          className="text-lg"
-                          animate={{
-                            scale: [1, 1.04, 1],
-                          }}
-                          transition={{
-                            duration: .7,
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                          }}
-                        >
-                          [ Create + ]
-                        </motion.span>
-                      )}
-                    </div>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setShowTokenz(!showTokenz)}
+                      className="text-gray-700 text-lg font-semibold px-4 py-2 transition-all duration-300 border-0 cursor-pointer hover:scale-[102%] ease-in-out"
+                    >
+                      <div className="flex justify-center items-center gap-2">
+                        {showTokenz ? (
+                          <span className="text-lg">NVM</span>
+                        ) : (
+                          <motion.span
+                            className="text-lg"
+                            animate={{
+                              scale: [1, 1.04, 1],
+                            }}
+                            transition={{
+                              duration: .7,
+                              repeat: Infinity,
+                              ease: "easeInOut"
+                            }}
+                          >
+                            [ Create + ]
+                          </motion.span>
+                        )}
+                      </div>
+                    </button>
+                    
+                    <button
+                      onClick={handleRefresh}
+                      disabled={isRefreshing}
+                      className="text-gray-700 transition-all duration-300 border-0 cursor-pointer hover:scale-[102%] ease-in-out disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <motion.div
+                        animate={{ rotate: isRefreshing ? 360 : 0 }}
+                        transition={{
+                          duration: 1,
+                          repeat: isRefreshing ? Infinity : 0,
+                          ease: "linear"
+                        }}
+                      >
+                        <BiRefresh size={30} />
+                      </motion.div>
+                    </button>
+                  </div>
                 </div>
               </div>
           </div>
