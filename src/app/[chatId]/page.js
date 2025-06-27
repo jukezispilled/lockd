@@ -15,7 +15,9 @@ export default function ChatPage() {
   const [chatData, setChatData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showJumpButton, setShowJumpButton] = useState(false);
   const messagesEndRef = useRef(null);
+  const scrollContainerRef = useRef(null);
 
   const {
     messages,
@@ -24,6 +26,21 @@ export default function ChatPage() {
     error: messageError,
     refreshMessages
   } = useChatMessages(chatId);
+
+  // Function to scroll to bottom
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Check if user is near bottom of scroll
+  const handleScroll = () => {
+    if (!scrollContainerRef.current) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+    
+    setShowJumpButton(!isNearBottom);
+  };
 
   // Fetch chat data
   useEffect(() => {
@@ -52,7 +69,7 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Poll for new messages every 3 seconds
+  // Poll for new messages every 10 minutes
   useEffect(() => {
     if (!chatId) return;
 
@@ -122,8 +139,41 @@ export default function ChatPage() {
         <ChatHeader chatData={chatData} />
         
         <div className="bg-gray-100 flex-1 overflow-hidden flex flex-col justify-center items-center">
-          <div className='h-[90%] w-[75%] border border-gray-300 rounded-xl p-4 flex flex-col'> {/* Added flex flex-col */}
-            <div className='flex-grow overflow-y-auto'> {/* Added flex-grow and overflow-y-auto */}
+          <div className='h-[90%] w-[75%] bg-white rounded-xl p-4 flex flex-col relative'>
+            {/* Jump to Present Button */}
+            <AnimatePresence>
+              {showJumpButton && (
+                <motion.button
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={scrollToBottom}
+                  className="absolute top-4 left-4 z-10 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg cursor-pointer flex items-center gap-2 text-sm font-medium transition-colors"
+                >
+                  <svg 
+                    className="w-4 h-4" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M19 14l-7 7m0 0l-7-7m7 7V3" 
+                    />
+                  </svg>
+                  Jump to Present
+                </motion.button>
+              )}
+            </AnimatePresence>
+
+            <div 
+              ref={scrollContainerRef}
+              onScroll={handleScroll}
+              className='flex-grow overflow-y-auto'
+            >
               <MessageList 
                 messages={messages} 
                 isLoading={isSendingMessage}
