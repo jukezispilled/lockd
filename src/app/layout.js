@@ -1,5 +1,7 @@
+// app/layout.jsx
 import { Inter, JetBrains_Mono } from "next/font/google";
 import WalletProviders from "@/components/Provider";
+import Banner from "@/components/Banner"; // Import the new Banner component
 import "./globals.css";
 
 const roundedSans = Inter({
@@ -24,6 +26,8 @@ export default function RootLayout({ children }) {
       <body
         className={`${roundedSans.variable} ${monoFont.variable} antialiased`}
       >
+        {/* The banner is placed directly inside the body, above children */}
+        <Banner />
         <WalletProviders>
           {children}
         </WalletProviders>

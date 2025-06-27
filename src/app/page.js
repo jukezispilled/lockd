@@ -24,7 +24,7 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white relative">
       <RetroGrid />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
