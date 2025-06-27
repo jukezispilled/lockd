@@ -128,7 +128,7 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey }) {
   };
 
   return (
-    <div className="bg-white rounded-xl p-6 border border-gray-200 mb-2 max-w-2xl shadow-sm">
+    <div className="bg-white rounded-xl p-6 border border-gray-200 mb-2 max-w-2xl shadow-xs">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-600 mb-2">

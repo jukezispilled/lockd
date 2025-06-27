@@ -326,7 +326,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15 }}
           >
-            <div className="bg-white rounded-xl p-6 border border-gray-200 mb-2 max-w-2xl shadow-sm">
+            <div className="bg-white rounded-xl p-6 border border-gray-200 mb-2 max-w-2xl shadow-xs">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
