@@ -1,8 +1,7 @@
-// components/MessageInput.js
-
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
+import { LuSend } from "react-icons/lu";
 
 export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
   const [message, setMessage] = useState('');
@@ -48,7 +47,7 @@ export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="What's up?"
-            className="w-full py-5 px-3 pr-14 text-black bg-white rounded-2xl focus:outline-none focus:ring-1 focus:ring-gray-300 focus:border-transparent resize-none min-h-[48px] max-h-32 shadow-xs"
+            className="w-full py-5 px-3 pr-14 text-black bg-white rounded-full focus:outline-none focus:ring-1 focus:ring-gray-300 focus:border-transparent resize-none min-h-[48px] max-h-32 shadow-xs"
             rows={1}
             disabled={disabled}
           />
@@ -57,8 +56,9 @@ export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
             type="submit"
             disabled={!message.trim() || disabled || message.length > 1000}
             className="absolute right-2 top-1/2 -translate-y-1/2 text-2xl bg-green-300 p-2 rounded-full disabled:bg-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[44px] h-11"
+            aria-label="Send message" // Added for accessibility
           >
-            ⬆️
+            <LuSend size={20} className="text-gray-700 -rotate-45 translate-x-[1px] translate-y-[1px]"/> {/* Replaced emoji with icon */}
           </button>
         </div>
       </form>

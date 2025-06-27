@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useEffect, useCallback, memo } from 'react'; // Import memo
 import Image from 'next/image';
 
-import { FiCopy, FiCheck } from 'react-icons/fi'; // Example using react-icons
+import { FiCopy, FiCheck, FiArrowLeft } from 'react-icons/fi'; // Import FiArrowLeft
 
 // Component to fetch and display the token image
 const TokenImage = memo(function TokenImage({ mintAddress }) { // Wrapped with memo
@@ -137,8 +137,9 @@ export const ChatHeader = ({ chatData }) => {
             <button
               onClick={() => window.history.back()}
               className="p-2 rounded-full text-2xl"
+              aria-label="Go back" // Added for accessibility
             >
-              ⬅️
+              <FiArrowLeft size={24} /> {/* Replaced emoji with icon */}
             </button>
             <div>
               <h1 className="text-xl font-bold text-gray-800">{chatData.name} • ({chatData.tokenSym})</h1>
