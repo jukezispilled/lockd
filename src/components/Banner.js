@@ -33,6 +33,13 @@ const Banner = () => {
       >
         CA: unrevealed
       </span>
+    </div>
+  );
+};
+
+export default Banner;
+
+/*
       <button
         onClick={handleCloseClick}
         className="bg-transparent border-none text-xl cursor-pointer text-gray-500 p-0 leading-none"
@@ -40,8 +47,4 @@ const Banner = () => {
       >
         &times;
       </button>
-    </div>
-  );
-};
-
-export default Banner;
+*/
