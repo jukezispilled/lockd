@@ -259,7 +259,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
           transition={{ duration: 0.25 }}
           className="flex flex-col justify-center items-center py-12 text-gray-500"
         >
-          <div className="text-lg mb-2">No squads found for "{searchQuery}"</div>
+          <div className="text-lg mb-2">No squads found for &quot;{searchQuery}&quot;</div>
           <button
             onClick={clearSearch}
             className="text-zinc-600 hover:text-zinc-800 underline transition-colors duration-200"
