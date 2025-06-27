@@ -56,7 +56,7 @@ export default function Home() {
                 {/* Squad component - always rendered but hidden when showTokenz is true */}
                 <div 
                   className={`self-start transition-opacity duration-300 ${
-                    showTokenz ? 'opacity-0 pointer-events-none absolute inset-0' : 'opacity-100'
+                    showTokenz ? 'opacity-0 pointer-events-none absolute inset-0 hidden' : 'opacity-100'
                   }`}
                 >
                   <Squad
