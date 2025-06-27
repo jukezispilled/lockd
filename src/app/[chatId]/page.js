@@ -139,7 +139,7 @@ export default function ChatPage() {
         <ChatHeader chatData={chatData} />
         
         <div className="bg-gray-100 flex-1 overflow-hidden flex flex-col justify-center items-center">
-          <div className='h-[90%] w-[90%] md:w-[75%] bg-white rounded-xl p-4 flex flex-col relative'>
+          <div className='h-[95%] w-[90%] md:w-[75%] bg-white rounded-xl p-4 flex flex-col relative'>
             {/* Jump to Present Button */}
             <AnimatePresence>
               {showJumpButton && (
