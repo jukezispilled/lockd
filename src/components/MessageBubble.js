@@ -33,9 +33,14 @@ export const MessageBubble = ({ message, isOwn, showAvatar }) => {
       {/* Message content */}
       <div className="max-w-xs lg:max-w-md">
         {!isOwn && showAvatar && (
-          <div className="text-xs text-gray-500 mb-1 px-2">
+          <a
+            href={`https://solscan.io/account/${message.senderPublicKey}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-gray-500 mb-1 px-2 hover:underline"
+          >
             {getSenderName(message.senderPublicKey)}
-          </div>
+          </a>
         )}
         
         <div
