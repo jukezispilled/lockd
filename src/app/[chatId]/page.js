@@ -121,7 +121,7 @@ export default function ChatPage() {
       >
         <ChatHeader chatData={chatData} />
         
-        <div className="flex-1 overflow-hidden flex flex-col justify-center items-center">
+        <div className="bg-gray-100 flex-1 overflow-hidden flex flex-col justify-center items-center">
           <div className='h-[90%] w-[75%] border border-gray-300 rounded-xl p-4 flex flex-col'> {/* Added flex flex-col */}
             <div className='flex-grow overflow-y-auto'> {/* Added flex-grow and overflow-y-auto */}
               <MessageList 

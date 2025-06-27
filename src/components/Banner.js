@@ -25,7 +25,7 @@ const Banner = () => {
   }
 
   return (
-    <div className="bg-gray-100 py-0.25 px-2 text-center relative flex items-center justify-center gap-2.5 border-b border-gray-300">
+    <div className="bg-gray-200 py-0.25 px-2 text-center relative flex items-center justify-center gap-2.5 border-b border-gray-300">
       <span
         onClick={handleCopyClick}
         className="cursor-pointer font-bold text-xs md:text-xs text-gray-700 flex-grow"
