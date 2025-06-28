@@ -30,7 +30,7 @@ const Banner = () => {
         className="cursor-pointer font-bold text-xs md:text-xs text-gray-700 flex-grow"
         title="Click to copy"
       >
-        Launching on Believe
+        Not live yet
       </span>
     </div>
   );
