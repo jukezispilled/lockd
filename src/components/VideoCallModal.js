@@ -56,8 +56,8 @@ const MemoizedParticipantCard = memo(({
   console.log(`🃏 Rendering participant card for ${participant.session_id} (local: ${participant.local})`);
   
   const cardClass = isGrid 
-    ? "relative bg-gray-700 rounded-lg overflow-hidden"
-    : "relative bg-gray-800 rounded-lg overflow-hidden flex-1 min-w-0";
+    ? "relative bg-zinc-900 rounded-lg overflow-hidden"
+    : "relative bg-zinc-900 rounded-lg overflow-hidden flex-1 min-w-0";
   
   const videoClass = "w-full h-full object-cover";
   const nameClass = isGrid 
