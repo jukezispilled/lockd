@@ -139,7 +139,7 @@ export default function ChatPage() {
         <ChatHeader chatData={chatData} />
         
         <div className="bg-gray-100 flex-1 overflow-hidden flex flex-col justify-center items-center">
-          <div className='h-[95%] w-[90%] md:w-[75%] bg-white rounded-xl p-4 flex flex-col relative'>
+          <div className='h-[95%] w-[90%] md:w-[75%] bg-white rounded-xl m-4 flex flex-col relative'>
             {/* Jump to Present Button */}
             <AnimatePresence>
               {showJumpButton && (
@@ -149,7 +149,7 @@ export default function ChatPage() {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                   onClick={scrollToBottom}
-                  className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg cursor-pointer flex items-center gap-2 text-sm font-medium transition-colors"
+                  className="absolute top-1 md:top-4 left-1/2 -translate-x-1/2 z-10 md:bg-gray-100 text-gray-700 px-3 py-2 rounded-lg cursor-pointer flex items-center gap-2 text-xs md:text-sm font-medium transition-colors"
                 >
                   <svg 
                     className="w-4 h-4" 
