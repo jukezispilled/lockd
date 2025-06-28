@@ -812,7 +812,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           url: roomUrl,
           startVideoOff: true,  // Start with camera OFF
           startAudioOff: true, // Start with audio ON
-          userName: `User ${Math.floor(Math.random() * 1000)}`
+          userName: `Anon`
         });
 
       } catch (err) {
