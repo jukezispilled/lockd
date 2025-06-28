@@ -121,143 +121,153 @@ export default function ChatPage() {
 
   if (loading) {
     return (
-      <AnimatePresence mode="wait">
-        <motion.div
-          key="loading"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.25 }}
-          className="bg-gray-100 flex items-center justify-center h-[100dvh]"
-        >
-          <div className="text-center">
-            <p className="text-gray-600">Loading chat...</p>
-          </div>
-        </motion.div>
-      </AnimatePresence>
+      <div className="flex flex-col h-screen h-[100dvh] overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="bg-gray-100 flex items-center justify-center flex-1"
+          >
+            <div className="text-center">
+              <p className="text-gray-600">Loading chat...</p>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <AnimatePresence mode="wait">
-        <motion.div
-          key="error"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.25 }}
-          className="bg-gray-100 flex items-center justify-center h-[100dvh]"
-        >
-          <div className="text-center">
-            <div className="text-red-500 text-6xl mb-4">⚠️</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Bro is not lockd in</h2>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <button
-              onClick={() => (window.location.href = '/')}
-              className="bg-black text-white px-6 py-2 rounded-lg"
-            >
-              Go Back
-            </button>
-          </div>
-        </motion.div>
-      </AnimatePresence>
+      <div className="flex flex-col h-screen h-[100dvh] overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key="error"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="bg-gray-100 flex items-center justify-center flex-1"
+          >
+            <div className="text-center">
+              <div className="text-red-500 text-6xl mb-4">⚠️</div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Bro is not lockd in</h2>
+              <p className="text-gray-600 mb-4">{error}</p>
+              <button
+                onClick={() => (window.location.href = '/')}
+                className="bg-black text-white px-6 py-2 rounded-lg"
+              >
+                Go Back
+              </button>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
     );
   }
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key="chat-page"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        transition={{ duration: 0.25 }}
-        className="flex flex-col h-[100dvh]"
-      >
-        <ChatHeader chatData={chatData} />
-        
-        <div className="bg-gray-100 flex-1 h-[95%] m-4 overflow-hidden flex flex-col justify-center items-center">
-          <div className="flex flex-col md:flex-row gap-4 h-full w-[90%]">
-            {/* Video Call Button */}
-            <div className="flex flex-col gap-2 md:flex-shrink-0">
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={handleJoinRoom}
-                disabled={isCreatingRoom}
-                className="bg-gray-200 text-gray-800 p-3 rounded-xl transition-colors flex items-center justify-center w-min md:w-50 h-auto cursor-pointer gap-3 flex-row-reverse md:flex-row"
-                title="Join Video/Voice Call"
-              >
-                {isCreatingRoom ? (
-                  <div className="size-6 border-4 border-gray-800 border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <HiSpeakerphone className="size-6" />
-                )}
-                <span className="text-base font-medium hidden md:block">Voice Chat</span>
-              </motion.button>
-            </div>
+    <div className="flex flex-col h-screen h-[100dvh] overflow-hidden">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key="chat-page"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          className="flex flex-col h-full"
+        >
+          <div className="flex-shrink-0">
+            <ChatHeader chatData={chatData} />
+          </div>
+          
+          <div className="bg-gray-100 flex-1 min-h-0 my-4 md:m-4 overflow-hidden flex flex-col justify-center items-center">
+            <div className="flex flex-col md:flex-row gap-4 h-full w-[90%] min-h-0">
+              {/* Video Call Button */}
+              <div className="flex flex-col gap-2 md:flex-shrink-0 flex-shrink-0">
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleJoinRoom}
+                  disabled={isCreatingRoom}
+                  className="bg-gray-200 text-gray-800 p-3 rounded-xl transition-colors flex items-center justify-center w-min md:w-50 h-auto cursor-pointer gap-3 flex-row-reverse md:flex-row"
+                  title="Join Video/Voice Call"
+                >
+                  {isCreatingRoom ? (
+                    <div className="size-6 border-4 border-gray-800 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <HiSpeakerphone className="size-6" />
+                  )}
+                  <span className="text-base font-medium hidden md:block">Voice Chat</span>
+                </motion.button>
+              </div>
 
-            {/* Main Chat Container */}
-            <div className='flex-1 bg-white rounded-xl flex flex-col relative min-h-0'>
-              {/* Jump to Present Button */}
-              <AnimatePresence>
-                {showJumpButton && (
-                  <motion.button
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    onClick={scrollToBottom}
-                    className="absolute top-0 md:top-4 left-1/2 -translate-x-1/2 z-10 md:bg-gray-100 text-gray-700 px-3 py-0.5 md:py-2 rounded-lg cursor-pointer flex items-center gap-2 text-xs md:text-sm font-medium transition-colors"
-                  >
-                    <svg 
-                      className="w-4 h-4 hidden md:block" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
+              {/* Main Chat Container */}
+              <div className='flex-1 bg-white rounded-xl flex flex-col relative min-h-0'>
+                {/* Jump to Present Button */}
+                <AnimatePresence>
+                  {showJumpButton && (
+                    <motion.button
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      onClick={scrollToBottom}
+                      className="absolute top-0 md:top-4 left-1/2 -translate-x-1/2 z-10 md:bg-gray-100 text-gray-700 px-3 py-0.5 md:py-2 rounded-lg cursor-pointer flex items-center gap-2 text-xs md:text-sm font-medium transition-colors"
                     >
-                      <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth={2} 
-                        d="M19 14l-7 7m0 0l-7-7m7 7V3" 
-                      />
-                    </svg>
-                    Jump to Present
-                  </motion.button>
-                )}
-              </AnimatePresence>
+                      <svg 
+                        className="w-4 h-4 hidden md:block" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth={2} 
+                          d="M19 14l-7 7m0 0l-7-7m7 7V3" 
+                        />
+                      </svg>
+                      Jump to Present
+                    </motion.button>
+                  )}
+                </AnimatePresence>
 
-              <div 
-                ref={scrollContainerRef}
-                onScroll={handleScroll}
-                className='flex-grow overflow-y-auto'
-              >
-                <MessageList 
-                  messages={messages} 
-                  isLoading={isSendingMessage}
-                  error={messageError}
-                />
-                <div ref={messagesEndRef} />
+                <div 
+                  ref={scrollContainerRef}
+                  onScroll={handleScroll}
+                  className='flex-grow overflow-y-auto min-h-0'
+                >
+                  <MessageList 
+                    messages={messages} 
+                    isLoading={isSendingMessage}
+                    error={messageError}
+                  />
+                  <div ref={messagesEndRef} />
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <MessageInput 
-          onSendMessage={sendMessage}
-          disabled={isSendingMessage}
-          chatId={chatId}
-        />
+          <div className="flex-shrink-0">
+            <MessageInput 
+              onSendMessage={sendMessage}
+              disabled={isSendingMessage}
+              chatId={chatId}
+            />
+          </div>
 
-        {/* Video Call Modal */}
-        <VideoCallModal
-          isOpen={showVideoModal}
-          onClose={handleCloseVideo}
-          roomUrl={roomUrl}
-          chatId={chatId}
-        />
-      </motion.div>
-    </AnimatePresence>
+          {/* Video Call Modal */}
+          <VideoCallModal
+            isOpen={showVideoModal}
+            onClose={handleCloseVideo}
+            roomUrl={roomUrl}
+            chatId={chatId}
+          />
+        </motion.div>
+      </AnimatePresence>
+    </div>
   );
 }
