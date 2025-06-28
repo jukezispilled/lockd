@@ -185,7 +185,7 @@ export default function ChatPage() {
           </div>
           
           <div className="bg-gray-100 flex-1 min-h-0 mb-4 md:my-4 overflow-hidden flex flex-col justify-center items-center">
-            <div className="flex flex-col md:flex-row gap-4 h-full w-[95%] min-h-0">
+            <div className="flex flex-col md:flex-row gap-4 h-full w-[90%] md:w-[95%] min-h-0">
               {/* Video Call Button */}
               <div className="flex flex-col gap-2 md:flex-shrink-0 flex-shrink-0">
                 <motion.button
