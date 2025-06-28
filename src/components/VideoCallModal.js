@@ -1240,7 +1240,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
               <div className="absolute inset-0 flex items-center justify-center z-20 bg-black">
                 <div className="text-center text-white">
                   <div className="w-12 h-12 border-3 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                  <p className="text-lg">Connecting to video call...</p>
+                  <p className="text-lg">Connecting to voice chat...</p>
                   <p className="text-sm text-gray-400 mt-2">Please allow camera and microphone access</p>
                 </div>
               </div>
@@ -1284,7 +1284,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
                 <div className="text-center max-w-md mx-auto">
                   <div className="text-8xl mb-6">📹</div>
                   <h3 className="text-2xl font-semibold mb-2">Ready to Join</h3>
-                  <p className="text-gray-400 text-lg">Waiting for participants to join the call...</p>
+                  <p className="text-gray-400 text-lg">Waiting for participants to join the chat...</p>
                 </div>
               </div>
             )}
