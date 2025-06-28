@@ -1,16 +1,125 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { MdMic, MdMicOff, MdVideocam, MdVideocamOff, MdScreenShare, MdStopScreenShare, MdCallEnd } from 'react-icons/md';
 import { FaUsers, FaTimes } from 'react-icons/fa';
+
+// Memoized video component to prevent unnecessary re-renders
+const MemoizedVideoElement = memo(({ 
+  participant, 
+  isScreen = false, 
+  setVideoRef, 
+  isAudioMuted,
+  className = "",
+  style = {}
+}) => {
+  console.log(`🎬 Rendering video element for ${participant.session_id} (local: ${participant.local})`);
+  
+  return (
+    <video
+      key={`${participant.session_id}-${isScreen ? 'screen' : 'main'}`}
+      ref={el => setVideoRef(el, participant.session_id, isScreen)}
+      autoPlay
+      playsInline
+      muted={participant.local} // Only mute local participant to prevent echo
+      className={className}
+      style={style}
+    />
+  );
+}, (prevProps, nextProps) => {
+  // Only re-render if video-related props change
+  const videoPropsChanged = 
+    prevProps.participant.session_id !== nextProps.participant.session_id ||
+    prevProps.participant.video !== nextProps.participant.video ||
+    prevProps.participant.videoTrack?.id !== nextProps.participant.videoTrack?.id ||
+    prevProps.participant.local !== nextProps.participant.local ||
+    prevProps.isScreen !== nextProps.isScreen;
+  
+  if (!videoPropsChanged) {
+    console.log(`🚫 Preventing re-render of video element for ${prevProps.participant.session_id}`);
+  }
+  
+  return !videoPropsChanged; // Return true to prevent re-render
+});
+
+// Memoized participant card to prevent unnecessary re-renders
+const MemoizedParticipantCard = memo(({ 
+  participant, 
+  setVideoRef, 
+  isAudioMuted, 
+  isGrid = false 
+}) => {
+  console.log(`🃏 Rendering participant card for ${participant.session_id} (local: ${participant.local})`);
+  
+  const cardClass = isGrid 
+    ? "relative bg-gray-700 rounded-lg overflow-hidden"
+    : "relative bg-gray-800 rounded-lg overflow-hidden flex-1 min-w-0";
+  
+  const videoClass = "w-full h-full object-cover";
+  const nameClass = isGrid 
+    ? "absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-2 rounded-full"
+    : "absolute bottom-1 left-1 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs";
+  
+  const avatarSize = isGrid ? "w-16 h-16" : "w-8 h-8";
+  const avatarTextSize = isGrid ? "text-2xl" : "text-sm";
+  
+  const muteIconClass = isGrid 
+    ? "absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full"
+    : "absolute top-1 right-1 bg-red-500 text-white p-1 rounded";
+  
+  const muteIconSize = isGrid ? "w-4 h-4" : "w-3 h-3";
+  
+  return (
+    <div className={cardClass}>
+      <MemoizedVideoElement
+        participant={participant}
+        setVideoRef={setVideoRef}
+        isAudioMuted={isAudioMuted}
+        className={videoClass}
+      />
+      {!participant.video && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-700">
+          <div className={`${avatarSize} bg-gray-500 rounded-full flex items-center justify-center text-white ${avatarTextSize} font-semibold`}>
+            {(participant.user_name || 'U')[0].toUpperCase()}
+          </div>
+        </div>
+      )}
+      <div className={nameClass}>
+        {participant.local ? 'You' : (participant.user_name || 'Unknown')}
+      </div>
+      {isAudioMuted && (
+        <div className={muteIconClass}>
+          <MdMicOff className={muteIconSize} />
+        </div>
+      )}
+    </div>
+  );
+}, (prevProps, nextProps) => {
+  // Only re-render if video state or audio mute state changes
+  const shouldRerender = 
+    prevProps.participant.session_id !== nextProps.participant.session_id ||
+    prevProps.participant.video !== nextProps.participant.video ||
+    prevProps.participant.videoTrack?.id !== nextProps.participant.videoTrack?.id ||
+    prevProps.participant.user_name !== nextProps.participant.user_name ||
+    prevProps.participant.local !== nextProps.participant.local ||
+    prevProps.isAudioMuted !== nextProps.isAudioMuted ||
+    prevProps.isGrid !== nextProps.isGrid;
+  
+  if (!shouldRerender) {
+    console.log(`🚫 Preventing re-render of participant card for ${prevProps.participant.session_id}`);
+  }
+  
+  return !shouldRerender;
+});
 
 export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [callObject, setCallObject] = useState(null);
   const [participants, setParticipants] = useState({});
+  const [participantAudioStates, setParticipantAudioStates] = useState({});
   const [localParticipant, setLocalParticipant] = useState(null);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -21,6 +130,32 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
   const videoRefs = useRef({});
   const audioRefs = useRef({}); // Add audio refs
   const streamUpdateTimeouts = useRef({});
+  const [lastVideoStates, setLastVideoStates] = useState({});
+
+  // Track video state changes to prevent unnecessary updates
+  const hasVideoStateChanged = useCallback((participant) => {
+    const sessionId = participant.session_id;
+    const currentVideoState = {
+      video: participant.video,
+      hasVideoTrack: !!participant.videoTrack,
+      videoTrackId: participant.videoTrack?.id
+    };
+    
+    const lastState = lastVideoStates[sessionId];
+    const hasChanged = !lastState || 
+      lastState.video !== currentVideoState.video ||
+      lastState.hasVideoTrack !== currentVideoState.hasVideoTrack ||
+      lastState.videoTrackId !== currentVideoState.videoTrackId;
+    
+    if (hasChanged) {
+      setLastVideoStates(prev => ({
+        ...prev,
+        [sessionId]: currentVideoState
+      }));
+    }
+    
+    return hasChanged;
+  }, [lastVideoStates]);
 
   // Function to get real-time media state from Daily (single source of truth)
   const getCurrentMediaState = () => {
@@ -105,33 +240,62 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
         clearTimeout(streamUpdateTimeouts.current[sessionId]);
       }
 
-      // Handle regular video stream
+      // Handle regular video stream - INCLUDING LOCAL PARTICIPANT
       const videoElement = videoRefs.current[sessionId];
       if (videoElement) {
         if (participant.videoTrack && participant.video) {
           try {
             const newStream = new MediaStream([participant.videoTrack]);
             
-            if (!videoElement.srcObject || 
-                videoElement.srcObject.getTracks()[0]?.id !== participant.videoTrack.id) {
+            // Only update video streams if the video track actually changed
+            // Don't update for audio-only changes to prevent flickering
+            const shouldUpdate = !videoElement.srcObject || 
+                               videoElement.srcObject.getTracks()[0]?.id !== participant.videoTrack.id;
+            
+            if (shouldUpdate) {
+              console.log(`Setting video stream for ${sessionId} (local: ${participant.local}) - track changed`);
               
-              console.log(`Setting video stream for ${sessionId}`);
+              // Immediate assignment for local participants, slight delay for remote
+              const delay = participant.local ? 10 : 50;
+              
               streamUpdateTimeouts.current[sessionId] = setTimeout(() => {
-                if (videoElement && participant.videoTrack) {
-                  videoElement.srcObject = newStream;
-                  videoElement.play().then(() => {
-                    console.log(`Video playing for ${sessionId}`);
-                  }).catch(err => {
-                    console.warn('Video play failed:', err);
-                  });
+                if (videoElement && participant.videoTrack && videoElement.parentNode) {
+                  try {
+                    videoElement.srcObject = newStream;
+                    
+                    // For local participants, ensure autoplay works
+                    if (participant.local) {
+                      videoElement.muted = true; // Ensure local video is muted to prevent echo
+                      videoElement.playsInline = true;
+                      videoElement.autoplay = true;
+                    }
+                    
+                    videoElement.play().then(() => {
+                      console.log(`✅ Video playing for ${sessionId} (local: ${participant.local})`);
+                    }).catch(err => {
+                      console.warn(`❌ Video play failed for ${sessionId}:`, err);
+                      
+                      // Retry for local participants
+                      if (participant.local) {
+                        setTimeout(() => {
+                          videoElement.play().catch(console.warn);
+                        }, 200);
+                      }
+                    });
+                  } catch (streamErr) {
+                    console.warn(`Error assigning stream to ${sessionId}:`, streamErr);
+                  }
                 }
-              }, 50);
+              }, delay);
+            } else {
+              console.log(`Skipping video update for ${sessionId} - same track (prevents flicker)`);
             }
           } catch (err) {
             console.warn('Error creating video stream:', err);
+            // Retry logic with exponential backoff
             streamUpdateTimeouts.current[sessionId] = setTimeout(() => {
               updateVideoStreams({ [sessionId]: participant });
-            }, 200);
+            }, participant.local ? 100 : 200);
           }
         } else {
           console.log(`Clearing video for ${sessionId} (no track or video off)`);
@@ -139,9 +303,11 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
             videoElement.srcObject = null;
           }
         }
+      } else {
+        console.log(`⚠️ No video element found for ${sessionId} - may need DOM update`);
       }
 
-      // Handle audio stream for remote participants
+      // Handle audio stream for remote participants ONLY
       if (!participant.local && participant.audioTrack) {
         const audioElement = audioRefs.current[`audio-${sessionId}`];
         if (audioElement) {
@@ -253,6 +419,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
         }
         setCallObject(null);
         setParticipants({});
+        setParticipantAudioStates({});
         setLocalParticipant(null);
         setIsLoading(true);
         setError(null);
@@ -260,6 +427,8 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
         videoRefs.current = {};
         audioRefs.current = {};
         setIsScreenSharing(false);
+        setLastVideoStates({}); // Clear video state tracking
+        setLastVideoStates({}); // Clear video state tracking
       }
       return;
     }
@@ -325,8 +494,18 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           .on('joined-meeting', async (event) => {
             console.log('Joined meeting', event);
             const allParticipants = daily.participants();
-            console.log('All participants on join:', allParticipants);
+            console.log('All participants on join:', Object.keys(allParticipants));
+            
+            // Initialize both participants and audio states
             setParticipants(allParticipants);
+            
+            // Initialize audio states for all participants
+            const audioStates = {};
+            Object.values(allParticipants).forEach(p => {
+              audioStates[p.session_id] = p.audio;
+            });
+            setParticipantAudioStates(audioStates);
+            
             setLocalParticipant(allParticipants.local);
             setMeetingState('joined');
             setIsLoading(false);
@@ -355,11 +534,20 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
             }, 1000);
           })
           .on('participant-joined', (event) => {
-            console.log('Participant joined', event);
+            console.log('Participant joined', event.participant.session_id);
             
             const allParticipants = daily.participants();
-            console.log('All participants after new join:', allParticipants);
+            console.log('All participants after new join:', Object.keys(allParticipants));
+            
+            // Update participants state immediately
             setParticipants(allParticipants);
+            
+            // Add the new participant to audio states
+            setParticipantAudioStates(prevAudio => {
+              const newAudioStates = { ...prevAudio };
+              newAudioStates[event.participant.session_id] = event.participant.audio;
+              return newAudioStates;
+            });
             
             setForceUpdate(prev => prev + 1);
             
@@ -384,14 +572,25 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
             }, 1200);
           })
           .on('participant-left', (event) => {
-            console.log('Participant left', event);
+            console.log('Participant left', event.participant.session_id);
+            
+            // Get fresh participants list AFTER the participant has left
             const allParticipants = daily.participants();
-            console.log('All participants after someone left:', allParticipants);
+            console.log('All participants after someone left:', Object.keys(allParticipants));
+            
+            // CRITICAL: Update participants state immediately to trigger re-render
             setParticipants(allParticipants);
+            
+            // Also update audio states to remove the left participant
+            setParticipantAudioStates(prevAudio => {
+              const newAudioStates = { ...prevAudio };
+              delete newAudioStates[event.participant.session_id];
+              return newAudioStates;
+            });
 
             // Clean up refs and timeouts for left participant
             const sessionId = event.participant.session_id;
-            console.log(`Cleaning up refs for participant ${sessionId}`);
+            console.log(`🧹 Cleaning up refs for departed participant ${sessionId}`);
             
             // Clean up timeouts
             if (streamUpdateTimeouts.current[sessionId]) {
@@ -405,41 +604,118 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
 
             // Clean up video refs
             if (videoRefs.current[sessionId]) {
+              console.log(`🗑️ Removing video ref for ${sessionId}`);
+              const videoElement = videoRefs.current[sessionId];
+              if (videoElement && videoElement.srcObject) {
+                videoElement.srcObject = null;
+              }
               delete videoRefs.current[sessionId];
             }
             if (videoRefs.current[`${sessionId}-screen`]) {
+              console.log(`🗑️ Removing screen ref for ${sessionId}`);
+              const screenElement = videoRefs.current[`${sessionId}-screen`];
+              if (screenElement && screenElement.srcObject) {
+                screenElement.srcObject = null;
+              }
               delete videoRefs.current[`${sessionId}-screen`];
             }
 
             // Clean up audio refs
             if (audioRefs.current[`audio-${sessionId}`]) {
+              console.log(`🗑️ Removing audio ref for ${sessionId}`);
+              const audioElement = audioRefs.current[`audio-${sessionId}`];
+              if (audioElement && audioElement.srcObject) {
+                audioElement.srcObject = null;
+              }
               delete audioRefs.current[`audio-${sessionId}`];
             }
 
+            // Clean up video state tracking
+            setLastVideoStates(prevStates => {
+              const newStates = { ...prevStates };
+              delete newStates[sessionId];
+              return newStates;
+            });
+
+            // Force a re-render to update the UI immediately
             setForceUpdate(prev => prev + 1);
 
+            // Small delay to ensure DOM cleanup, then update streams for remaining participants
             setTimeout(() => {
-              console.log('Updating streams after participant left');
+              console.log('🔄 Updating streams after participant left - remaining participants:', Object.keys(allParticipants));
               updateVideoStreams(allParticipants);
             }, 100);
           })
           .on('participant-updated', (event) => {
-            console.log('Participant updated', event);
+            console.log('Participant updated', event.participant.session_id, 'audio:', event.participant.audio, 'video:', event.participant.video);
             
             const allParticipants = daily.participants();
-            setParticipants(allParticipants);
+            
+            // CRITICAL: Create completely separate audio state object to prevent re-renders
+            setParticipantAudioStates(prevAudio => {
+              const newAudioStates = { ...prevAudio };
+              newAudioStates[event.participant.session_id] = event.participant.audio;
+              return newAudioStates;
+            });
 
             if (event.participant.local) {
               setLocalParticipant(event.participant);
+              
+              // Check if video state actually changed for local participant
+              const videoChanged = hasVideoStateChanged(event.participant);
+              
+              if (videoChanged) {
+                console.log('📹 Local video state changed - updating video streams');
+                
+                // Only update participants state when video changes
+                setParticipants(allParticipants);
+                setForceUpdate(prev => prev + 1);
+                
+                if (event.participant.video && event.participant.videoTrack) {
+                  setTimeout(() => {
+                    const localVideoElement = videoRefs.current[event.participant.session_id];
+                    if (localVideoElement) {
+                      try {
+                        const stream = new MediaStream([event.participant.videoTrack]);
+                        localVideoElement.srcObject = stream;
+                        localVideoElement.muted = true;
+                        localVideoElement.play().then(() => {
+                          console.log('✅ Local video updated successfully');
+                        }).catch(err => {
+                          console.warn('❌ Local video update failed:', err);
+                        });
+                      } catch (err) {
+                        console.warn('Error updating local video:', err);
+                      }
+                    }
+                  }, 100);
+                }
+                
+                setTimeout(() => {
+                  console.log('🔄 Updating streams for video state change');
+                  const freshParticipants = daily.participants();
+                  updateVideoStreams(freshParticipants);
+                }, 150);
+              } else {
+                console.log('🎤 Audio-only change detected - ZERO video updates');
+              }
+            } else {
+              // For remote participants, check if their video state changed
+              const videoChanged = hasVideoStateChanged(event.participant);
+              
+              if (videoChanged) {
+                console.log('📹 Remote participant video state changed');
+                setParticipants(allParticipants);
+                setForceUpdate(prev => prev + 1);
+                setTimeout(() => {
+                  console.log('🔄 Updating streams for remote participant video change');
+                  const freshParticipants = daily.participants();
+                  updateVideoStreams(freshParticipants);
+                }, 150);
+              } else {
+                console.log('🎤 Remote participant audio-only change - ZERO video updates');
+              }
             }
-
-            setForceUpdate(prev => prev + 1);
-
-            setTimeout(() => {
-              console.log('Updating streams for participant update');
-              const freshParticipants = daily.participants();
-              updateVideoStreams(freshParticipants);
-            }, 150);
           })
           .on('track-started', (event) => {
             console.log('Track started', event);
@@ -527,11 +803,11 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
 
         setCallObject(daily);
 
-        // Join the meeting with audio ON
+        // Join the meeting with CAMERA OFF and audio ON
         await daily.join({
           url: roomUrl,
-          startVideoOff: true,
-          startAudioOff: false, // CHANGED: Start with audio ON
+          startVideoOff: true,  // Start with camera OFF
+          startAudioOff: false, // Start with audio ON
           userName: `User ${Math.floor(Math.random() * 1000)}`
         });
 
@@ -573,7 +849,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
         videoRefs.current = {};
         audioRefs.current = {};
         setIsScreenSharing(false);
-        setUserInteracted(false);
       }
     };
   }, [isOpen, roomUrl]);
@@ -594,7 +869,13 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
       const currentLocal = callObject.participants().local;
       if (!currentLocal) return;
       
+      console.log(`🎤 Toggling mute from ${!currentLocal.audio} to ${currentLocal.audio} (audio-only change)`);
+      
       await callObject.setLocalAudio(!currentLocal.audio);
+      
+      // Note: We intentionally DON'T call setForceUpdate or updateVideoStreams here
+      // because mute/unmute is audio-only and shouldn't affect video rendering
+      
     } catch (err) {
       console.error('Error toggling mute:', err);
       setError('Failed to toggle microphone');
@@ -609,12 +890,55 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
       const currentLocal = callObject.participants().local;
       if (!currentLocal) return;
       
+      console.log(`🎥 Toggling camera from ${currentLocal.video} to ${!currentLocal.video}`);
+      
       await callObject.setLocalVideo(!currentLocal.video);
       
-      setTimeout(() => {
-        const allParticipants = callObject.participants();
-        updateVideoStreams(allParticipants);
-      }, 500);
+      // Force immediate re-render
+      setForceUpdate(prev => prev + 1);
+      
+      // Multiple attempts to ensure local video renders properly
+      const retryVideoSetup = (attempt) => {
+        setTimeout(() => {
+          console.log(`🔄 Camera toggle retry attempt ${attempt}`);
+          const allParticipants = callObject.participants();
+          const localParticipant = allParticipants.local;
+          
+          if (localParticipant) {
+            console.log(`Local participant state - video: ${localParticipant.video}, videoTrack: ${!!localParticipant.videoTrack}`);
+            
+            // Force update of local video specifically
+            const localVideoElement = videoRefs.current[localParticipant.session_id];
+            if (localVideoElement && localParticipant.video && localParticipant.videoTrack) {
+              try {
+                const stream = new MediaStream([localParticipant.videoTrack]);
+                localVideoElement.srcObject = stream;
+                localVideoElement.muted = true; // Prevent echo
+                localVideoElement.play().then(() => {
+                  console.log(`✅ Local video playing successfully on attempt ${attempt}`);
+                }).catch(err => {
+                  console.warn(`❌ Local video play failed on attempt ${attempt}:`, err);
+                });
+              } catch (err) {
+                console.warn(`Error setting local video stream on attempt ${attempt}:`, err);
+              }
+            }
+          }
+          
+          // Update all streams
+          updateVideoStreams(allParticipants);
+          
+          // Force another re-render
+          if (attempt <= 2) {
+            setForceUpdate(prev => prev + 1);
+          }
+        }, attempt * 300);
+      };
+      
+      // Try multiple times with increasing delays
+      retryVideoSetup(1);
+      retryVideoSetup(2);
+      retryVideoSetup(3);
       
     } catch (err) {
       console.error('Error toggling camera:', err);
@@ -661,49 +985,65 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
     const refKey = isScreen ? `${sessionId}-screen` : sessionId;
     
     if (element) {
-      console.log(`Setting video ref for ${refKey}`);
+      console.log(`📹 Setting video ref for ${refKey}`);
       videoRefs.current[refKey] = element;
       
       if (callObject && meetingState === 'joined') {
-        const setupStream = (attempt = 1) => {
+        const setupStream = (attempt = 1, maxAttempts = 5) => {
           setTimeout(() => {
             const currentParticipants = callObject.participants();
             const participant = currentParticipants[sessionId];
             
-            if (participant && element) {
+            if (participant && element && element.parentNode) {
               const track = isScreen ? participant.screenVideoTrack : participant.videoTrack;
               const hasVideo = isScreen ? !!participant.screenVideoTrack : participant.video;
               
-              console.log(`Attempt ${attempt}: Setting up video for ${sessionId}, hasVideo: ${hasVideo}, track:`, !!track);
+              console.log(`🎬 Attempt ${attempt}/${maxAttempts}: Setting up video for ${sessionId} (local: ${participant.local}), hasVideo: ${hasVideo}, track:`, !!track);
               
-              if (track && hasVideo && element.parentNode) {
+              if (track && hasVideo) {
                 try {
                   const stream = new MediaStream([track]);
                   element.srcObject = stream;
+                  
+                  // Special handling for local participants
+                  if (participant.local) {
+                    element.muted = true; // Always mute local to prevent echo
+                    element.autoplay = true;
+                    element.playsInline = true;
+                  }
+                  
                   element.play().then(() => {
-                    console.log(`SUCCESS: Video playing for ${sessionId} on attempt ${attempt}`);
+                    console.log(`✅ SUCCESS: Video playing for ${sessionId} (local: ${participant.local}) on attempt ${attempt}`);
                   }).catch(err => {
-                    console.warn(`Play failed for ${sessionId} on attempt ${attempt}:`, err);
-                    if (attempt < 3) setupStream(attempt + 1);
+                    console.warn(`❌ Play failed for ${sessionId} on attempt ${attempt}:`, err);
+                    if (attempt < maxAttempts) {
+                      setupStream(attempt + 1, maxAttempts);
+                    }
                   });
                 } catch (err) {
-                  console.warn(`Stream assignment failed for ${sessionId} on attempt ${attempt}:`, err);
-                  if (attempt < 3) setupStream(attempt + 1);
+                  console.warn(`💥 Stream assignment failed for ${sessionId} on attempt ${attempt}:`, err);
+                  if (attempt < maxAttempts) {
+                    setupStream(attempt + 1, maxAttempts);
+                  }
                 }
               } else if (!hasVideo && element.parentNode) {
                 element.srcObject = null;
-                console.log(`Cleared video for ${sessionId} (no video)`);
-              } else if (attempt < 3) {
-                setupStream(attempt + 1);
+                console.log(`🚫 Cleared video for ${sessionId} (no video)`);
+              } else if (attempt < maxAttempts) {
+                console.log(`⏳ Waiting for video track for ${sessionId}, attempt ${attempt}/${maxAttempts}`);
+                setupStream(attempt + 1, maxAttempts);
               }
+            } else if (attempt < maxAttempts) {
+              console.log(`⏳ Waiting for participant or element for ${sessionId}, attempt ${attempt}/${maxAttempts}`);
+              setupStream(attempt + 1, maxAttempts);
             }
-          }, attempt * 100);
+          }, attempt * 150); // Slightly longer delays for better reliability
         };
         
         setupStream();
       }
     } else {
-      console.log(`Removing video ref for ${refKey}`);
+      console.log(`🗑️ Removing video ref for ${refKey}`);
       delete videoRefs.current[refKey];
     }
   }, [callObject, meetingState]);
@@ -713,6 +1053,8 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
     if (meetingState === 'joined' && callObject && Object.keys(participants).length > 0) {
       console.log('Force update triggered, participants:', Object.keys(participants));
       
+      // Only retry video setup if forceUpdate was triggered by video-related changes
+      // Check if the update was caused by video state changes, not audio changes
       const retryVideoSetup = (attempt) => {
         setTimeout(() => {
           console.log(`Retry attempt ${attempt} for video setup`);
@@ -722,25 +1064,26 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           console.log('Current video refs:', currentRefs);
           console.log('Current participants:', Object.keys(currentParticipants));
           
+          // Only update video streams if we have video refs and this isn't an audio-only change
           if (currentRefs.length > 0) {
             updateVideoStreams(currentParticipants);
-          } else if (attempt < 5) {
+          } else if (attempt < 3) { // Reduced attempts to minimize flicker
             retryVideoSetup(attempt + 1);
           }
-        }, attempt * 200);
+        }, attempt * 300); // Increased delay to reduce rapid updates
       };
       
       retryVideoSetup(1);
     }
   }, [forceUpdate, meetingState, participants, updateVideoStreams]);
 
-  // Function to render audio elements for remote participants
+  // Function to render audio elements for remote participants with stable keys
   const renderAudioElements = () => {
     const remoteParticipants = Object.values(participants).filter(p => !p.local);
     
     return remoteParticipants.map(participant => (
       <audio
-        key={`audio-${participant.session_id}-${forceUpdate}`}
+        key={`audio-${participant.session_id}`}
         ref={el => setAudioRef(el, participant.session_id)}
         autoPlay
         playsInline
@@ -749,15 +1092,16 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
     ));
   };
 
-  // Function to render participant videos
-  const renderParticipantVideos = () => {
+  // Memoized video rendering function to prevent unnecessary re-renders
+  const memoizedVideoContent = useMemo(() => {
     const participantList = Object.values(participants);
-    const remoteParticipants = participantList.filter(p => !p.local);
     const hasScreenShare = participantList.some(p => p.screenVideoTrack);
 
-    console.log('Rendering participant videos for:', participantList.map(p => p.session_id));
+    console.log('🎭 RENDERING VIDEO CONTENT - participants:', participantList.map(p => p.session_id));
+    console.log('🎭 Current participant count:', participantList.length);
 
     if (participantList.length === 0) {
+      console.log('🎭 No participants - returning null');
       return null;
     }
 
@@ -769,12 +1113,11 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           {/* Screen share - takes most of the space */}
           {screenSharingParticipant && (
             <div className="flex-1 bg-black rounded-lg overflow-hidden mb-4 relative">
-              <video
-                key={`${screenSharingParticipant.session_id}-screen-${forceUpdate}`}
-                ref={el => setVideoRef(el, screenSharingParticipant.session_id, true)}
-                autoPlay
-                playsInline
-                muted={screenSharingParticipant.local}
+              <MemoizedVideoElement
+                participant={screenSharingParticipant}
+                isScreen={true}
+                setVideoRef={setVideoRef}
+                isAudioMuted={!participantAudioStates[screenSharingParticipant.session_id]}
                 className="w-full h-full object-contain"
               />
               <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
@@ -785,33 +1128,18 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
 
           {/* Participant videos in a horizontal strip */}
           <div className="flex gap-2 h-24">
-            {participantList.map(participant => (
-              <div key={`${participant.session_id}-strip-${forceUpdate}`} className="relative bg-gray-800 rounded-lg overflow-hidden flex-1 min-w-0">
-                <video
-                  key={`${participant.session_id}-video-${forceUpdate}`}
-                  ref={el => setVideoRef(el, participant.session_id)}
-                  autoPlay
-                  playsInline
-                  muted={participant.local}
-                  className="w-full h-full object-cover"
+            {participantList.map(participant => {
+              console.log(`🎭 Rendering strip participant: ${participant.session_id}`);
+              return (
+                <MemoizedParticipantCard
+                  key={participant.session_id} // Stable key based on session_id
+                  participant={participant}
+                  setVideoRef={setVideoRef}
+                  isAudioMuted={!participantAudioStates[participant.session_id]}
+                  isGrid={false}
                 />
-                {!participant.video && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-700">
-                    <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                      {(participant.user_name || 'U')[0].toUpperCase()}
-                    </div>
-                  </div>
-                )}
-                <div className="absolute bottom-1 left-1 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
-                  {participant.local ? 'You' : (participant.user_name || 'Unknown')}
-                </div>
-                {!participant.audio && (
-                  <div className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded">
-                    <MdMicOff className="w-3 h-3" />
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       );
@@ -823,44 +1151,31 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
                     Math.ceil(Math.sqrt(participantList.length));
 
     return (
-      <div
-        className={`grid gap-4 h-full ${
-          gridCols === 1 ? 'grid-cols-1' :
-          gridCols === 2 ? 'grid-cols-2' :
-          gridCols === 3 ? 'grid-cols-3' :
-          'grid-cols-4'
-        }`}
-      >
-        {participantList.map(participant => (
-          <div key={`${participant.session_id}-grid-${forceUpdate}`} className="relative bg-gray-700 rounded-lg overflow-hidden">
-            <video
-              key={`${participant.session_id}-main-${forceUpdate}`}
-              ref={el => setVideoRef(el, participant.session_id)}
-              autoPlay
-              playsInline
-              muted={participant.local}
-              className="w-full h-full object-cover"
-            />
-            {!participant.video && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-700">
-                <div className="w-16 h-16 bg-gray-500 rounded-full flex items-center justify-center text-white text-2xl font-semibold">
-                  {(participant.user_name || 'U')[0].toUpperCase()}
-                </div>
-              </div>
-            )}
-            <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-2 rounded-full">
-              {participant.local ? 'You' : (participant.user_name || 'Unknown')}
+        <div className='h-full'>
+            <div
+                className={`grid gap-4 h-full ${
+                gridCols === 1 ? 'grid-cols-1' :
+                gridCols === 2 ? 'grid-rows-2' :
+                gridCols === 3 ? 'grid-cols-3' :
+                'grid-cols-4'
+                }`}
+            >
+                {participantList.map(participant => {
+                console.log(`🎭 Rendering grid participant: ${participant.session_id}`);
+                return (
+                    <MemoizedParticipantCard
+                    key={participant.session_id} // Stable key based on session_id
+                    participant={participant}
+                    setVideoRef={setVideoRef}
+                    isAudioMuted={!participantAudioStates[participant.session_id]}
+                    isGrid={true}
+                    />
+                );
+                })}
             </div>
-            {!participant.audio && (
-              <div className="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full">
-                <MdMicOff className="w-4 h-4" />
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+        </div>
     );
-  };
+  }, [participants, participantAudioStates, setVideoRef]); // Only depends on actual video-related state
 
   const participantCount = Object.keys(participants).length;
   const hasParticipants = participantCount > 0;
@@ -897,10 +1212,10 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
                 'bg-red-500'
               }`}></div>
               <h3 className="font-semibold">
-                {meetingState === 'joined' ? `Voice Call • ${participantCount} participant${participantCount !== 1 ? 's' : ''}` :
+                {meetingState === 'joined' ? `Video Call • ${participantCount} participant${participantCount !== 1 ? 's' : ''}` :
                  meetingState === 'loading' ? 'Connecting...' :
                  meetingState === 'error' ? 'Connection Error' :
-                 'Voice Call'}
+                 'Video Call'}
               </h3>
             </div>
             <div className="flex items-center gap-2">
@@ -954,8 +1269,8 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
 
             {/* Custom Video Rendering Area */}
             {!isLoading && !error && hasParticipants && (
-              <div className="w-full h-full" key={`video-container-${forceUpdate}`}>
-                {renderParticipantVideos()}
+              <div className="w-full h-full flex justify-center" key="video-container-stable">
+                {memoizedVideoContent}
               </div>
             )}
 
