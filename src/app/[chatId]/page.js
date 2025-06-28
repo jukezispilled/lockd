@@ -170,7 +170,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen h-[100dvh] overflow-hidden">
+    <div className="flex flex-col h-[100dvh] overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.div
           key="chat-page"
