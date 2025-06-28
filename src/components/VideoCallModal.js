@@ -3,9 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
-// Import icons from react-icons
 import { MdMic, MdMicOff, MdVideocam, MdVideocamOff, MdScreenShare, MdStopScreenShare, MdCallEnd } from 'react-icons/md';
-import { FaUsers, FaTimes, FaExpand, FaCompress } from 'react-icons/fa';
+import { FaUsers, FaTimes } from 'react-icons/fa';
 
 export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -35,18 +34,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
       isCameraOff: currentLocal ? !currentLocal.video : true
     };
   };
-
-  // Function to enable audio playback
-  const enableAudioPlayback = useCallback(() => {
-    // Enable all existing audio elements
-    Object.values(audioRefs.current).forEach(audioElement => {
-      if (audioElement && audioElement.paused) {
-        audioElement.play().catch(err => {
-          console.warn('Audio autoplay prevented:', err);
-        });
-      }
-    });
-  }, []);
 
   // Enhanced audio element ref setter
   const setAudioRef = useCallback((element, sessionId) => {
@@ -658,14 +645,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
     }
   };
 
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      modalRef.current?.requestFullscreen?.();
-    } else {
-      document.exitFullscreen?.();
-    }
-  };
-
   const leaveCall = async () => {
     if (callObject) {
       try {
@@ -676,18 +655,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
     }
     onClose();
   };
-
-  // Handle fullscreen changes
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    };
-  }, []);
 
   // Enhanced video element ref setter
   const setVideoRef = useCallback((element, sessionId, isScreen = false) => {
@@ -937,13 +904,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
               </h3>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                onClick={toggleFullscreen}
-                className="text-gray-300 hover:text-white transition-colors p-2 rounded-lg"
-                title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-              >
-                {isFullscreen ? <FaCompress className="w-4 h-4" /> : <FaExpand className="w-4 h-4" />}
-              </button>
               <button
                 onClick={onClose}
                 className="text-gray-300 hover:text-white transition-colors p-2 rounded-lg"
