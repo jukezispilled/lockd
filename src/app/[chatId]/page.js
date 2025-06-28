@@ -177,15 +177,15 @@ export default function ChatPage() {
       >
         <ChatHeader chatData={chatData} />
         
-        <div className="bg-gray-100 flex-1 overflow-hidden flex flex-col justify-center items-center">
-          <div className="flex gap-4 h-[95%] w-[90%] md:w-[90%] m-4">
+        <div className="bg-gray-100 flex-1 h-[95%] m-4 overflow-hidden flex flex-col justify-center items-center">
+          <div className="flex flex-col md:flex-row gap-4 h-full w-[90%]">
             {/* Video Call Button */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 md:flex-shrink-0">
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={handleJoinRoom}
                 disabled={isCreatingRoom}
-                className="bg-gray-200 text-gray-800 p-3 rounded-xl transition-colors flex items-center justify-center w-50 h-auto cursor-pointer gap-3 flex-row-reverse"
+                className="bg-gray-200 text-gray-800 p-3 rounded-xl transition-colors flex items-center justify-center w-min md:w-50 h-auto cursor-pointer gap-3 flex-row-reverse md:flex-row"
                 title="Join Video/Voice Call"
               >
                 {isCreatingRoom ? (
@@ -193,12 +193,12 @@ export default function ChatPage() {
                 ) : (
                   <HiSpeakerphone className="size-6" />
                 )}
-                <span className="text-base font-medium">Voice Chat</span>
+                <span className="text-base font-medium hidden md:block">Voice Chat</span>
               </motion.button>
             </div>
 
             {/* Main Chat Container */}
-            <div className='flex-1 bg-white rounded-xl flex flex-col relative'>
+            <div className='flex-1 bg-white rounded-xl flex flex-col relative min-h-0'>
               {/* Jump to Present Button */}
               <AnimatePresence>
                 {showJumpButton && (
@@ -208,7 +208,7 @@ export default function ChatPage() {
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
                     onClick={scrollToBottom}
-                    className="absolute top-0 md:top-4 left-1/2 -translate-x-1/2 z-10 md:bg-gray-100 text-gray-700 px-3 py-2 rounded-lg cursor-pointer flex items-center gap-2 text-xs md:text-sm font-medium transition-colors"
+                    className="absolute top-0 md:top-4 left-1/2 -translate-x-1/2 z-10 md:bg-gray-100 text-gray-700 px-3 py-0.5 md:py-2 rounded-lg cursor-pointer flex items-center gap-2 text-xs md:text-sm font-medium transition-colors"
                   >
                     <svg 
                       className="w-4 h-4 hidden md:block" 
