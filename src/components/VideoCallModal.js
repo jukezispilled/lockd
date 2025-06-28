@@ -1216,10 +1216,10 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
                 'bg-red-500'
               }`}></div>
               <h3 className="font-semibold">
-                {meetingState === 'joined' ? `Video Call • ${participantCount} participant${participantCount !== 1 ? 's' : ''}` :
+                {meetingState === 'joined' ? `Voice Chat • ${participantCount} participant${participantCount !== 1 ? 's' : ''}` :
                  meetingState === 'loading' ? 'Connecting...' :
                  meetingState === 'error' ? 'Connection Error' :
-                 'Video Call'}
+                 'Voice Chat'}
               </h3>
             </div>
             <div className="flex items-center gap-2">
