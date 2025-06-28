@@ -133,7 +133,7 @@ export const ChatHeader = ({ chatData }) => {
     <>
       <div className="bg-gray-100 p-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+          <div className="text-gray-800 flex items-center space-x-3">
             <button
               onClick={() => (window.location.href = '/')}
               className="p-2 rounded-full text-2xl"
