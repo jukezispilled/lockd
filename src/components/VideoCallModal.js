@@ -811,7 +811,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
         await daily.join({
           url: roomUrl,
           startVideoOff: true,  // Start with camera OFF
-          startAudioOff: false, // Start with audio ON
+          startAudioOff: true, // Start with audio ON
           userName: `User ${Math.floor(Math.random() * 1000)}`
         });
 
@@ -1333,7 +1333,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
               <button
                 onClick={toggleScreenShare}
                 disabled={!callObject || meetingState !== 'joined'}
-                className={`p-3 rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                className={`p-3 rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hidden md:block ${
                   isScreenSharing
                     ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/25'
                     : 'bg-gray-700 hover:bg-gray-600 text-white'
