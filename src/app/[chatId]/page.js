@@ -203,7 +203,7 @@ export default function ChatPage() {
                   <span className="text-base font-medium hidden md:block">voice</span>
                 </motion.button>
                 <hr className="my-4 border-t border-gray-300" />
-                <div className='cursor-pointer'>#general</div>
+                <div className='cursor-pointer text-gray-800'>#general</div>
               </div>
 
               {/* Main Chat Container */}
