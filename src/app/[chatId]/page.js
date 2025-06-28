@@ -202,6 +202,8 @@ export default function ChatPage() {
                   )}
                   <span className="text-base font-medium hidden md:block">Voice Chat</span>
                 </motion.button>
+                <hr className="my-4 border-t border-gray-300" />
+                <div className=''>#general</div>
               </div>
 
               {/* Main Chat Container */}
