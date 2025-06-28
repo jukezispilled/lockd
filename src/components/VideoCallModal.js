@@ -1291,7 +1291,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           </div>
 
           {/* Custom Controls Bar */}
-          <div className="p-4 bg-black border-t border-gray-700">
+          <div className="p-4 bg-black border-t border-gray-700 relative">
             <div className="flex items-center justify-center gap-4">
               {/* Mute Button */}
               <button
@@ -1348,7 +1348,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
               </button>
 
               {/* Participants Info */}
-              <div className="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded-full text-white">
+              <div className="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded-full text-white absolute right-4">
                 <FaUsers className="w-4 h-4" />
                 <span className="text-sm font-medium">{participantCount}</span>
               </div>
