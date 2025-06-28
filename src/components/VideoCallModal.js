@@ -16,9 +16,11 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [meetingState, setMeetingState] = useState('new');
-  const [forceUpdate, setForceUpdate] = useState(0); // Add force update trigger
+  const [forceUpdate, setForceUpdate] = useState(0);
+  const [userInteracted, setUserInteracted] = useState(false); // Track user interaction for autoplay
   const modalRef = useRef(null);
   const videoRefs = useRef({});
+  const audioRefs = useRef({}); // Add audio refs
   const streamUpdateTimeouts = useRef({});
 
   // Function to get real-time media state from Daily (single source of truth)
@@ -34,23 +36,100 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
     };
   };
 
-  // Enhanced video stream update function with better error handling and retries
+  // Function to enable audio playback (handles browser autoplay restrictions)
+  const enableAudioPlayback = useCallback(() => {
+    if (!userInteracted) {
+      setUserInteracted(true);
+    }
+    
+    // Enable all existing audio elements
+    Object.values(audioRefs.current).forEach(audioElement => {
+      if (audioElement && audioElement.paused) {
+        audioElement.play().catch(err => {
+          console.warn('Audio autoplay prevented:', err);
+        });
+      }
+    });
+
+    // Also try document-level audio elements
+    const audioElements = document.querySelectorAll('audio[data-participant]');
+    audioElements.forEach(audio => {
+      if (audio.paused) {
+        audio.play().catch(err => {
+          console.warn('Audio autoplay prevented:', err);
+        });
+      }
+    });
+  }, [userInteracted]);
+
+  // Enhanced audio element ref setter
+  const setAudioRef = useCallback((element, sessionId) => {
+    const refKey = `audio-${sessionId}`;
+    
+    if (element) {
+      console.log(`Setting audio ref for ${sessionId}`);
+      audioRefs.current[refKey] = element;
+      element.dataset.participant = sessionId;
+      
+      // Immediately try to set up audio if we have the participant data
+      if (callObject && meetingState === 'joined') {
+        const setupAudio = (attempt = 1) => {
+          setTimeout(() => {
+            const currentParticipants = callObject.participants();
+            const participant = currentParticipants[sessionId];
+            
+            if (participant && participant.audioTrack && !participant.local && element.parentNode) {
+              try {
+                const audioStream = new MediaStream([participant.audioTrack]);
+                element.srcObject = audioStream;
+                
+                if (userInteracted) {
+                  element.play().then(() => {
+                    console.log(`Audio playing for ${sessionId}`);
+                  }).catch(err => {
+                    console.warn(`Audio play failed for ${sessionId}:`, err);
+                    if (attempt < 3) setupAudio(attempt + 1);
+                  });
+                } else {
+                  console.log(`Audio ready for ${sessionId}, waiting for user interaction`);
+                }
+              } catch (err) {
+                console.warn(`Error setting up audio for ${sessionId}:`, err);
+                if (attempt < 3) setupAudio(attempt + 1);
+              }
+            } else if (attempt < 3 && participant) {
+              setupAudio(attempt + 1);
+            }
+          }, attempt * 100);
+        };
+        
+        setupAudio();
+      }
+    } else {
+      console.log(`Removing audio ref for ${sessionId}`);
+      delete audioRefs.current[refKey];
+    }
+  }, [callObject, meetingState, userInteracted]);
+
+  // Enhanced video stream update function with audio handling
   const updateVideoStreams = useCallback((participantsToUpdate) => {
     if (!callObject) {
-      console.log('No call object, skipping video stream update');
+      console.log('No call object, skipping stream update');
       return;
     }
 
-    // Use callObject.participants() to get the most current state
     const currentParticipants = callObject.participants();
-    console.log('Updating video streams for participants:', Object.keys(currentParticipants));
+    console.log('Updating streams for participants:', Object.keys(currentParticipants));
     
     Object.values(currentParticipants).forEach(participant => {
       const sessionId = participant.session_id;
       console.log(`Processing participant ${sessionId}:`, {
         hasVideo: participant.video,
         hasVideoTrack: !!participant.videoTrack,
-        hasScreenShare: !!participant.screenVideoTrack
+        hasAudio: participant.audio,
+        hasAudioTrack: !!participant.audioTrack,
+        hasScreenShare: !!participant.screenVideoTrack,
+        isLocal: participant.local
       });
       
       // Clear any pending timeout for this participant
@@ -60,25 +139,18 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
 
       // Handle regular video stream
       const videoElement = videoRefs.current[sessionId];
-      console.log(`Video element for ${sessionId}:`, !!videoElement);
-      
       if (videoElement) {
         if (participant.videoTrack && participant.video) {
-          // Create new MediaStream with video track
           try {
             const newStream = new MediaStream([participant.videoTrack]);
             
-            // Only update if the source is different to avoid flickering
             if (!videoElement.srcObject || 
                 videoElement.srcObject.getTracks()[0]?.id !== participant.videoTrack.id) {
               
               console.log(`Setting video stream for ${sessionId}`);
-              // Use a slight delay to ensure track is ready
               streamUpdateTimeouts.current[sessionId] = setTimeout(() => {
                 if (videoElement && participant.videoTrack) {
                   videoElement.srcObject = newStream;
-                  
-                  // Force play if needed
                   videoElement.play().then(() => {
                     console.log(`Video playing for ${sessionId}`);
                   }).catch(err => {
@@ -89,16 +161,63 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
             }
           } catch (err) {
             console.warn('Error creating video stream:', err);
-            // Retry after a short delay
             streamUpdateTimeouts.current[sessionId] = setTimeout(() => {
               updateVideoStreams({ [sessionId]: participant });
             }, 200);
           }
         } else {
-          // Clear video when track is not available or video is off
           console.log(`Clearing video for ${sessionId} (no track or video off)`);
           if (videoElement.srcObject) {
             videoElement.srcObject = null;
+          }
+        }
+      }
+
+      // Handle audio stream for remote participants
+      if (!participant.local && participant.audioTrack) {
+        const audioElement = audioRefs.current[`audio-${sessionId}`];
+        if (audioElement) {
+          try {
+            const audioStream = new MediaStream([participant.audioTrack]);
+            
+            if (!audioElement.srcObject || 
+                audioElement.srcObject.getTracks()[0]?.id !== participant.audioTrack.id) {
+              
+              console.log(`Setting audio stream for ${sessionId}`);
+              audioElement.srcObject = audioStream;
+              
+              if (userInteracted) {
+                audioElement.play().then(() => {
+                  console.log(`Audio playing for ${sessionId}`);
+                }).catch(err => {
+                  console.warn(`Audio play failed for ${sessionId}:`, err);
+                });
+              }
+            }
+          } catch (err) {
+            console.warn(`Error setting up audio for ${sessionId}:`, err);
+          }
+        } else {
+          // Create audio element if it doesn't exist
+          console.log(`Creating audio element for ${sessionId}`);
+          const newAudioElement = document.createElement('audio');
+          newAudioElement.autoplay = true;
+          newAudioElement.playsInline = true;
+          newAudioElement.dataset.participant = sessionId;
+          newAudioElement.style.display = 'none';
+          document.body.appendChild(newAudioElement);
+          
+          try {
+            const audioStream = new MediaStream([participant.audioTrack]);
+            newAudioElement.srcObject = audioStream;
+            
+            if (userInteracted) {
+              newAudioElement.play().catch(err => {
+                console.warn(`Audio play failed for ${sessionId}:`, err);
+              });
+            }
+          } catch (err) {
+            console.warn(`Error setting up new audio element for ${sessionId}:`, err);
           }
         }
       }
@@ -116,7 +235,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
               streamUpdateTimeouts.current[`${sessionId}-screen`] = setTimeout(() => {
                 if (screenElement && participant.screenVideoTrack) {
                   screenElement.srcObject = newScreenStream;
-                  
                   screenElement.play().catch(err => {
                     console.warn('Screen share play failed:', err);
                   });
@@ -133,7 +251,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
         }
       }
     });
-  }, []); // Remove callObject dependency to prevent recreation
+  }, [userInteracted]);
 
   // Function to sync React state with Daily's actual state
   const syncStateWithDaily = useCallback(() => {
@@ -144,12 +262,24 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
       if (local) {
         setLocalParticipant(local);
         setParticipants(allParticipants);
-        
-        // Update video streams with current participants
         updateVideoStreams(allParticipants);
       }
     }
   }, [callObject, meetingState, updateVideoStreams]);
+
+  // Check audio permissions
+  const checkAudioPermissions = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop());
+      console.log('Audio permissions granted');
+      return true;
+    } catch (err) {
+      console.error('Audio permissions denied:', err);
+      setError('Microphone access is required for audio calls');
+      return false;
+    }
+  };
 
   useEffect(() => {
     if (!isOpen || !roomUrl) {
@@ -161,6 +291,10 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
             if (timeout) clearTimeout(timeout);
           });
           streamUpdateTimeouts.current = {};
+          
+          // Clean up audio elements
+          const audioElements = document.querySelectorAll('audio[data-participant]');
+          audioElements.forEach(element => element.remove());
           
           callObject.leave();
           callObject.destroy();
@@ -174,7 +308,9 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
         setError(null);
         setMeetingState('new');
         videoRefs.current = {};
+        audioRefs.current = {};
         setIsScreenSharing(false);
+        setUserInteracted(false);
       }
       return;
     }
@@ -212,6 +348,12 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           throw new Error('Daily.co SDK not loaded');
         }
 
+        // Check audio permissions first
+        const hasAudioPermission = await checkAudioPermissions();
+        if (!hasAudioPermission) {
+          return;
+        }
+
         // Check if we already have a call object to prevent duplicates
         if (callObject) {
           console.log('Call object already exists, not creating new one');
@@ -243,62 +385,52 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
             // Force a re-render to ensure video elements are created
             setForceUpdate(prev => prev + 1);
 
-            // CRITICAL: Multiple attempts to set up video streams
-            // Attempt 1: Immediate
+            // Multiple attempts to set up streams
             setTimeout(() => {
-              console.log('First attempt: Updating video streams after join');
+              console.log('First attempt: Updating streams after join');
               const freshParticipants = daily.participants();
               updateVideoStreams(freshParticipants);
             }, 100);
 
-            // Attempt 2: After DOM should be ready
             setTimeout(() => {
-              console.log('Second attempt: Updating video streams after DOM ready');
+              console.log('Second attempt: Updating streams after DOM ready');
               const freshParticipants = daily.participants();
               updateVideoStreams(freshParticipants);
             }, 500);
 
-            // Attempt 3: Final attempt with longer delay
             setTimeout(() => {
-              console.log('Final attempt: Updating video streams');
+              console.log('Final attempt: Updating streams');
               const freshParticipants = daily.participants();
               updateVideoStreams(freshParticipants);
-              // Force another re-render to trigger setVideoRef callbacks
               setForceUpdate(prev => prev + 1);
             }, 1000);
           })
           .on('participant-joined', (event) => {
             console.log('Participant joined', event);
             
-            // Update state first
             const allParticipants = daily.participants();
             console.log('All participants after new join:', allParticipants);
             setParticipants(allParticipants);
             
-            // Force a re-render to ensure new video elements are created
             setForceUpdate(prev => prev + 1);
             
-            // Multiple attempts to set up video for new participant
-            // Attempt 1: Quick attempt
+            // Multiple attempts to set up streams for new participant
             setTimeout(() => {
-              console.log('First attempt: Setting up video for new participant');
+              console.log('First attempt: Setting up streams for new participant');
               const freshParticipants = daily.participants();
               updateVideoStreams(freshParticipants);
             }, 200);
 
-            // Attempt 2: After DOM should be ready
             setTimeout(() => {
-              console.log('Second attempt: Setting up video for new participant');
+              console.log('Second attempt: Setting up streams for new participant');
               const freshParticipants = daily.participants();
               updateVideoStreams(freshParticipants);
             }, 600);
 
-            // Attempt 3: Final attempt with force update
             setTimeout(() => {
-              console.log('Final attempt: Setting up video for new participant');
+              console.log('Final attempt: Setting up streams for new participant');
               const freshParticipants = daily.participants();
               updateVideoStreams(freshParticipants);
-              // Force another re-render to trigger setVideoRef callbacks
               setForceUpdate(prev => prev + 1);
             }, 1200);
           })
@@ -308,10 +440,11 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
             console.log('All participants after someone left:', allParticipants);
             setParticipants(allParticipants);
 
-            // Clean up video refs and timeouts for left participant
+            // Clean up refs and timeouts for left participant
             const sessionId = event.participant.session_id;
             console.log(`Cleaning up refs for participant ${sessionId}`);
             
+            // Clean up timeouts
             if (streamUpdateTimeouts.current[sessionId]) {
               clearTimeout(streamUpdateTimeouts.current[sessionId]);
               delete streamUpdateTimeouts.current[sessionId];
@@ -320,6 +453,8 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
               clearTimeout(streamUpdateTimeouts.current[`${sessionId}-screen`]);
               delete streamUpdateTimeouts.current[`${sessionId}-screen`];
             }
+
+            // Clean up video refs
             if (videoRefs.current[sessionId]) {
               delete videoRefs.current[sessionId];
             }
@@ -327,33 +462,36 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
               delete videoRefs.current[`${sessionId}-screen`];
             }
 
-            // Force a re-render to update the UI immediately
+            // Clean up audio refs and elements
+            if (audioRefs.current[`audio-${sessionId}`]) {
+              delete audioRefs.current[`audio-${sessionId}`];
+            }
+            const audioElement = document.querySelector(`audio[data-participant="${sessionId}"]`);
+            if (audioElement) {
+              audioElement.remove();
+            }
+
             setForceUpdate(prev => prev + 1);
 
-            // Update video streams for remaining participants
             setTimeout(() => {
-              console.log('Updating video streams after participant left');
+              console.log('Updating streams after participant left');
               updateVideoStreams(allParticipants);
             }, 100);
           })
           .on('participant-updated', (event) => {
             console.log('Participant updated', event);
             
-            // Update state immediately
             const allParticipants = daily.participants();
             setParticipants(allParticipants);
 
-            // Update local participant state if it's the local participant
             if (event.participant.local) {
               setLocalParticipant(event.participant);
             }
 
-            // Force re-render for participant updates
             setForceUpdate(prev => prev + 1);
 
-            // Update video streams with delay to ensure state is stable
             setTimeout(() => {
-              console.log('Updating video streams for participant update');
+              console.log('Updating streams for participant update');
               const freshParticipants = daily.participants();
               updateVideoStreams(freshParticipants);
             }, 150);
@@ -361,16 +499,37 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           .on('track-started', (event) => {
             console.log('Track started', event);
             
-            // Force re-render when new tracks start
             setForceUpdate(prev => prev + 1);
             
-            // Significant delay for track-started to ensure track is fully ready
+            // Handle audio tracks specifically
+            if (event.track && event.track.kind === 'audio' && !event.participant.local) {
+              console.log('Audio track started for remote participant');
+              setTimeout(() => {
+                let audioElement = document.querySelector(`audio[data-participant="${event.participant.session_id}"]`);
+                if (!audioElement) {
+                  audioElement = document.createElement('audio');
+                  audioElement.autoplay = true;
+                  audioElement.playsInline = true;
+                  audioElement.dataset.participant = event.participant.session_id;
+                  audioElement.style.display = 'none';
+                  document.body.appendChild(audioElement);
+                }
+                
+                if (event.track) {
+                  const audioStream = new MediaStream([event.track]);
+                  audioElement.srcObject = audioStream;
+                  if (userInteracted) {
+                    audioElement.play().catch(err => console.warn('Audio play failed:', err));
+                  }
+                }
+              }, 100);
+            }
+            
             setTimeout(() => {
-              console.log('Updating video streams for track started');
+              console.log('Updating streams for track started');
               updateVideoStreams(daily.participants());
             }, 400);
             
-            // Additional attempt for track-started events
             setTimeout(() => {
               console.log('Second attempt for track started');
               updateVideoStreams(daily.participants());
@@ -408,12 +567,17 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
             setLocalParticipant(null);
             setMeetingState('left');
             
-            // Clear all timeouts and refs
+            // Clean up all timeouts, refs, and audio elements
             Object.values(streamUpdateTimeouts.current).forEach(timeout => {
               if (timeout) clearTimeout(timeout);
             });
             streamUpdateTimeouts.current = {};
             videoRefs.current = {};
+            audioRefs.current = {};
+            
+            const audioElements = document.querySelectorAll('audio[data-participant]');
+            audioElements.forEach(element => element.remove());
+            
             setIsScreenSharing(false);
           })
           .on('camera-error', (event) => {
@@ -427,14 +591,12 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
 
         setCallObject(daily);
 
-        // Join the meeting with proper configuration
+        // Join the meeting with audio ON
         await daily.join({
           url: roomUrl,
-          // Media settings - starting off
           startVideoOff: true,
-          startAudioOff: true,
-          // User info
-          userName: `User ${Math.floor(Math.random() * 1000)}` // You can customize this
+          startAudioOff: false, // CHANGED: Start with audio ON
+          userName: `User ${Math.floor(Math.random() * 1000)}`
         });
 
       } catch (err) {
@@ -447,17 +609,17 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
 
     // Cleanup function
     return () => {
-      // Only cleanup if this effect created the call object
       if (callObject) {
         try {
           console.log('Cleaning up call object');
-          // Clear all pending timeouts
           Object.values(streamUpdateTimeouts.current).forEach(timeout => {
             if (timeout) clearTimeout(timeout);
           });
           streamUpdateTimeouts.current = {};
           
-          // Leave and destroy the call object
+          const audioElements = document.querySelectorAll('audio[data-participant]');
+          audioElements.forEach(element => element.remove());
+          
           if (callObject.meetingState() !== 'left-meeting') {
             callObject.leave();
           }
@@ -466,7 +628,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           console.warn('Error during cleanup:', err);
         }
         
-        // Reset all states
         setCallObject(null);
         setParticipants({});
         setLocalParticipant(null);
@@ -474,12 +635,14 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
         setError(null);
         setMeetingState('new');
         videoRefs.current = {};
+        audioRefs.current = {};
         setIsScreenSharing(false);
+        setUserInteracted(false);
       }
     };
-  }, [isOpen, roomUrl]); // Removed updateVideoStreams from dependencies to prevent recreation
+  }, [isOpen, roomUrl]);
 
-  // Sync state with Daily periodically to catch any drift
+  // Sync state with Daily periodically
   useEffect(() => {
     if (meetingState === 'joined' && callObject) {
       const interval = setInterval(syncStateWithDaily, 3000);
@@ -487,9 +650,11 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
     }
   }, [meetingState, callObject, syncStateWithDaily]);
 
-  // Enhanced toggle functions with additional video stream refresh
+  // Enhanced toggle functions with user interaction tracking
   const toggleMute = async () => {
     if (!callObject || meetingState !== 'joined') return;
+    
+    enableAudioPlayback(); // Enable audio on user interaction
     
     try {
       const currentLocal = callObject.participants().local;
@@ -506,13 +671,14 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
   const toggleCamera = async () => {
     if (!callObject || meetingState !== 'joined') return;
     
+    enableAudioPlayback(); // Enable audio on user interaction
+    
     try {
       const currentLocal = callObject.participants().local;
       if (!currentLocal) return;
       
       await callObject.setLocalVideo(!currentLocal.video);
       
-      // Force video stream refresh after camera toggle
       setTimeout(() => {
         const allParticipants = callObject.participants();
         updateVideoStreams(allParticipants);
@@ -528,6 +694,8 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
   const toggleScreenShare = async () => {
     if (!callObject || meetingState !== 'joined') return;
     
+    enableAudioPlayback(); // Enable audio on user interaction
+    
     try {
       if (isScreenSharing) {
         await callObject.stopScreenShare();
@@ -535,7 +703,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
         await callObject.startScreenShare();
       }
       
-      // Force stream refresh after screen share toggle
       setTimeout(() => {
         const allParticipants = callObject.participants();
         updateVideoStreams(allParticipants);
@@ -549,6 +716,8 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
   };
 
   const toggleFullscreen = () => {
+    enableAudioPlayback(); // Enable audio on user interaction
+    
     if (!document.fullscreenElement) {
       modalRef.current?.requestFullscreen?.();
     } else {
@@ -579,7 +748,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
     };
   }, []);
 
-  // FIXED: Enhanced video element ref setter that doesn't depend on stale participants state
+  // Enhanced video element ref setter
   const setVideoRef = useCallback((element, sessionId, isScreen = false) => {
     const refKey = isScreen ? `${sessionId}-screen` : sessionId;
     
@@ -587,9 +756,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
       console.log(`Setting video ref for ${refKey}`);
       videoRefs.current[refKey] = element;
       
-      // CRITICAL FIX: Immediately try to set up stream when ref is available
       if (callObject && meetingState === 'joined') {
-        // Multiple attempts to ensure stream gets set
         const setupStream = (attempt = 1) => {
           setTimeout(() => {
             const currentParticipants = callObject.participants();
@@ -601,7 +768,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
               
               console.log(`Attempt ${attempt}: Setting up video for ${sessionId}, hasVideo: ${hasVideo}, track:`, !!track);
               
-              if (track && hasVideo && element.parentNode) { // Check element is still in DOM
+              if (track && hasVideo && element.parentNode) {
                 try {
                   const stream = new MediaStream([track]);
                   element.srcObject = stream;
@@ -616,11 +783,9 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
                   if (attempt < 3) setupStream(attempt + 1);
                 }
               } else if (!hasVideo && element.parentNode) {
-                // Clear video if participant has video off
                 element.srcObject = null;
                 console.log(`Cleared video for ${sessionId} (no video)`);
               } else if (attempt < 3) {
-                // Retry if track not ready yet
                 setupStream(attempt + 1);
               }
             }
@@ -633,12 +798,11 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
       console.log(`Removing video ref for ${refKey}`);
       delete videoRefs.current[refKey];
     }
-  }, [callObject, meetingState]); // Updated dependencies
+  }, [callObject, meetingState]);
 
-  // ADDED: Effect to force video stream updates when DOM is ready
+  // Effect to force video stream updates when DOM is ready
   useEffect(() => {
     if (meetingState === 'joined' && callObject && Object.keys(participants).length > 0) {
-      // Multiple retry attempts to ensure video streams are set up
       console.log('Force update triggered, participants:', Object.keys(participants));
       
       const retryVideoSetup = (attempt) => {
@@ -653,7 +817,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           if (currentRefs.length > 0) {
             updateVideoStreams(currentParticipants);
           } else if (attempt < 5) {
-            // If no refs yet, try again
             retryVideoSetup(attempt + 1);
           }
         }, attempt * 200);
@@ -662,6 +825,21 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
       retryVideoSetup(1);
     }
   }, [forceUpdate, meetingState, participants, updateVideoStreams]);
+
+  // Function to render audio elements for remote participants
+  const renderAudioElements = () => {
+    const remoteParticipants = Object.values(participants).filter(p => !p.local);
+    
+    return remoteParticipants.map(participant => (
+      <audio
+        key={`audio-${participant.session_id}-${forceUpdate}`}
+        ref={el => setAudioRef(el, participant.session_id)}
+        autoPlay
+        playsInline
+        style={{ display: 'none' }}
+      />
+    ));
+  };
 
   // Function to render participant videos
   const renderParticipantVideos = () => {
@@ -801,6 +979,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           className={`rounded-xl w-full max-w-4xl flex flex-col overflow-hidden shadow-md bg-white ${
             isFullscreen ? 'h-screen max-w-none rounded-none' : 'h-[70vh]'
           }`}
+          onClick={enableAudioPlayback} // Enable audio on any modal click
         >
           {/* Header */}
           <div className="flex items-center justify-between p-4 bg-black text-white">
@@ -816,8 +995,20 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
                  meetingState === 'error' ? 'Connection Error' :
                  'Voice Call'}
               </h3>
+              {!userInteracted && meetingState === 'joined' && (
+                <span className="text-yellow-400 text-sm">
+                  Click anywhere to enable audio
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={toggleFullscreen}
+                className="text-gray-300 hover:text-white transition-colors p-2 rounded-lg"
+                title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+              >
+                {isFullscreen ? <FaCompress className="w-4 h-4" /> : <FaExpand className="w-4 h-4" />}
+              </button>
               <button
                 onClick={onClose}
                 className="text-gray-300 hover:text-white transition-colors p-2 rounded-lg"
@@ -957,6 +1148,25 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
                 <MdCallEnd className="w-6 h-6" />
               </button>
             </div>
+
+            {/* Audio Status Indicator */}
+            {meetingState === 'joined' && (
+              <div className="text-center mt-2">
+                <div className="text-xs text-gray-400">
+                  {!userInteracted && (
+                    <span className="text-yellow-400">⚠️ Click anywhere to enable audio playback</span>
+                  )}
+                  {userInteracted && (
+                    <span className="text-green-400">✓ Audio enabled</span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Hidden audio elements for remote participants */}
+          <div style={{ display: 'none' }}>
+            {renderAudioElements()}
           </div>
         </motion.div>
       </motion.div>
