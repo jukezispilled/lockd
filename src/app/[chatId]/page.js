@@ -200,7 +200,7 @@ export default function ChatPage() {
                   ) : (
                     <HiSpeakerphone className="size-6" />
                   )}
-                  <span className="text-base font-medium hidden md:block">Voice Chat</span>
+                  <span className="text-base font-medium hidden md:block">voice</span>
                 </motion.button>
                 <hr className="my-4 border-t border-gray-300" />
                 <div className=''>#general</div>
