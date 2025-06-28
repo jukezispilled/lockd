@@ -40,7 +40,7 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-[calc(100dvh-20px)] bg-gray-100 relative">
+    <div className="min-h-[100dvh] bg-gray-100 relative">
       {/* RetroGrid background component */}
       <RetroGrid />
       <div className="container mx-auto px-4 py-8">

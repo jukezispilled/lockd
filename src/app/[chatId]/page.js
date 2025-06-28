@@ -89,7 +89,7 @@ export default function ChatPage() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.25 }}
-          className="bg-gray-100 flex items-center justify-center h-[calc(100dvh-20px)]"
+          className="bg-gray-100 flex items-center justify-center h-[100dvh]"
         >
           <div className="text-center">
             <p className="text-gray-600">Loading chat...</p>
@@ -108,7 +108,7 @@ export default function ChatPage() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.25 }}
-          className="bg-gray-100 flex items-center justify-center h-[calc(100dvh-20px)]"
+          className="bg-gray-100 flex items-center justify-center h-[100dvh]"
         >
           <div className="text-center">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
@@ -134,7 +134,7 @@ export default function ChatPage() {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.25 }}
-        className="flex flex-col h-[calc(100dvh-20px)]"
+        className="flex flex-col h-[100dvh]"
       >
         <ChatHeader chatData={chatData} />
         

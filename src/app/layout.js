@@ -26,8 +26,6 @@ export default function RootLayout({ children }) {
       <body
         className={`${roundedSans.variable} ${monoFont.variable} antialiased`}
       >
-        {/* The banner is placed directly inside the body, above children */}
-        <Banner />
         <WalletProviders>
           {children}
         </WalletProviders>
