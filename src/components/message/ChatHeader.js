@@ -77,7 +77,7 @@ const TokenImage = memo(function TokenImage({ mintAddress }) { // Wrapped with m
 
   if (loading) {
     return (
-      <div className="w-[82px] h-[82px] rounded-xl bg-gray-200 animate-pulse" />
+      <div className="size-[65.45px] md:size-[82px] rounded-xl bg-gray-200 animate-pulse" />
     );
   }
 
