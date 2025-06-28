@@ -14,7 +14,7 @@ export const MessageBubble = ({ message, isOwn, showAvatar }) => {
   };
 
   return (
-    <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} items-start gap-2`}>
+    <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} items-end gap-2`}>
       {/* Avatar for other users (left side) */}
       {!isOwn && (
         <div className="flex-shrink-0">
@@ -52,10 +52,6 @@ export const MessageBubble = ({ message, isOwn, showAvatar }) => {
         >
           <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
         </div>
-        
-        <div className={`text-xs text-gray-400 mt-1 px-2 ${isOwn ? 'text-right' : 'text-left'}`}>
-          {formatTime(message.timestamp)}
-        </div>
       </div>
 
       {/* Avatar for own messages (right side) */}
@@ -75,3 +71,9 @@ export const MessageBubble = ({ message, isOwn, showAvatar }) => {
     </div>
   );
 };
+
+/*
+        <div className={`text-xs text-gray-400 mt-1 px-2 ${isOwn ? 'text-right' : 'text-left'}`}>
+          {formatTime(message.timestamp)}
+        </div>
+*/
