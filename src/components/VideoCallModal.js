@@ -44,6 +44,8 @@ const MemoizedVideoElement = memo(({
   return !videoPropsChanged; // Return true to prevent re-render
 });
 
+MemoizedVideoElement.displayName = 'MemoizedVideoElement';
+
 // Memoized participant card to prevent unnecessary re-renders
 const MemoizedParticipantCard = memo(({ 
   participant, 
@@ -113,6 +115,8 @@ const MemoizedParticipantCard = memo(({
   
   return !shouldRerender;
 });
+
+MemoizedParticipantCard.displayName = 'MemoizedParticipantCard';
 
 export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
   const [isLoading, setIsLoading] = useState(true);
