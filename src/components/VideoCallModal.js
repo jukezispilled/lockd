@@ -17,7 +17,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [meetingState, setMeetingState] = useState('new');
   const [forceUpdate, setForceUpdate] = useState(0);
-  const [userInteracted, setUserInteracted] = useState(false); // Track user interaction for autoplay
+
   const modalRef = useRef(null);
   const videoRefs = useRef({});
   const audioRefs = useRef({}); // Add audio refs
@@ -36,12 +36,8 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
     };
   };
 
-  // Function to enable audio playback (handles browser autoplay restrictions)
+  // Function to enable audio playback
   const enableAudioPlayback = useCallback(() => {
-    if (!userInteracted) {
-      setUserInteracted(true);
-    }
-    
     // Enable all existing audio elements
     Object.values(audioRefs.current).forEach(audioElement => {
       if (audioElement && audioElement.paused) {
@@ -50,17 +46,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
         });
       }
     });
-
-    // Also try document-level audio elements
-    const audioElements = document.querySelectorAll('audio[data-participant]');
-    audioElements.forEach(audio => {
-      if (audio.paused) {
-        audio.play().catch(err => {
-          console.warn('Audio autoplay prevented:', err);
-        });
-      }
-    });
-  }, [userInteracted]);
+  }, []);
 
   // Enhanced audio element ref setter
   const setAudioRef = useCallback((element, sessionId) => {
@@ -69,7 +55,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
     if (element) {
       console.log(`Setting audio ref for ${sessionId}`);
       audioRefs.current[refKey] = element;
-      element.dataset.participant = sessionId;
       
       // Immediately try to set up audio if we have the participant data
       if (callObject && meetingState === 'joined') {
@@ -83,16 +68,12 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
                 const audioStream = new MediaStream([participant.audioTrack]);
                 element.srcObject = audioStream;
                 
-                if (userInteracted) {
-                  element.play().then(() => {
-                    console.log(`Audio playing for ${sessionId}`);
-                  }).catch(err => {
-                    console.warn(`Audio play failed for ${sessionId}:`, err);
-                    if (attempt < 3) setupAudio(attempt + 1);
-                  });
-                } else {
-                  console.log(`Audio ready for ${sessionId}, waiting for user interaction`);
-                }
+                element.play().then(() => {
+                  console.log(`Audio playing for ${sessionId}`);
+                }).catch(err => {
+                  console.warn(`Audio play failed for ${sessionId}:`, err);
+                  if (attempt < 3) setupAudio(attempt + 1);
+                });
               } catch (err) {
                 console.warn(`Error setting up audio for ${sessionId}:`, err);
                 if (attempt < 3) setupAudio(attempt + 1);
@@ -109,7 +90,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
       console.log(`Removing audio ref for ${sessionId}`);
       delete audioRefs.current[refKey];
     }
-  }, [callObject, meetingState, userInteracted]);
+  }, [callObject, meetingState]);
 
   // Enhanced video stream update function with audio handling
   const updateVideoStreams = useCallback((participantsToUpdate) => {
@@ -186,38 +167,14 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
               console.log(`Setting audio stream for ${sessionId}`);
               audioElement.srcObject = audioStream;
               
-              if (userInteracted) {
-                audioElement.play().then(() => {
-                  console.log(`Audio playing for ${sessionId}`);
-                }).catch(err => {
-                  console.warn(`Audio play failed for ${sessionId}:`, err);
-                });
-              }
-            }
-          } catch (err) {
-            console.warn(`Error setting up audio for ${sessionId}:`, err);
-          }
-        } else {
-          // Create audio element if it doesn't exist
-          console.log(`Creating audio element for ${sessionId}`);
-          const newAudioElement = document.createElement('audio');
-          newAudioElement.autoplay = true;
-          newAudioElement.playsInline = true;
-          newAudioElement.dataset.participant = sessionId;
-          newAudioElement.style.display = 'none';
-          document.body.appendChild(newAudioElement);
-          
-          try {
-            const audioStream = new MediaStream([participant.audioTrack]);
-            newAudioElement.srcObject = audioStream;
-            
-            if (userInteracted) {
-              newAudioElement.play().catch(err => {
+              audioElement.play().then(() => {
+                console.log(`Audio playing for ${sessionId}`);
+              }).catch(err => {
                 console.warn(`Audio play failed for ${sessionId}:`, err);
               });
             }
           } catch (err) {
-            console.warn(`Error setting up new audio element for ${sessionId}:`, err);
+            console.warn(`Error setting up audio for ${sessionId}:`, err);
           }
         }
       }
@@ -251,7 +208,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
         }
       }
     });
-  }, [userInteracted]);
+  }, []);
 
   // Function to sync React state with Daily's actual state
   const syncStateWithDaily = useCallback(() => {
@@ -292,9 +249,15 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           });
           streamUpdateTimeouts.current = {};
           
-          // Clean up audio elements
+          // Clean up audio elements managed by React only
           const audioElements = document.querySelectorAll('audio[data-participant]');
-          audioElements.forEach(element => element.remove());
+          audioElements.forEach(element => {
+            // Only remove if it was manually created (has data-participant but no React ref)
+            const sessionId = element.dataset.participant;
+            if (!audioRefs.current[`audio-${sessionId}`]) {
+              element.remove();
+            }
+          });
           
           callObject.leave();
           callObject.destroy();
@@ -310,7 +273,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
         videoRefs.current = {};
         audioRefs.current = {};
         setIsScreenSharing(false);
-        setUserInteracted(false);
       }
       return;
     }
@@ -462,13 +424,9 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
               delete videoRefs.current[`${sessionId}-screen`];
             }
 
-            // Clean up audio refs and elements
+            // Clean up audio refs
             if (audioRefs.current[`audio-${sessionId}`]) {
               delete audioRefs.current[`audio-${sessionId}`];
-            }
-            const audioElement = document.querySelector(`audio[data-participant="${sessionId}"]`);
-            if (audioElement) {
-              audioElement.remove();
             }
 
             setForceUpdate(prev => prev + 1);
@@ -504,25 +462,10 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
             // Handle audio tracks specifically
             if (event.track && event.track.kind === 'audio' && !event.participant.local) {
               console.log('Audio track started for remote participant');
+              // Let React handle audio elements - don't create manually
               setTimeout(() => {
-                let audioElement = document.querySelector(`audio[data-participant="${event.participant.session_id}"]`);
-                if (!audioElement) {
-                  audioElement = document.createElement('audio');
-                  audioElement.autoplay = true;
-                  audioElement.playsInline = true;
-                  audioElement.dataset.participant = event.participant.session_id;
-                  audioElement.style.display = 'none';
-                  document.body.appendChild(audioElement);
-                }
-                
-                if (event.track) {
-                  const audioStream = new MediaStream([event.track]);
-                  audioElement.srcObject = audioStream;
-                  if (userInteracted) {
-                    audioElement.play().catch(err => console.warn('Audio play failed:', err));
-                  }
-                }
-              }, 100);
+                updateVideoStreams(daily.participants());
+              }, 200);
             }
             
             setTimeout(() => {
@@ -575,8 +518,14 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
             videoRefs.current = {};
             audioRefs.current = {};
             
+            // Only clean up manually created audio elements, not React-managed ones
             const audioElements = document.querySelectorAll('audio[data-participant]');
-            audioElements.forEach(element => element.remove());
+            audioElements.forEach(element => {
+              const sessionId = element.dataset.participant;
+              if (!audioRefs.current[`audio-${sessionId}`]) {
+                element.remove();
+              }
+            });
             
             setIsScreenSharing(false);
           })
@@ -650,11 +599,9 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
     }
   }, [meetingState, callObject, syncStateWithDaily]);
 
-  // Enhanced toggle functions with user interaction tracking
+  // Enhanced toggle functions
   const toggleMute = async () => {
     if (!callObject || meetingState !== 'joined') return;
-    
-    enableAudioPlayback(); // Enable audio on user interaction
     
     try {
       const currentLocal = callObject.participants().local;
@@ -670,8 +617,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
 
   const toggleCamera = async () => {
     if (!callObject || meetingState !== 'joined') return;
-    
-    enableAudioPlayback(); // Enable audio on user interaction
     
     try {
       const currentLocal = callObject.participants().local;
@@ -694,8 +639,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
   const toggleScreenShare = async () => {
     if (!callObject || meetingState !== 'joined') return;
     
-    enableAudioPlayback(); // Enable audio on user interaction
-    
     try {
       if (isScreenSharing) {
         await callObject.stopScreenShare();
@@ -716,8 +659,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
   };
 
   const toggleFullscreen = () => {
-    enableAudioPlayback(); // Enable audio on user interaction
-    
     if (!document.fullscreenElement) {
       modalRef.current?.requestFullscreen?.();
     } else {
@@ -979,7 +920,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           className={`rounded-xl w-full max-w-4xl flex flex-col overflow-hidden shadow-md bg-white ${
             isFullscreen ? 'h-screen max-w-none rounded-none' : 'h-[70vh]'
           }`}
-          onClick={enableAudioPlayback} // Enable audio on any modal click
         >
           {/* Header */}
           <div className="flex items-center justify-between p-4 bg-black text-white">
@@ -995,11 +935,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
                  meetingState === 'error' ? 'Connection Error' :
                  'Voice Call'}
               </h3>
-              {!userInteracted && meetingState === 'joined' && (
-                <span className="text-yellow-400 text-sm">
-                  Click anywhere to enable audio
-                </span>
-              )}
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -1148,20 +1083,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
                 <MdCallEnd className="w-6 h-6" />
               </button>
             </div>
-
-            {/* Audio Status Indicator */}
-            {meetingState === 'joined' && (
-              <div className="text-center mt-2">
-                <div className="text-xs text-gray-400">
-                  {!userInteracted && (
-                    <span className="text-yellow-400">⚠️ Click anywhere to enable audio playback</span>
-                  )}
-                  {userInteracted && (
-                    <span className="text-green-400">✓ Audio enabled</span>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Hidden audio elements for remote participants */}
