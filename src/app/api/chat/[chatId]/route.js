@@ -5,7 +5,7 @@ const client = new MongoClient(uri);
 
 export async function GET(request, { params }) {
   try {
-    const { chatId } = params;
+    const { chatId } = await params; // Added await here
 
     // Validate chatId
     if (!chatId || typeof chatId !== 'string' || !ObjectId.isValid(chatId)) {

@@ -6,7 +6,7 @@ const client = new MongoClient(uri);
 // GET - Fetch messages for a chat
 export async function GET(request, { params }) {
   try {
-    const { chatId } = params;
+    const { chatId } = await params; // Added await here
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit')) || 50;
     const skip = parseInt(searchParams.get('skip')) || 0;
@@ -30,7 +30,7 @@ export async function GET(request, { params }) {
       .toArray();
 
     return Response.json({ messages });
-
+   
   } catch (error) {
     console.error('Error fetching messages:', error);
     return Response.json(
@@ -45,7 +45,7 @@ export async function GET(request, { params }) {
 // POST - Send a new message
 export async function POST(request, { params }) {
   try {
-    const { chatId } = params;
+    const { chatId } = await params; // Added await here
     const { content, senderPublicKey } = await request.json();
 
     if (!chatId || !ObjectId.isValid(chatId)) {
@@ -115,7 +115,7 @@ export async function POST(request, { params }) {
         _id: message._id
       }
     });
-
+   
   } catch (error) {
     console.error('Error sending message:', error);
     return Response.json(

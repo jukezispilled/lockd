@@ -56,9 +56,9 @@ export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
             type="submit"
             disabled={!message.trim() || disabled || message.length > 1000}
             className="absolute right-2 top-1/2 -translate-y-1/2 text-2xl bg-green-300 p-2 rounded-full disabled:bg-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[44px] h-11"
-            aria-label="Send message" // Added for accessibility
+            aria-label="Send message"
           >
-            <FaArrowUp size={20} className="text-gray-700 translate-x-[1px] translate-y-[1px]"/> {/* Replaced emoji with icon */}
+            <FaArrowUp size={20} className="text-gray-700"/>
           </button>
         </div>
       </form>

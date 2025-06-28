@@ -19,6 +19,8 @@ export async function POST(req) {
   }
 
   let client; // Declare client variable to be accessible in finally block
+  let mintAddress; // Declare mintAddress outside the try block for broader scope
+
   try {
     // --- 2. Establish MongoDB Connection for this Request ---
     console.log("Attempting to connect to MongoDB...");
@@ -35,12 +37,47 @@ export async function POST(req) {
     console.log("MongoDB indexes ensured.");
 
     // --- 3. Parse Request Body and Validate Input ---
-    const { mintAddress } = await req.json();
+    let body;
+    try {
+      // Check if request has content-type header
+      const contentType = req.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error("Invalid content-type:", contentType);
+        return NextResponse.json({ 
+          error: 'Content-Type must be application/json' 
+        }, { status: 400 });
+      }
+
+      // Clone the request to check if body is empty
+      const requestClone = req.clone();
+      const text = await requestClone.text();
+      
+      if (!text || text.trim() === '') {
+        console.error("Empty request body received");
+        return NextResponse.json({ 
+          error: 'Request body cannot be empty. Please provide a JSON object with mintAddress.' 
+        }, { status: 400 });
+      }
+
+      // Now parse the JSON
+      body = await req.json();
+      mintAddress = body.mintAddress;
+      
+    } catch (jsonParseError) {
+      console.error("Error parsing request JSON:", jsonParseError);
+      return NextResponse.json({ 
+        error: 'Invalid JSON in request body. Please ensure you are sending valid JSON.' 
+      }, { status: 400 });
+    }
+    
     console.log("Received request for mint addresses:", mintAddress);
 
     if (!mintAddress) {
       console.log("Invalid request: Mint address(es) is required.");
-      return NextResponse.json({ error: 'Mint address(es) is required.' }, { status: 400 });
+      return NextResponse.json({ 
+        error: 'Mint address(es) is required. Please provide mintAddress in the request body.',
+        example: { mintAddress: "So11111111111111111111111111111111111111112" }
+      }, { status: 400 });
     }
 
     let mintAccountsToProcess;
@@ -50,12 +87,18 @@ export async function POST(req) {
       mintAccountsToProcess = [mintAddress];
     } else {
       console.log("Invalid request: Invalid mint address format.");
-      return NextResponse.json({ error: 'Invalid mint address format. Must be a string or an array of strings.' }, { status: 400 });
+      return NextResponse.json({ 
+        error: 'Invalid mint address format. Must be a string or an array of strings.',
+        example: { mintAddress: "So11111111111111111111111111111111111111112" }
+      }, { status: 400 });
     }
 
     if (mintAccountsToProcess.length === 0) {
       console.log("Invalid request: Mint address(es) cannot be empty.");
-      return NextResponse.json({ error: 'Mint address(es) cannot be empty.' }, { status: 400 });
+      return NextResponse.json({ 
+        error: 'Mint address(es) cannot be empty.',
+        example: { mintAddress: "So11111111111111111111111111111111111111112" }
+      }, { status: 400 });
     }
 
     const heliusUrl = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}`;

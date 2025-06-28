@@ -5,10 +5,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MessageList } from '@/components/MessageList';
-import { MessageInput } from '@/components/MessageInput';
-import { ChatHeader } from '@/components/ChatHeader';
+import { MessageList } from '@/components/message/MessageList';
+import { MessageInput } from '@/components/message/MessageInput';
+import { ChatHeader } from '@/components/message/ChatHeader';
+import { VideoCallModal } from '@/components/VideoCallModal';
 import { useChatMessages } from '../hooks/useChatMessages';
+
+import { HiSpeakerphone } from "react-icons/hi";
 
 export default function ChatPage() {
   const { chatId } = useParams();
@@ -16,6 +19,9 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showJumpButton, setShowJumpButton] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [roomUrl, setRoomUrl] = useState(null);
+  const [isCreatingRoom, setIsCreatingRoom] = useState(false);
   const messagesEndRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
@@ -40,6 +46,39 @@ export default function ChatPage() {
     const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
     
     setShowJumpButton(!isNearBottom);
+  };
+
+  // Create or join Daily.co room
+  const handleJoinRoom = async () => {
+    setIsCreatingRoom(true);
+    try {
+      // Create or get existing room for this chat
+      const response = await fetch(`/api/video-room/${chatId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create/join room');
+      }
+      
+      const data = await response.json();
+      setRoomUrl(data.url);
+      setShowVideoModal(true);
+    } catch (err) {
+      console.error('Error joining room:', err);
+      // You could add a toast notification here
+    } finally {
+      setIsCreatingRoom(false);
+    }
+  };
+
+  // Close video modal
+  const handleCloseVideo = () => {
+    setShowVideoModal(false);
+    setRoomUrl(null);
   };
 
   // Fetch chat data
@@ -139,47 +178,68 @@ export default function ChatPage() {
         <ChatHeader chatData={chatData} />
         
         <div className="bg-gray-100 flex-1 overflow-hidden flex flex-col justify-center items-center">
-          <div className='h-[95%] w-[90%] md:w-[75%] bg-white rounded-xl m-4 flex flex-col relative'>
-            {/* Jump to Present Button */}
-            <AnimatePresence>
-              {showJumpButton && (
-                <motion.button
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                  onClick={scrollToBottom}
-                  className="absolute top-0 md:top-4 left-1/2 -translate-x-1/2 z-10 md:bg-gray-100 text-gray-700 px-3 py-2 rounded-lg cursor-pointer flex items-center gap-2 text-xs md:text-sm font-medium transition-colors"
-                >
-                  <svg 
-                    className="w-4 h-4" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d="M19 14l-7 7m0 0l-7-7m7 7V3" 
-                    />
-                  </svg>
-                  Jump to Present
-                </motion.button>
-              )}
-            </AnimatePresence>
+          <div className="flex gap-4 h-[95%] w-[90%] md:w-[90%] m-4">
+            {/* Video Call Button */}
+            <div className="flex flex-col gap-2">
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={handleJoinRoom}
+                disabled={isCreatingRoom}
+                className="bg-gray-200 text-gray-800 p-3 rounded-xl transition-colors flex items-center justify-center w-50 h-auto cursor-pointer gap-3 flex-row-reverse"
+                title="Join Video/Voice Call"
+              >
+                {isCreatingRoom ? (
+                  <div className="size-6 border-4 border-gray-800 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <HiSpeakerphone className="size-6" />
+                )}
+                <span className="text-base font-medium">Voice Chat</span>
+              </motion.button>
+            </div>
 
-            <div 
-              ref={scrollContainerRef}
-              onScroll={handleScroll}
-              className='flex-grow overflow-y-auto'
-            >
-              <MessageList 
-                messages={messages} 
-                isLoading={isSendingMessage}
-                error={messageError}
-              />
-              <div ref={messagesEndRef} />
+            {/* Main Chat Container */}
+            <div className='flex-1 bg-white rounded-xl flex flex-col relative'>
+              {/* Jump to Present Button */}
+              <AnimatePresence>
+                {showJumpButton && (
+                  <motion.button
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    onClick={scrollToBottom}
+                    className="absolute top-0 md:top-4 left-1/2 -translate-x-1/2 z-10 md:bg-gray-100 text-gray-700 px-3 py-2 rounded-lg cursor-pointer flex items-center gap-2 text-xs md:text-sm font-medium transition-colors"
+                  >
+                    <svg 
+                      className="w-4 h-4" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M19 14l-7 7m0 0l-7-7m7 7V3" 
+                      />
+                    </svg>
+                    Jump to Present
+                  </motion.button>
+                )}
+              </AnimatePresence>
+
+              <div 
+                ref={scrollContainerRef}
+                onScroll={handleScroll}
+                className='flex-grow overflow-y-auto'
+              >
+                <MessageList 
+                  messages={messages} 
+                  isLoading={isSendingMessage}
+                  error={messageError}
+                />
+                <div ref={messagesEndRef} />
+              </div>
             </div>
           </div>
         </div>
@@ -187,6 +247,14 @@ export default function ChatPage() {
         <MessageInput 
           onSendMessage={sendMessage}
           disabled={isSendingMessage}
+          chatId={chatId}
+        />
+
+        {/* Video Call Modal */}
+        <VideoCallModal
+          isOpen={showVideoModal}
+          onClose={handleCloseVideo}
+          roomUrl={roomUrl}
           chatId={chatId}
         />
       </motion.div>

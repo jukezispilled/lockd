@@ -7,7 +7,7 @@ import { MessageBubble } from './MessageBubble';
 export const MessageList = ({ messages, isLoading, error }) => {
   if (error) {
     return (
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center pt-4">
         <div className="text-center">
           <div className="text-red-500 text-4xl mb-2">⚠️</div>
           <p className="text-red-600">Error loading messages</p>
@@ -19,7 +19,7 @@ export const MessageList = ({ messages, isLoading, error }) => {
 
   if (!messages || messages.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center pt-4">
         <div className="text-center">
           <div className="text-6xl mb-4">💬</div>
           <h3 className="text-xl font-semibold text-gray-700 mb-2">No messages yet</h3>
