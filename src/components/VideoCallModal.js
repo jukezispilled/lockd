@@ -82,8 +82,8 @@ const MemoizedParticipantCard = memo(({
         className={videoClass}
       />
       {!participant.video && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-700">
-          <div className={`${avatarSize} bg-gray-500 rounded-full flex items-center justify-center text-white ${avatarTextSize} font-semibold`}>
+        <div className="absolute inset-0 flex items-center justify-center bg-zinc-900">
+          <div className={`${avatarSize} bg-gray-700 rounded-full flex items-center justify-center text-white ${avatarTextSize} font-semibold`}>
             {(participant.user_name || 'U')[0].toUpperCase()}
           </div>
         </div>
