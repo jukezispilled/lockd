@@ -121,7 +121,7 @@ export default function ChatPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col h-screen h-[100dvh] overflow-hidden">
+      <div className="flex flex-col h-[100dvh] overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key="loading"
@@ -142,7 +142,7 @@ export default function ChatPage() {
 
   if (error) {
     return (
-      <div className="flex flex-col h-screen h-[100dvh] overflow-hidden">
+      <div className="flex flex-col h-[100dvh] overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key="error"
