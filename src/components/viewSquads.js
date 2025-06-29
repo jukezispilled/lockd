@@ -225,7 +225,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
             placeholder="Search by name, ticker, or CA..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-10 py-3 border border-gray-300 text-gray-700 rounded-full focus:ring-2 focus:ring-zinc-500 focus:border-transparent outline-none transition-all duration-200 bg-white shadow-sm"
+            className="w-full pl-10 pr-10 py-3 text-gray-300 rounded-full focus:ring-2 focus:ring-zinc-500 focus:border-transparent outline-none transition-all duration-200 bg-[#333] shadow-sm"
           />
           {searchQuery && (
             <button
