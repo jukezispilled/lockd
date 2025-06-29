@@ -47,7 +47,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="p-8">
             {/* Wallet connection button positioned at top right */}
-            <div className="text-center absolute top-5 right-5 z-20">
+            <div className="text-center absolute top-4 right-5 z-20">
               <WalletMultiButton>{connected ? 'sign-out' : 'sign-in'}</WalletMultiButton>
             </div>
             <div>
