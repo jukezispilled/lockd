@@ -61,8 +61,8 @@ const MemoizedParticipantCard = memo(({
   
   const videoClass = "w-full h-full object-cover";
   const nameClass = isGrid 
-    ? "absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-2 rounded-full"
-    : "absolute bottom-1 left-1 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs";
+    ? "absolute bottom-4 left-4 bg-zinc-950 bg-opacity-50 text-white px-3 py-2 rounded-full"
+    : "absolute bottom-1 left-1 bg-zinc-950 bg-opacity-50 text-white px-2 py-1 rounded text-xs";
   
   const avatarSize = isGrid ? "w-16 h-16" : "w-8 h-8";
   const avatarTextSize = isGrid ? "text-2xl" : "text-sm";
@@ -1203,12 +1203,12 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className={`rounded-xl w-full max-w-4xl flex flex-col overflow-hidden shadow-md bg-white ${
+          className={`rounded-2xl w-full max-w-4xl flex flex-col overflow-hidden shadow-md border border-gray-700 ${
             isFullscreen ? 'h-screen max-w-none rounded-none' : 'h-[70vh]'
           }`}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 bg-black text-white">
+          <div className="flex items-center justify-between p-4 bg-zinc-950 text-white">
             <div className="flex items-center gap-3">
               <div className={`w-3 h-3 rounded-full ${
                 meetingState === 'joined' ? 'bg-green-500 animate-pulse' :
@@ -1234,10 +1234,10 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           </div>
 
           {/* Video Container - Custom video rendering area */}
-          <div className="flex-1 bg-black relative overflow-hidden p-4">
+          <div className="flex-1 bg-zinc-950 relative overflow-hidden p-4">
             {/* Loading State */}
             {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center z-20 bg-black">
+              <div className="absolute inset-0 flex items-center justify-center z-20 bg-zinc-950">
                 <div className="text-center text-white">
                   <div className="w-12 h-12 border-3 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                   <p className="text-lg">Connecting to voice chat...</p>
@@ -1248,7 +1248,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
 
             {/* Error State */}
             {error && (
-              <div className="absolute inset-0 flex items-center justify-center z-20 bg-black">
+              <div className="absolute inset-0 flex items-center justify-center z-20 bg-zinc-950">
                 <div className="text-center text-white max-w-md mx-auto p-6">
                   <div className="text-red-400 text-6xl mb-4">⚠️</div>
                   <h3 className="text-xl font-semibold mb-2">Connection Failed</h3>
@@ -1280,7 +1280,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
 
             {/* Waiting State */}
             {!isLoading && !error && !hasParticipants && meetingState !== 'joined' && (
-              <div className="absolute inset-0 flex items-center justify-center text-white z-10 bg-black">
+              <div className="absolute inset-0 flex items-center justify-center text-white z-10 bg-zinc-950">
                 <div className="text-center max-w-md mx-auto">
                   <div className="text-8xl mb-6">📹</div>
                   <h3 className="text-2xl font-semibold mb-2">Ready to Join</h3>
@@ -1291,7 +1291,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           </div>
 
           {/* Custom Controls Bar */}
-          <div className="p-4 bg-black relative">
+          <div className="p-4 bg-zinc-950 relative">
             <div className="flex items-center justify-center gap-4">
               {/* Mute Button */}
               <button

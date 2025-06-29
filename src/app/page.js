@@ -40,7 +40,7 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-[100dvh] bg-gray-100 relative">
+    <div className="min-h-[100dvh] bg-black relative">
       {/* RetroGrid background component */}
       <RetroGrid />
       <div className="container mx-auto px-2 md:px-4 py-8">
@@ -93,7 +93,7 @@ export default function Home() {
                   {/* Button to toggle between Tokenz and Squad components */}
                   <button
                     onClick={() => setShowTokenz(!showTokenz)}
-                    className="text-gray-700 text-lg font-semibold px-4 py-2 transition-all duration-300 border-0 cursor-pointer hover:scale-[102%] ease-in-out"
+                    className="text-white text-lg font-semibold px-4 py-2 transition-all duration-300 border-0 cursor-pointer hover:scale-[102%] ease-in-out"
                   >
                     <div className="flex justify-center items-center gap-2">
                       {showTokenz ? (
@@ -120,7 +120,7 @@ export default function Home() {
                   <button
                     onClick={handleRefresh}
                     disabled={isRefreshing}
-                    className={`text-gray-700 transition-all duration-300 border-0 cursor-pointer hover:scale-[102%] ease-in-out disabled:cursor-not-allowed disabled:opacity-50 ${showTokenz ? 'hidden' : ''}`}
+                    className={`text-white transition-all duration-300 border-0 cursor-pointer hover:scale-[102%] ease-in-out disabled:cursor-not-allowed disabled:opacity-50 ${showTokenz ? 'hidden' : ''}`}
                   >
                     <motion.div
                       animate={{ rotate: isRefreshing ? 360 : 0 }}

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f3f4f6;
+  --background: #000000;
   --foreground: #171717;
 }
 
@@ -14,7 +14,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #000000;
     --foreground: #ededed;
   }
 }
@@ -34,7 +34,7 @@ button.wallet-adapter-button-trigger:hover {
 }
 
 @theme inline {
-  --animate-grid: grid 15s linear infinite;
+  --animate-grid: grid 30s linear infinite;
  
   @keyframes grid {
     0% {

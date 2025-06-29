@@ -38,7 +38,7 @@ export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
   }, [message]);
 
   return (
-    <div className="bg-gray-100 pb-4 flex justify-center">
+    <div className="bg-black pb-4 flex justify-center">
       <form onSubmit={handleSubmit} className="flex items-center w-[90%] md:w-[75%]">
         <div className="flex-1 relative flex items-center">
           <textarea
@@ -47,7 +47,7 @@ export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="What's up?"
-            className="w-full py-5 px-3 pr-14 text-black bg-white rounded-full focus:outline-none focus:ring-1 focus:ring-gray-300 focus:border-transparent resize-none min-h-[48px] max-h-32 shadow-xs"
+            className="w-full py-5 px-3 pr-14 text-white border border-[#333] bg-black rounded-full focus:outline-none focus:ring-1 focus:ring-gray-500 focus:border-transparent resize-none min-h-[48px] max-h-32 shadow-xs"
             rows={1}
             disabled={disabled}
           />

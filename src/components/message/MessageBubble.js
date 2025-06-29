@@ -47,7 +47,7 @@ export const MessageBubble = ({ message, isOwn, showAvatar }) => {
           className={`px-4 py-2 rounded-2xl ${
             isOwn
               ? 'bg-[#007aff] text-white rounded-br-none'
-              : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
+              : 'bg-gray-700 text-white rounded-bl-none'
           }`}
         >
           <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>

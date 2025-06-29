@@ -129,10 +129,10 @@ export default function ChatPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="bg-gray-100 flex items-center justify-center flex-1"
+            className="bg-black flex items-center justify-center flex-1"
           >
             <div className="text-center">
-              <p className="text-gray-600">Loading chat...</p>
+              <p className="text-gray-300">Loading chat...</p>
             </div>
           </motion.div>
         </AnimatePresence>
@@ -150,15 +150,15 @@ export default function ChatPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="bg-gray-100 flex items-center justify-center flex-1"
+            className="bg-black flex items-center justify-center flex-1"
           >
             <div className="text-center">
               <div className="text-red-500 text-6xl mb-4">⚠️</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Bro is not lockd in</h2>
-              <p className="text-gray-600 mb-4">{error}</p>
+              <h2 className="text-2xl font-bold text-white mb-2">Bro is not lockd in</h2>
+              <p className="text-gray-300 mb-4">{error}</p>
               <button
                 onClick={() => (window.location.href = '/')}
-                className="bg-black text-white px-6 py-2 rounded-lg"
+                className="bg-black border border-[#333] text-white px-6 py-2 rounded-lg"
               >
                 Go Back
               </button>
@@ -184,7 +184,7 @@ export default function ChatPage() {
             <ChatHeader chatData={chatData} />
           </div>
           
-          <div className="bg-gray-100 flex-1 min-h-0 pb-4 md:pb-0 md:my-4 overflow-hidden flex flex-col justify-center items-center">
+          <div className="bg-black flex-1 min-h-0 pb-4 md:pb-0 md:my-4 overflow-hidden flex flex-col justify-center items-center">
             <div className="flex flex-col md:flex-row gap-4 h-full w-[90%] md:w-[95%] min-h-0">
               {/* Video Call Button */}
               <div className="flex flex-col gap-1 md:gap-2 md:flex-shrink-0 flex-shrink-0">
@@ -192,22 +192,22 @@ export default function ChatPage() {
                   whileTap={{ scale: 0.95 }}
                   onClick={handleJoinRoom}
                   disabled={isCreatingRoom}
-                  className="bg-white text-gray-800 p-3 rounded-xl transition-colors flex items-center justify-center w-min md:w-40 h-auto cursor-pointer gap-3 flex-row-reverse md:flex-row"
+                  className="bg-black border border-[#333] text-gray-300 p-3 rounded-xl transition-colors flex items-center justify-center w-min md:w-40 h-auto cursor-pointer gap-3 flex-row-reverse md:flex-row"
                   title="Join Video/Voice Call"
                 >
                   {isCreatingRoom ? (
-                    <div className="size-6 border-4 border-gray-800 border-t-transparent rounded-full animate-spin" />
+                    <div className="size-6 border-4 border-gray-300 border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <HiSpeakerphone className="size-6" />
                   )}
-                  <span className="text-base font-medium hidden md:block">voice</span>
+                  <span className="text-base font-medium hidden md:block text-white">voice</span>
                 </motion.button>
-                <hr className="my-4 border-t border-gray-300" />
-                <div className='cursor-pointer text-gray-800'>#general</div>
+                <hr className="my-4 border-t border-[#333]" />
+                <div className='cursor-pointer text-white'>#general</div>
               </div>
 
               {/* Main Chat Container */}
-              <div className='flex-1 bg-white rounded-xl flex flex-col relative min-h-0'>
+              <div className='flex-1 bg-black border border-[#333] rounded-xl flex flex-col relative min-h-0'>
                 {/* Jump to Present Button */}
                 <AnimatePresence>
                   {showJumpButton && (
@@ -217,7 +217,7 @@ export default function ChatPage() {
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
                       onClick={scrollToBottom}
-                      className="absolute top-0 md:top-4 left-1/2 -translate-x-1/2 z-10 md:bg-gray-100 text-gray-700 px-3 py-0.5 md:py-2 rounded-lg cursor-pointer flex items-center gap-2 text-xs md:text-sm font-medium transition-colors"
+                      className="absolute top-0 md:top-4 left-1/2 -translate-x-1/2 z-10 text-white px-3 py-0.5 md:py-2 rounded-lg cursor-pointer flex items-center gap-2 text-xs md:text-sm font-medium transition-colors"
                     >
                       <svg 
                         className="w-4 h-4 hidden md:block" 

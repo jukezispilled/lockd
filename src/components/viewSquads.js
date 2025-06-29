@@ -167,7 +167,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.25 }}
-        className="flex h-[80dvh] justify-center items-center text-gray-600"
+        className="flex h-[80dvh] justify-center items-center text-gray-300"
       >
         {isRefreshing ? 'Refreshing squads...' : 'Loading squads...'}
       </motion.div>
@@ -206,8 +206,8 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
 
   return (
     <div className='mt-[10%] md:mt-[7%]'>
-      <div className="text-4xl md:text-7xl font-bold text-center mb-1 text-black">Find Your Squad.</div>
-      <div className="text-sm md:text-lg font-bold text-center mb-4 text-gray-600">it&apos;s time to get lockd in</div>
+      <div className="text-4xl md:text-7xl font-bold text-center mb-1 text-white">Find Your Squad.</div>
+      <div className="text-sm md:text-lg font-bold text-center mb-4 text-gray-300">it&apos;s time to get lockd in</div>
       
       {/* Search Bar */}
       <motion.div
@@ -257,12 +257,12 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.25 }}
-          className="flex flex-col justify-center items-center py-12 text-gray-500"
+          className="flex flex-col justify-center items-center py-12 text-gray-300"
         >
           <div className="text-lg mb-2">No squads found for &quot;{searchQuery}&quot;</div>
           <button
             onClick={clearSearch}
-            className="text-zinc-600 hover:text-zinc-800 underline transition-colors duration-200"
+            className="text-zinc-500 hover:text-zinc-800 underline transition-colors duration-200"
           >
             Clear search to see all squads
           </button>
@@ -289,7 +289,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.25 }}
-                className="h-[200px] w-full max-w-[350px] md:max-w-[250px] rounded-2xl bg-zinc-950 shadow-sm p-2 flex flex-col justify-between relative"
+                className="h-[200px] w-full max-w-[350px] md:max-w-[250px] rounded-2xl bg-black border border-[#333] p-2 flex flex-col justify-between relative"
                 onClick={() => handleChatClick(chat._id)}
               >
                 <div>
