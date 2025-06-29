@@ -285,9 +285,9 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
             {filteredGroupChats.map((chat) => (
               <motion.div
                 key={chat._id}
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.25 }}
                 className="h-[225px] w-full max-w-[400px] md:w-[225px] bg-black border border-black hover:border-[#333] transition duration-150 ease-in-out p-2 md:p-0 flex flex-col justify-between relative"
                 onClick={() => handleChatClick(chat._id)}
