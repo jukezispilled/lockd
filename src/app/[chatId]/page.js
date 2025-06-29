@@ -192,7 +192,7 @@ export default function ChatPage() {
                   whileTap={{ scale: 0.95 }}
                   onClick={handleJoinRoom}
                   disabled={isCreatingRoom}
-                  className="bg-black rounded-sm border border-[#333] text-gray-300 p-3 transition-colors flex items-center justify-center w-min md:w-40 h-auto cursor-pointer gap-3 flex-row-reverse md:flex-row"
+                  className="bg-black rounded-sm border border-[#333] text-gray-300 p-3 transition-colors flex items-center justify-center w-min md:w-32 h-auto cursor-pointer gap-3 flex-row-reverse md:flex-row"
                   title="Join Video/Voice Call"
                 >
                   {isCreatingRoom ? (
