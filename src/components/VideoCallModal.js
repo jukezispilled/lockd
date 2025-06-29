@@ -1291,7 +1291,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           </div>
 
           {/* Custom Controls Bar */}
-          <div className="p-4 bg-black border-t border-gray-700 relative">
+          <div className="p-4 bg-black relative">
             <div className="flex items-center justify-center gap-4">
               {/* Mute Button */}
               <button
