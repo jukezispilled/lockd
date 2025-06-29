@@ -128,10 +128,10 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey }) {
   };
 
   return (
-    <div className="bg-white rounded-xl p-6 border border-gray-200 mb-2 max-w-2xl shadow-xs">
+    <div className="bg-black rounded-xl p-6 border border-[#333] mb-2 max-w-2xl shadow-xs">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-600 mb-2">
+          <label className="block text-sm font-medium text-white mb-2">
             Contract Address*
           </label>
           <input
@@ -139,7 +139,7 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey }) {
             value={tokenAddress}
             onChange={handleInputChange}
             placeholder="e.x. Hx...1a2b"
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-black"
+            className="w-full p-3 border border-[#333] rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-white"
             disabled={isLoading || isCreatingChat}
             required
           />
@@ -148,7 +148,7 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey }) {
         <button
           type="submit"
           disabled={isLoading || isCreatingChat || !tokenAddress}
-          className="w-full bg-black text-white py-3 px-6 rounded-lg font-semibold disabled:cursor-not-allowed cursor-pointer"
+          className="w-full bg-black text-white border border-[#333] py-3 px-6 rounded-lg font-semibold disabled:cursor-not-allowed cursor-pointer"
         >
           {isLoading ? 'Fetching Token Data...' : isCreatingChat ? 'Setting up Chat...' : 'Create +'}
         </button>
