@@ -206,8 +206,8 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
 
   return (
     <div className='mt-[10%] md:mt-[7%]'>
-      <div className="text-4xl md:text-7xl font-bold text-center mb-1 text-white">Find Your Squad.</div>
-      <div className="text-sm md:text-lg font-bold text-center mb-4 text-gray-300">it&apos;s time to get lockd in</div>
+      <div className="text-4xl md:text-8xl font-bold text-center mb-1 text-white">Find Your Squad.</div>
+      <div className="text-sm md:text-lg font-bold text-center mb-4 text-gray-300">time to get lockd in</div>
       
       {/* Search Bar */}
       <motion.div
@@ -225,7 +225,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
             placeholder="Search by name, ticker, or CA..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-10 py-3 text-gray-300 rounded-full focus:ring-2 focus:ring-zinc-500 focus:border-transparent outline-none transition-all duration-200 bg-[#333] shadow-sm"
+            className="w-full pl-10 pr-10 py-3 text-gray-300 rounded-full border border-[#333] focus:ring-2 focus:ring-zinc-700 focus:border-transparent outline-none transition-all duration-200 bg-black shadow-sm"
           />
           {searchQuery && (
             <button
@@ -277,7 +277,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.25 }}
-          className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-start cursor-pointer p-4 justify-items-center ${
+          className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-start cursor-pointer pb-4 justify-items-center ${
             isRefreshing ? 'opacity-70 pointer-events-none' : ''
           }`}
         >
@@ -289,7 +289,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.25 }}
-                className="h-[225px] w-full max-w-[400px] md:max-w-[400px] rounded-md bg-black border border-[#333] p-2 flex flex-col justify-between relative"
+                className="h-[225px] w-full max-w-[400px] md:w-[225px] bg-black border border-[#333] p-2 flex flex-col justify-between relative"
                 onClick={() => handleChatClick(chat._id)}
               >
                 <div>
