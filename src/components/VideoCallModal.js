@@ -56,8 +56,8 @@ const MemoizedParticipantCard = memo(({
   console.log(`🃏 Rendering participant card for ${participant.session_id} (local: ${participant.local})`);
   
   const cardClass = isGrid 
-    ? "relative bg-zinc-900 rounded-lg overflow-hidden"
-    : "relative bg-zinc-900 rounded-lg overflow-hidden flex-1 min-w-0";
+    ? "relative bg-black overflow-hidden"
+    : "relative bg-black overflow-hidden flex-1 min-w-0";
   
   const videoClass = "w-full h-full object-cover";
   const nameClass = isGrid 
@@ -82,7 +82,7 @@ const MemoizedParticipantCard = memo(({
         className={videoClass}
       />
       {!participant.video && (
-        <div className="absolute inset-0 flex items-center justify-center bg-zinc-900">
+        <div className="absolute inset-0 flex items-center justify-center bg-zinc-900 border-gray-300">
           <div className={`${avatarSize} bg-gray-700 rounded-full flex items-center justify-center text-white ${avatarTextSize} font-semibold`}>
             {(participant.user_name || 'U')[0].toUpperCase()}
           </div>
@@ -1203,7 +1203,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className={`rounded-2xl w-full max-w-4xl flex flex-col overflow-hidden shadow-md border border-gray-700 ${
+          className={`w-full max-w-4xl flex flex-col overflow-hidden border border-[#333] ${
             isFullscreen ? 'h-screen max-w-none rounded-none' : 'h-[70vh]'
           }`}
         >
@@ -1348,7 +1348,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
               </button>
 
               {/* Participants Info */}
-              <div className="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded-full text-white absolute right-4">
+              <div className="flex items-center gap-2 px-3 py-2 bg-black border border-[#333] rounded-full text-white absolute right-4">
                 <FaUsers className="w-4 h-4" />
                 <span className="text-sm font-medium">{participantCount}</span>
               </div>
