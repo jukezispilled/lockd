@@ -158,7 +158,7 @@ export default function ChatPage() {
               <p className="text-gray-300 mb-4">{error}</p>
               <button
                 onClick={() => (window.location.href = '/')}
-                className="bg-black border border-[#333] text-white px-6 py-2 rounded-lg"
+                className="bg-black border border-[#333] text-white px-6 py-2"
               >
                 Go Back
               </button>

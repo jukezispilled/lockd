@@ -128,7 +128,7 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey }) {
   };
 
   return (
-    <div className="bg-black rounded-xl p-6 border border-[#333] mb-2 max-w-2xl shadow-xs">
+    <div className="bg-black p-6 border border-[#333] mb-2 max-w-2xl shadow-xs">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-white mb-2">
@@ -139,7 +139,7 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey }) {
             value={tokenAddress}
             onChange={handleInputChange}
             placeholder="e.x. Hx...1a2b"
-            className="w-full p-3 border border-[#333] rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-white"
+            className="w-full p-3 border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
             disabled={isLoading || isCreatingChat}
             required
           />
@@ -148,26 +148,26 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey }) {
         <button
           type="submit"
           disabled={isLoading || isCreatingChat || !tokenAddress}
-          className="w-full bg-black text-white border border-[#333] py-3 px-6 rounded-lg font-semibold disabled:cursor-not-allowed cursor-pointer"
+          className="w-full bg-black text-white border border-[#333] py-3 px-6 font-semibold disabled:cursor-not-allowed cursor-pointer"
         >
           {isLoading ? 'Fetching Token Data...' : isCreatingChat ? 'Setting up Chat...' : 'Create +'}
         </button>
       </form>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-4">
+        <div className="bg-red-50 border border-red-200 p-4 mt-4">
           <p className="text-red-800">{error}</p>
         </div>
       )}
 
       {successMessage && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
+        <div className="bg-green-50 border border-green-200 p-4 mt-4">
           <p className="text-green-800">{successMessage}</p>
         </div>
       )}
 
       {chatCreationStatus && !successMessage && !error && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+        <div className="bg-blue-50 border border-blue-200 p-4 mt-4">
           <p className="text-blue-800">{chatCreationStatus}</p>
         </div>
       )}

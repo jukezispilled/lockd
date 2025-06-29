@@ -77,7 +77,7 @@ const TokenImage = memo(function TokenImage({ mintAddress }) { // Wrapped with m
 
   if (loading) {
     return (
-      <div className="size-[65.45px] md:size-[82px] rounded-xl bg-gray-200 animate-pulse" />
+      <div className="size-[65.45px] md:size-[82px] bg-gray-200 animate-pulse" />
     );
   }
 
@@ -103,7 +103,6 @@ const TokenImage = memo(function TokenImage({ mintAddress }) { // Wrapped with m
           alt={`Image for token ${mintAddress}`}
           width={82} // Small size for the bottom-left corner
           height={82}
-          className="rounded-xl" // Tailwind classes for styling
         />
       </motion.div>
     </AnimatePresence>

@@ -225,7 +225,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
             placeholder="Search by name, ticker, or CA..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-10 py-3 border border-gray-300 text-gray-700 rounded-xl focus:ring-2 focus:ring-zinc-500 focus:border-transparent outline-none transition-all duration-200 bg-white shadow-sm"
+            className="w-full pl-10 pr-10 py-3 border border-gray-300 text-gray-700 rounded-full focus:ring-2 focus:ring-zinc-500 focus:border-transparent outline-none transition-all duration-200 bg-white shadow-sm"
           />
           {searchQuery && (
             <button
@@ -289,7 +289,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.25 }}
-                className="h-[200px] w-full max-w-[350px] md:max-w-[250px] rounded-2xl bg-black border border-[#333] p-2 flex flex-col justify-between relative"
+                className="h-[200px] w-full max-w-[350px] md:max-w-[250px] bg-black border border-[#333] p-2 flex flex-col justify-between relative"
                 onClick={() => handleChatClick(chat._id)}
               >
                 <div>

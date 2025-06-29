@@ -334,7 +334,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15 }}
           >
-            <div className="bg-black rounded-xl p-6 border border-[#333] mb-2 max-w-2xl shadow-xs">
+            <div className="bg-black p-6 border border-[#333] mb-2 max-w-2xl shadow-xs">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -347,7 +347,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       value={formData.name}
                       onChange={handleInputChange}
                       placeholder="e.x. Anon"
-                      className="w-full p-3 border border-[#333] rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3 border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
                       disabled={isCreatingToken}
                       required
                     />
@@ -363,7 +363,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       value={formData.symbol}
                       onChange={handleInputChange}
                       placeholder="e.x. ANON"
-                      className="w-full p-3 border border-[#333] rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3 border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
                       disabled={isCreatingToken}
                       required
                       maxLength={10}
@@ -381,7 +381,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                     onChange={handleInputChange}
                     placeholder="Describe your token..."
                     rows={3}
-                    className="w-full p-3 border border-[#333] rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-white"
+                    className="w-full p-3 border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
                     disabled={isCreatingToken}
                     required
                   />
@@ -398,7 +398,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       value={formData.twitter}
                       onChange={handleInputChange}
                       placeholder="https://x.com/..."
-                      className="w-full p-3 border border-[#333] rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3 border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
                       disabled={isCreatingToken}
                     />
                   </div>
@@ -413,7 +413,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       value={formData.telegram}
                       onChange={handleInputChange}
                       placeholder="https://t.me/..."
-                      className="w-full p-3 border border-[#333] rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3 border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
                       disabled={isCreatingToken}
                     />
                   </div>
@@ -428,7 +428,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       value={formData.website}
                       onChange={handleInputChange}
                       placeholder="https://..."
-                      className="w-full p-3 border border-[#333] rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3 border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
                       disabled={isCreatingToken}
                     />
                   </div>
@@ -440,7 +440,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       Image*
                     </label>
                     <div
-                      className={`flex items-center space-x-2 w-full p-1 border-1 rounded-lg transition-colors duration-200 ${
+                      className={`flex items-center space-x-2 w-full p-1 border-1 transition-colors duration-200 ${
                         isDraggingOver ? 'border-black bg-gray-50 border-dashed' : 'border-[#333] border-solid'
                       }`}
                       onDragOver={handleDragOver}
@@ -457,7 +457,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       />
                       <label
                         htmlFor="token-image-upload"
-                        className="cursor-pointer bg-black text-white py-2 px-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:ring-opacity-50"
+                        className="cursor-pointer bg-black text-white py-2 px-3 focus:outline-none focus:ring-2 focus:ring-black focus:ring-opacity-50"
                       >
                         Choose File
                       </label>
@@ -479,7 +479,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       placeholder="0.1"
                       step="0.01"
                       min="0.005"
-                      className="w-full p-3 border border-[#333] rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3 border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
                       disabled={isCreatingToken}
                     />
                   </div>
@@ -488,7 +488,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                 <button
                   type="submit"
                   disabled={isCreatingToken || isCreatingChat || !formIsValid} // Disabled when creating or if form is not valid
-                  className={`w-full py-3 px-6 rounded-lg font-semibold border border-[#333] ${
+                  className={`w-full py-3 px-6 font-semibold border border-[#333] ${
                     isCreatingToken || isCreatingChat || !formIsValid
                       ? 'bg-black text-white cursor-not-allowed'
                       : 'bg-black text-white cursor-pointer'
@@ -545,7 +545,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
       )}
 
       {chatCreationStatus && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mb-4">
+        <div className="bg-blue-50 border border-blue-200 p-2 mb-4">
           <p className="text-blue-800">{chatCreationStatus}</p>
         </div>
       )}
@@ -555,7 +555,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
           <h3 className="text-xl font-bold text-black mb-4">Created Tokens</h3>
           <div className="space-y-3">
             {createdTokens.map((token) => (
-              <div key={token.mint} className="bg-gray-50 rounded-lg p-4">
+              <div key={token.mint} className="bg-gray-50 p-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                   <div>
                     <span className="font-medium text-gray-600">Name:</span> {token.name} ({token.symbol})
