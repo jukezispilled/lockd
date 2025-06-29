@@ -97,10 +97,10 @@ export default function Home() {
                   >
                     <div className="flex justify-center items-center gap-2">
                       {showTokenz ? (
-                        <span className="text-lg">NVM</span>
+                        <span className="text-sm md:text-base">NVM</span>
                       ) : (
                         <motion.span
-                          className="text-lg"
+                          className="text-sm md:text-base"
                           animate={{
                             scale: [1, 1.04, 1],
                           }}
