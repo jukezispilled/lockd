@@ -207,7 +207,7 @@ export default function ChatPage() {
               </div>
 
               {/* Main Chat Container */}
-              <div className='flex-1 bg-black rounded-sm border border-[#333] flex flex-col relative min-h-0'>
+              <div className='flex-1 bg-black border border-[#333] flex flex-col relative min-h-0'>
                 {/* Jump to Present Button */}
                 <AnimatePresence>
                   {showJumpButton && (
