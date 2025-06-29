@@ -192,7 +192,7 @@ export default function ChatPage() {
                   whileTap={{ scale: 0.95 }}
                   onClick={handleJoinRoom}
                   disabled={isCreatingRoom}
-                  className="bg-black border border-[#333] text-gray-300 p-3 rounded-xl transition-colors flex items-center justify-center w-min md:w-40 h-auto cursor-pointer gap-3 flex-row-reverse md:flex-row"
+                  className="bg-black border border-[#333] text-gray-300 p-3 transition-colors flex items-center justify-center w-min md:w-40 h-auto cursor-pointer gap-3 flex-row-reverse md:flex-row"
                   title="Join Video/Voice Call"
                 >
                   {isCreatingRoom ? (
@@ -207,7 +207,7 @@ export default function ChatPage() {
               </div>
 
               {/* Main Chat Container */}
-              <div className='flex-1 bg-black border border-[#333] rounded-xl flex flex-col relative min-h-0'>
+              <div className='flex-1 bg-black border border-[#333] flex flex-col relative min-h-0'>
                 {/* Jump to Present Button */}
                 <AnimatePresence>
                   {showJumpButton && (
