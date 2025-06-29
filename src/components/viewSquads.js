@@ -25,8 +25,8 @@ function TokenImage({ imageUrl, mintAddress }) { // Added mintAddress for alt te
       <Image
         src={imageUrl}
         alt={`Image for token ${mintAddress}`}
-        width={96}
-        height={96}
+        width={112}
+        height={112}
         className="rounded-xl"
       />
     </motion.div>
@@ -294,10 +294,10 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
               >
                 <div>
                   <div className='absolute top-2 left-2 w-[55%]'>
-                    <p className="text-gray-100 text-xl font-semibold break-words line-clamp-2">
+                    <p className="text-gray-100 text-xl md:text-base font-semibold break-words line-clamp-2">
                       {chat.name || "Untitled Group Chat"}
                     </p>
-                    <p className="text-gray-500 text-sm line-clamp-2">
+                    <p className="text-gray-500 text-base md:text-xs line-clamp-2">
                       {`(${chat.tokenSym})` || ""}
                     </p>
                   </div>
@@ -328,14 +328,14 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
                     {chat.description || ""}
                   </p>
                 </div>
-                <div className='absolute bottom-2 left-2 z-10'>
+                <div className='absolute bottom-2 right-2 z-10'>
                   {/* Only render TokenImage if tokenMint exists and image data is loaded */}
                   {chat.tokenMint && !loadingImages && tokenImages[chat.tokenMint] && (
                     <TokenImage imageUrl={tokenImages[chat.tokenMint]} mintAddress={chat.tokenMint} />
                   )}
                   {/* Show loading state for images */}
                   {chat.tokenMint && loadingImages && (
-                     <div className="w-[96px] h-[96px] rounded-xl bg-gray-100 animate-pulse" />
+                     <div className="size-[112px] rounded-xl bg-gray-100 animate-pulse" />
                   )}
                    {chat.tokenMint && !loadingImages && !tokenImages[chat.tokenMint] && (
                      <div className="text-red-500 text-xs">Image not found.</div>
