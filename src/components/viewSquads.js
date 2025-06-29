@@ -27,7 +27,7 @@ function TokenImage({ imageUrl, mintAddress }) { // Added mintAddress for alt te
         alt={`Image for token ${mintAddress}`}
         width={132}
         height={132}
-        className="rounded-xl"
+        className=""
       />
     </motion.div>
   );
@@ -335,7 +335,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
                   )}
                   {/* Show loading state for images */}
                   {chat.tokenMint && loadingImages && (
-                     <div className="size-[132px] rounded-xl bg-gray-100 animate-pulse" />
+                     <div className="size-[132px] bg-gray-100 animate-pulse" />
                   )}
                    {chat.tokenMint && !loadingImages && !tokenImages[chat.tokenMint] && (
                      <div className="text-red-500 text-xs">Image not found.</div>
