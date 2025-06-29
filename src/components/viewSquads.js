@@ -205,7 +205,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
   }
 
   return (
-    <div className='mt-[10%] md:mt-[7%]'>
+    <div className='mt-[10%] md:mt-[5%]'>
       <div className="text-4xl md:text-6xl font-bold text-center mb-1 text-white">Find Your Squad.</div>
       <div className="text-sm md:text-lg font-bold text-center mb-4 text-gray-300">time to get lockd in</div>
       

@@ -48,7 +48,7 @@ export default function Home() {
           <div className="p-8">
             {/* Wallet connection button positioned at top right */}
             <div className="text-center absolute top-5 right-5 z-20">
-              <WalletMultiButton>{connected ? 'Sign-Out' : 'Sign-In'}</WalletMultiButton>
+              <WalletMultiButton>{connected ? 'sign-out' : 'sign-in'}</WalletMultiButton>
             </div>
             <div>
               {/* Render both components but control visibility */}
@@ -97,7 +97,7 @@ export default function Home() {
                   >
                     <div className="flex justify-center items-center gap-2">
                       {showTokenz ? (
-                        <span className="text-sm md:text-base">NVM</span>
+                        <span className="text-sm md:text-base">nvm</span>
                       ) : (
                         <motion.span
                           className="text-sm md:text-base"
@@ -110,7 +110,7 @@ export default function Home() {
                             ease: "easeInOut"
                           }}
                         >
-                          [ Create + ]
+                          [ create + ]
                         </motion.span>
                       )}
                     </div>
