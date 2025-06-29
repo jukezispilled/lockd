@@ -142,7 +142,7 @@ export const ChatHeader = ({ chatData }) => {
               <FiArrowLeft size={24} /> {/* Replaced emoji with icon */}
             </button>
             <div>
-              <h1 className="text-xl font-bold text-white">{chatData.name} <span className='hidden md:inline'>•</span> ({chatData.tokenSym})</h1>
+              <h1 className="text-xl font-bold text-white">{chatData.name} ({chatData.tokenSym})</h1>
                 <div
                     className="flex items-center cursor-pointer"
                     onClick={(e) => handleCopyClick(e, chatData.tokenMint)}
