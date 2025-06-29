@@ -1228,7 +1228,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
                 className="text-gray-300 hover:text-white transition-colors p-2 rounded-lg"
                 title="Close"
               >
-                <FaTimes className="w-4 h-4" />
+                close
               </button>
             </div>
           </div>
