@@ -334,7 +334,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15 }}
           >
-            <div className="bg-black p-6 border border-[#333] mb-2 max-w-2xl shadow-xs">
+            <div className="bg-black p-6 rounded-sm border border-[#333] mb-2 max-w-2xl shadow-xs">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -347,7 +347,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       value={formData.name}
                       onChange={handleInputChange}
                       placeholder="e.x. Anon"
-                      className="w-full p-3 border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
                       disabled={isCreatingToken}
                       required
                     />
@@ -363,7 +363,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       value={formData.symbol}
                       onChange={handleInputChange}
                       placeholder="e.x. ANON"
-                      className="w-full p-3 border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
                       disabled={isCreatingToken}
                       required
                       maxLength={10}
@@ -381,7 +381,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                     onChange={handleInputChange}
                     placeholder="Describe your token..."
                     rows={3}
-                    className="w-full p-3 border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
+                    className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
                     disabled={isCreatingToken}
                     required
                   />
@@ -398,7 +398,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       value={formData.twitter}
                       onChange={handleInputChange}
                       placeholder="https://x.com/..."
-                      className="w-full p-3 border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
                       disabled={isCreatingToken}
                     />
                   </div>
@@ -413,7 +413,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       value={formData.telegram}
                       onChange={handleInputChange}
                       placeholder="https://t.me/..."
-                      className="w-full p-3 border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
                       disabled={isCreatingToken}
                     />
                   </div>
@@ -428,7 +428,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       value={formData.website}
                       onChange={handleInputChange}
                       placeholder="https://..."
-                      className="w-full p-3 border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3  rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
                       disabled={isCreatingToken}
                     />
                   </div>
@@ -440,8 +440,8 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       Image*
                     </label>
                     <div
-                      className={`flex items-center space-x-2 w-full p-1 border-1 transition-colors duration-200 ${
-                        isDraggingOver ? 'border-black bg-gray-50 border-dashed' : 'border-[#333] border-solid'
+                      className={`flex items-center space-x-2 w-full p-1 border-1 transition-colors duration-200 rounded-sm ${
+                        isDraggingOver ? 'border-black bg-[#333] border-dashed' : 'border-[#333] border-solid'
                       }`}
                       onDragOver={handleDragOver}
                       onDragLeave={handleDragLeave}
@@ -479,7 +479,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       placeholder="0.1"
                       step="0.01"
                       min="0.005"
-                      className="w-full p-3 border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
                       disabled={isCreatingToken}
                     />
                   </div>
@@ -488,7 +488,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                 <button
                   type="submit"
                   disabled={isCreatingToken || isCreatingChat || !formIsValid} // Disabled when creating or if form is not valid
-                  className={`w-full py-3 px-6 font-semibold border border-[#333] ${
+                  className={`w-full py-3 px-6 font-semibold rounded-sm border border-[#333] ${
                     isCreatingToken || isCreatingChat || !formIsValid
                       ? 'bg-black text-white cursor-not-allowed'
                       : 'bg-black text-white cursor-pointer'
