@@ -380,7 +380,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                     value={formData.description}
                     onChange={handleInputChange}
                     placeholder="Describe your token..."
-                    rows={3}
+                    rows={1}
                     className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
                     disabled={isCreatingToken}
                     required
