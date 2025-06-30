@@ -277,7 +277,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.25 }}
-          className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-start cursor-pointer pb-4 justify-items-center ${
+          className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-start cursor-pointer pb-4 justify-items-center ${
             isRefreshing ? 'opacity-70 pointer-events-none' : ''
           }`}
         >
@@ -289,7 +289,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.25 }}
-                className="h-[225px] w-full max-w-[400px] md:w-[225px] bg-black border border-black hover:border-[#333] transition duration-100 ease-in-out p-2 md:p-0 flex flex-col justify-between relative"
+                className="h-[225px] w-full max-w-[400px] md:w-[27%px] bg-black border border-black hover:border-[#333] transition duration-100 ease-in-out p-2 md:p-0 flex flex-col justify-between relative"
                 onClick={() => handleChatClick(chat._id)}
               >
                 <div>
