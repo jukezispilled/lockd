@@ -44,7 +44,7 @@ export default function Home() {
       {/* RetroGrid background component */}
       <RetroGrid />
       <div className="container mx-auto px-2 md:px-2 py-8">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="p-8">
             {/* Wallet connection button positioned at top right */}
             <div className="text-center absolute top-4 right-5 z-20">

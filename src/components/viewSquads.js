@@ -277,7 +277,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.25 }}
-          className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-start cursor-pointer pb-4 justify-items-center ${
+          className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-0 items-start cursor-pointer pb-4 justify-items-center ${
             isRefreshing ? 'opacity-70 pointer-events-none' : ''
           }`}
         >
