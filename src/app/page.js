@@ -48,7 +48,7 @@ export default function Home() {
           <div className="p-8">
             {/* Wallet connection button positioned at top right */}
             <div className="text-center absolute top-4 right-5 z-20">
-              <WalletMultiButton>{connected ? 'sign-out' : 'sign-in'}</WalletMultiButton>
+              <WalletMultiButton>{connected ? 'wallet' : 'wallet'}</WalletMultiButton>
             </div>
             <div>
               {/* Render both components but control visibility */}
