@@ -29,6 +29,7 @@ export default function ChatPage() {
   const [roomUrl, setRoomUrl] = useState(null);
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
   const [verificationAttempted, setVerificationAttempted] = useState(false);
+  const [isNearBottom, setIsNearBottom] = useState(true); // Track if user is near bottom
   const messagesEndRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
@@ -89,9 +90,10 @@ export default function ChatPage() {
     if (!scrollContainerRef.current) return;
     
     const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
-    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+    const nearBottom = scrollHeight - scrollTop - clientHeight < 100;
     
-    setShowJumpButton(!isNearBottom);
+    setIsNearBottom(nearBottom);
+    setShowJumpButton(!nearBottom);
   };
 
   // Create or join Daily.co room
@@ -155,12 +157,12 @@ export default function ChatPage() {
     }
   }, [connected, publicKey, chatData, hasAccess, verificationAttempted]);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Conditionally auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (hasAccess) {
+    if (hasAccess && isNearBottom) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, hasAccess]);
+  }, [messages, hasAccess, isNearBottom]);
 
   // Poll for new messages every 10 minutes (only if has access)
   useEffect(() => {
@@ -335,6 +337,20 @@ export default function ChatPage() {
                 </motion.button>
                 <hr className="my-4 border-t border-[#333]" />
                 <div className='cursor-pointer text-white'>#general</div>
+                <div className="hidden md:block">
+                  <hr className="my-4 border-t border-[#333]" />
+                  <div className='text-white mb-4'>Apps</div>
+                  <div className="relative">
+                    <img 
+                      src="/d.png" 
+                      alt="D" 
+                      className="w-[86px] h-auto border border-[#333] rounded-sm"
+                    />
+                    <div className="absolute -top-2 right-5 bg-black border border-[#333] text-white text-xs font-medium px-2 py-1 rounded">
+                      soon
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Main Chat Container */}
