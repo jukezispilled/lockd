@@ -6,7 +6,7 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RetroGrid } from '@/components/magicui/RetroGrid';
-import { BiRefresh, BiInfoCircle, BiX } from "react-icons/bi";
+import { BiRefresh, BiInfoCircle, BiX, BiCopy, BiCheck } from "react-icons/bi";
 import Image from 'next/image';
 
 import Tokenz from '@/components/createToken'; // Assuming this path is correct in your project
@@ -22,6 +22,10 @@ export default function Home() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [showInfoModal, setShowInfoModal] = useState(true);
+  const [isCopied, setIsCopied] = useState(false);
+
+  // Contract address - replace with your actual contract address
+  const CONTRACT_ADDRESS = "XXXXXXXXXXXXXXXXXXXX";
 
   // Ensure the component is mounted on the client-side before rendering
   useEffect(() => {
@@ -36,6 +40,21 @@ export default function Home() {
     // Add a small delay to show the refresh animation
     await new Promise(resolve => setTimeout(resolve, 1000));
     setIsRefreshing(false);
+  };
+
+  // Handler for copying contract address
+  const handleCopyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(CONTRACT_ADDRESS);
+      setIsCopied(true);
+      // Reset the copied state after 2 seconds
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+      console.log('Contract address copied to clipboard');
+    } catch (err) {
+      console.error('Failed to copy contract address:', err);
+    }
   };
 
   // Render nothing until the component is mounted to prevent hydration issues
@@ -203,9 +222,50 @@ export default function Home() {
                         <p className="text-gray-300 mb-4">
                           we believe lockd is the next step in strengthening and evolving our token squads so they can reach new heights in active users, market cap, purpose, and more.
                         </p>
-                        <p className="text-gray-300">
+                        <p className="text-gray-300 mb-6">
                           try it out now and give us feedback! early squad creators and participants will be rewarded! cmon bro, get lockd in.
                         </p>
+                        
+                        {/* Bottom section with contract address and Twitter link */}
+                        <div className="flex justify-between items-end">
+                          {/* Contract address section - bottom left */}
+                          <div className="flex items-center gap-2">
+                            <div className="text-xs text-gray-400">
+                              <div className="font-mono text-gray-300 truncate max-w-[120px]">
+                                {CONTRACT_ADDRESS}
+                              </div>
+                            </div>
+                            <button
+                              onClick={handleCopyAddress}
+                              className="text-gray-400 hover:text-white transition-colors cursor-pointer p-1"
+                              title={isCopied ? "Copied!" : "Copy contract address"}
+                            >
+                              {isCopied ? (
+                                <BiCheck size={16} className="text-green-400" />
+                              ) : (
+                                <BiCopy size={16} />
+                              )}
+                            </button>
+                          </div>
+
+                          {/* Twitter link - bottom right */}
+                          <div className="flex justify-end">
+                            <a
+                              href="https://x.com/lockddotfun"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="cursor-pointer"
+                            >
+                              <Image
+                                src="/x.png"
+                                alt="Twitter"
+                                width={24}
+                                height={24}
+                                className="object-contain"
+                              />
+                            </a>
+                          </div>
+                        </div>
                       </div>
                     </motion.div>
                   </motion.div>

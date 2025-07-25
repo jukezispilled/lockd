@@ -290,7 +290,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.25 }}
-                className="h-[200px] xl:h-[180px] w-full max-w-[400px] md:w-[27%px] bg-black border border-black hover:border-[#333] transition duration-100 ease-in-out p-1.5 md:p-0 flex flex-col justify-between relative"
+                className="h-[200px] lg:h-[180px] w-full max-w-[400px] md:w-[27%px] bg-black border border-black hover:border-[#333] transition duration-100 ease-in-out p-1.5 md:p-0 flex flex-col justify-between relative"
                 onClick={() => handleChatClick(chat._id)}
               >
                 <div>
