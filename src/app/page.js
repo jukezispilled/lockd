@@ -49,7 +49,7 @@ export default function Home() {
         <div className="max-w-[1100px] mx-auto">
           <div className="p-8">
             {/* Logo positioned at top center */}
-            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20">
+            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 invisible md:visible">
               <Image
                 src="/logo.png"
                 alt="Logo"
