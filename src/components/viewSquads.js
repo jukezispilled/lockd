@@ -44,6 +44,19 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
   const router = useRouter();
   const [copiedMint, setCopiedMint] = useState(null); // State to track which mint was copied
 
+  function formatAmount(amount) {
+    if (typeof amount !== 'number') amount = Number(amount);
+    if (isNaN(amount)) return amount;
+  
+    if (amount >= 1_000_000) {
+      return (amount / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+    }
+    if (amount >= 1_000) {
+      return (amount / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+    }
+    return amount.toString();
+  }  
+
   // Function to fetch group chats
   const fetchGroupChats = useCallback(async () => {
     setLoadingChats(true);
@@ -335,7 +348,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
                   <div className="absolute bottom-2 left-2 z-10 flex items-center gap-[1px]">
                     <IoIosLock className="text-gray-400" size={16} />
                     <p className="text-gray-300 text-sm">
-                      {chat.amount}
+                      {formatAmount(chat.amount)}
                     </p>
                   </div>
                 )}

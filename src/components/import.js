@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PublicKey } from '@solana/web3.js';
 import { useChatCreation } from '@/app/hooks/useChatCreation';
 
@@ -10,13 +10,58 @@ const HELIUS_RPC_URL = process.env.NEXT_PUBLIC_HELIUS_API_KEY
   ? `https://mainnet.helius-rpc.com/?api-key=${process.env.NEXT_PUBLIC_HELIUS_API_KEY}`
   : ''; // Fallback for local development or if not set
 
+const MAX_AMOUNT = 10000000; // 10 million
+const RATE_LIMIT_MINUTES = 5; // 5 minutes between squad creations
+const RATE_LIMIT_MS = RATE_LIMIT_MINUTES * 60 * 1000; // Convert to milliseconds
+
 export default function ImportTokenForChat({ onImportSuccess, publicKey, setGroupChat }) {
   const [tokenAddress, setTokenAddress] = useState('');
   const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [timeUntilNextCreation, setTimeUntilNextCreation] = useState(0);
   const { createGroupChat, isCreatingChat, chatCreationStatus, setChatCreationStatus } = useChatCreation();
+
+  // Check rate limit for current public key
+  const checkRateLimit = () => {
+    if (!publicKey) return { canCreate: true, timeLeft: 0 };
+
+    const publicKeyString = publicKey.toString();
+    const lastCreationTime = localStorage.getItem(`squadCreation_${publicKeyString}`);
+    
+    if (!lastCreationTime) {
+      return { canCreate: true, timeLeft: 0 };
+    }
+
+    const timeSinceLastCreation = Date.now() - parseInt(lastCreationTime);
+    const timeLeft = RATE_LIMIT_MS - timeSinceLastCreation;
+
+    return {
+      canCreate: timeSinceLastCreation >= RATE_LIMIT_MS,
+      timeLeft: Math.max(0, timeLeft)
+    };
+  };
+
+  // Update rate limit timer
+  useEffect(() => {
+    const updateTimer = () => {
+      const { timeLeft } = checkRateLimit();
+      setTimeUntilNextCreation(timeLeft);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(interval);
+  }, [publicKey]);
+
+  // Format time remaining
+  const formatTimeRemaining = (ms) => {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
 
   const handleTokenAddressChange = (e) => {
     setTokenAddress(e.target.value);
@@ -31,6 +76,11 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey, setGrou
       setAmount(value);
       setError('');
       setSuccessMessage('');
+      
+      // Check if amount exceeds maximum
+      if (value && parseFloat(value) > MAX_AMOUNT) {
+        setError(`Maximum amount is ${MAX_AMOUNT.toLocaleString()}`);
+      }
     }
   };
 
@@ -96,8 +146,20 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey, setGrou
       return;
     }
 
+    if (parseFloat(amount) > MAX_AMOUNT) {
+      setError(`Maximum amount is ${MAX_AMOUNT.toLocaleString()}`);
+      return;
+    }
+
     if (!publicKey) {
       setError('Please connect your wallet.');
+      return;
+    }
+
+    // Check rate limit
+    const { canCreate, timeLeft } = checkRateLimit();
+    if (!canCreate) {
+      setError(`You can create another squad in ${formatTimeRemaining(timeLeft)}`);
       return;
     }
 
@@ -126,6 +188,10 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey, setGrou
       }, publicKey);
 
       if (chatResult) {
+        // Record the creation time for rate limiting
+        const publicKeyString = publicKey.toString();
+        localStorage.setItem(`squadCreation_${publicKeyString}`, Date.now().toString());
+        
         setSuccessMessage('Squad created successfully!');
         
         // Send the chat data to setGroupChat if provided
@@ -158,6 +224,9 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey, setGrou
     }
   };
 
+  const { canCreate, timeLeft } = checkRateLimit();
+  const isRateLimited = !canCreate;
+
   return (
     <div className="bg-black p-6 rounded-sm border border-[#333] mb-2 max-w-2xl shadow-xs">
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -178,7 +247,7 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey, setGrou
 
         <div>
           <label className="block text-sm font-medium text-white mb-2">
-            Amount*
+            Amount* <span className="text-gray-400 text-xs">(max: {MAX_AMOUNT.toLocaleString()})</span>
           </label>
           <input
             type="text"
@@ -193,12 +262,23 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey, setGrou
 
         <button
           type="submit"
-          disabled={isLoading || isCreatingChat || !tokenAddress || !amount}
-          className="w-full bg-black text-white rounded-sm border border-[#333] py-3 px-6 font-semibold disabled:cursor-not-allowed cursor-pointer"
+          disabled={isLoading || isCreatingChat || !tokenAddress || !amount || isRateLimited || parseFloat(amount) > MAX_AMOUNT}
+          className="w-full bg-black text-white rounded-sm border border-[#333] py-3 px-6 font-semibold disabled:cursor-not-allowed cursor-pointer disabled:opacity-50"
         >
-          {isLoading ? 'Fetching Token Data...' : isCreatingChat ? 'Setting up Chat...' : 'Create +'}
+          {isLoading ? 'Fetching Token Data...' : 
+           isCreatingChat ? 'Setting up Chat...' : 
+           isRateLimited ? `Wait ${formatTimeRemaining(timeLeft)}` :
+           'Create +'}
         </button>
       </form>
+
+      {isRateLimited && (
+        <div className="bg-orange-50 border border-orange-200 p-4 mt-4 rounded-sm">
+          <p className="text-orange-800">
+            Rate limit active. You can create another squad in {formatTimeRemaining(timeLeft)}.
+          </p>
+        </div>
+      )}
 
       {error && (
         <div className="bg-red-50 border border-red-200 p-4 mt-4 rounded-sm">
