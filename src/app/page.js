@@ -25,7 +25,7 @@ export default function Home() {
   const [isCopied, setIsCopied] = useState(false);
 
   // Contract address - replace with your actual contract address
-  const CONTRACT_ADDRESS = "XXXXXXXXXXXXXXXXXXXX";
+  const CONTRACT_ADDRESS = "uploading...";
 
   // Ensure the component is mounted on the client-side before rendering
   useEffect(() => {
