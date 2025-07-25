@@ -47,7 +47,7 @@ export const MessageInput = ({ onSendMessage, disabled, chatId }) => {
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="What's up?"
-            className="w-full py-5 px-3 pr-14 text-white border border-[#333] bg-black rounded-full focus:outline-none focus:ring-1 focus:ring-zinc-700 focus:border-transparent resize-none min-h-[48px] max-h-32 shadow-xs"
+            className="w-full py-5 px-3 pr-14 text-white border border-[#333] bg-black rounded-md focus:outline-none focus:ring-1 focus:ring-zinc-700 focus:border-transparent resize-none min-h-[48px] max-h-32 shadow-xs"
             rows={1}
             disabled={disabled}
           />

@@ -3,13 +3,12 @@
 import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { MdMic, MdMicOff, MdVideocam, MdVideocamOff, MdScreenShare, MdStopScreenShare, MdCallEnd } from 'react-icons/md';
+import { MdMic, MdMicOff, MdVideocam, MdVideocamOff, MdCallEnd } from 'react-icons/md';
 import { FaUsers, FaTimes } from 'react-icons/fa';
 
 // Memoized video component to prevent unnecessary re-renders
 const MemoizedVideoElement = memo(({ 
   participant, 
-  isScreen = false, 
   setVideoRef, 
   isAudioMuted,
   className = "",
@@ -19,8 +18,8 @@ const MemoizedVideoElement = memo(({
   
   return (
     <video
-      key={`${participant.session_id}-${isScreen ? 'screen' : 'main'}`}
-      ref={el => setVideoRef(el, participant.session_id, isScreen)}
+      key={`${participant.session_id}-main`}
+      ref={el => setVideoRef(el, participant.session_id)}
       autoPlay
       playsInline
       muted={participant.local} // Only mute local participant to prevent echo
@@ -34,8 +33,7 @@ const MemoizedVideoElement = memo(({
     prevProps.participant.session_id !== nextProps.participant.session_id ||
     prevProps.participant.video !== nextProps.participant.video ||
     prevProps.participant.videoTrack?.id !== nextProps.participant.videoTrack?.id ||
-    prevProps.participant.local !== nextProps.participant.local ||
-    prevProps.isScreen !== nextProps.isScreen;
+    prevProps.participant.local !== nextProps.participant.local;
   
   if (!videoPropsChanged) {
     console.log(`🚫 Preventing re-render of video element for ${prevProps.participant.session_id}`);
@@ -125,7 +123,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
   const [participants, setParticipants] = useState({});
   const [participantAudioStates, setParticipantAudioStates] = useState({});
   const [localParticipant, setLocalParticipant] = useState(null);
-  const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [meetingState, setMeetingState] = useState('new');
   const [forceUpdate, setForceUpdate] = useState(0);
@@ -235,7 +232,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
         hasVideoTrack: !!participant.videoTrack,
         hasAudio: participant.audio,
         hasAudioTrack: !!participant.audioTrack,
-        hasScreenShare: !!participant.screenVideoTrack,
         isLocal: participant.local
       });
       
@@ -335,35 +331,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
           }
         }
       }
-
-      // Handle screen share stream
-      const screenElement = videoRefs.current[`${sessionId}-screen`];
-      if (screenElement) {
-        if (participant.screenVideoTrack) {
-          try {
-            const newScreenStream = new MediaStream([participant.screenVideoTrack]);
-            
-            if (!screenElement.srcObject || 
-                screenElement.srcObject.getTracks()[0]?.id !== participant.screenVideoTrack.id) {
-              
-              streamUpdateTimeouts.current[`${sessionId}-screen`] = setTimeout(() => {
-                if (screenElement && participant.screenVideoTrack) {
-                  screenElement.srcObject = newScreenStream;
-                  screenElement.play().catch(err => {
-                    console.warn('Screen share play failed:', err);
-                  });
-                }
-              }, 50);
-            }
-          } catch (err) {
-            console.warn('Error creating screen share stream:', err);
-          }
-        } else {
-          if (screenElement.srcObject) {
-            screenElement.srcObject = null;
-          }
-        }
-      }
     });
   }, []);
 
@@ -430,8 +397,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
         setMeetingState('new');
         videoRefs.current = {};
         audioRefs.current = {};
-        setIsScreenSharing(false);
-        setLastVideoStates({}); // Clear video state tracking
         setLastVideoStates({}); // Clear video state tracking
       }
       return;
@@ -601,10 +566,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
               clearTimeout(streamUpdateTimeouts.current[sessionId]);
               delete streamUpdateTimeouts.current[sessionId];
             }
-            if (streamUpdateTimeouts.current[`${sessionId}-screen`]) {
-              clearTimeout(streamUpdateTimeouts.current[`${sessionId}-screen`]);
-              delete streamUpdateTimeouts.current[`${sessionId}-screen`];
-            }
 
             // Clean up video refs
             if (videoRefs.current[sessionId]) {
@@ -614,14 +575,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
                 videoElement.srcObject = null;
               }
               delete videoRefs.current[sessionId];
-            }
-            if (videoRefs.current[`${sessionId}-screen`]) {
-              console.log(`🗑️ Removing screen ref for ${sessionId}`);
-              const screenElement = videoRefs.current[`${sessionId}-screen`];
-              if (screenElement && screenElement.srcObject) {
-                screenElement.srcObject = null;
-              }
-              delete videoRefs.current[`${sessionId}-screen`];
             }
 
             // Clean up audio refs
@@ -751,20 +704,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
               updateVideoStreams(daily.participants());
             }, 100);
           })
-          .on('screen-share-started', (event) => {
-            console.log('Screen share started', event);
-            setIsScreenSharing(event.session_id === daily.participants().local.session_id);
-            setTimeout(() => {
-              updateVideoStreams(daily.participants());
-            }, 300);
-          })
-          .on('screen-share-stopped', (event) => {
-            console.log('Screen share stopped', event);
-            setIsScreenSharing(false);
-            setTimeout(() => {
-              updateVideoStreams(daily.participants());
-            }, 100);
-          })
           .on('error', (event) => {
             console.error('Daily error', event);
             setError(event.errorMsg || 'An error occurred during the call');
@@ -793,8 +732,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
                 element.remove();
               }
             });
-            
-            setIsScreenSharing(false);
           })
           .on('camera-error', (event) => {
             console.error('Camera error', event);
@@ -852,7 +789,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
         setMeetingState('new');
         videoRefs.current = {};
         audioRefs.current = {};
-        setIsScreenSharing(false);
       }
     };
   }, [isOpen, roomUrl]);
@@ -951,28 +887,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
     }
   };
 
-  const toggleScreenShare = async () => {
-    if (!callObject || meetingState !== 'joined') return;
-    
-    try {
-      if (isScreenSharing) {
-        await callObject.stopScreenShare();
-      } else {
-        await callObject.startScreenShare();
-      }
-      
-      setTimeout(() => {
-        const allParticipants = callObject.participants();
-        updateVideoStreams(allParticipants);
-      }, 600);
-      
-    } catch (err) {
-      console.error('Screen share error:', err);
-      setError('Screen sharing is not available');
-      setTimeout(() => setError(null), 3000);
-    }
-  };
-
   const leaveCall = async () => {
     if (callObject) {
       try {
@@ -985,8 +899,8 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
   };
 
   // Enhanced video element ref setter
-  const setVideoRef = useCallback((element, sessionId, isScreen = false) => {
-    const refKey = isScreen ? `${sessionId}-screen` : sessionId;
+  const setVideoRef = useCallback((element, sessionId) => {
+    const refKey = sessionId;
     
     if (element) {
       console.log(`📹 Setting video ref for ${refKey}`);
@@ -999,8 +913,8 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
             const participant = currentParticipants[sessionId];
             
             if (participant && element && element.parentNode) {
-              const track = isScreen ? participant.screenVideoTrack : participant.videoTrack;
-              const hasVideo = isScreen ? !!participant.screenVideoTrack : participant.video;
+              const track = participant.videoTrack;
+              const hasVideo = participant.video;
               
               console.log(`🎬 Attempt ${attempt}/${maxAttempts}: Setting up video for ${sessionId} (local: ${participant.local}), hasVideo: ${hasVideo}, track:`, !!track);
               
@@ -1099,7 +1013,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
   // Memoized video rendering function to prevent unnecessary re-renders
   const memoizedVideoContent = useMemo(() => {
     const participantList = Object.values(participants);
-    const hasScreenShare = participantList.some(p => p.screenVideoTrack);
 
     console.log('🎭 RENDERING VIDEO CONTENT - participants:', participantList.map(p => p.session_id));
     console.log('🎭 Current participant count:', participantList.length);
@@ -1107,46 +1020,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
     if (participantList.length === 0) {
       console.log('🎭 No participants - returning null');
       return null;
-    }
-
-    // If there's screen sharing, prioritize it
-    if (hasScreenShare) {
-      const screenSharingParticipant = participantList.find(p => p.screenVideoTrack);
-      return (
-        <div className="flex flex-col h-full">
-          {/* Screen share - takes most of the space */}
-          {screenSharingParticipant && (
-            <div className="flex-1 bg-black rounded-lg overflow-hidden mb-4 relative">
-              <MemoizedVideoElement
-                participant={screenSharingParticipant}
-                isScreen={true}
-                setVideoRef={setVideoRef}
-                isAudioMuted={!participantAudioStates[screenSharingParticipant.session_id]}
-                className="w-full h-full object-contain"
-              />
-              <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
-                {screenSharingParticipant.user_name || 'Unknown'} is sharing screen
-              </div>
-            </div>
-          )}
-
-          {/* Participant videos in a horizontal strip */}
-          <div className="flex gap-2 h-24">
-            {participantList.map(participant => {
-              console.log(`🎭 Rendering strip participant: ${participant.session_id}`);
-              return (
-                <MemoizedParticipantCard
-                  key={participant.session_id} // Stable key based on session_id
-                  participant={participant}
-                  setVideoRef={setVideoRef}
-                  isAudioMuted={!participantAudioStates[participant.session_id]}
-                  isGrid={false}
-                />
-              );
-            })}
-          </div>
-        </div>
-      );
     }
 
     // Regular video call layout
@@ -1216,10 +1089,10 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
                 'bg-red-500'
               }`}></div>
               <h3 className="font-semibold">
-                {meetingState === 'joined' ? `Voice Chat • ${participantCount} participant${participantCount !== 1 ? 's' : ''}` :
+                {meetingState === 'joined' ? `Video Chat • ${participantCount} participant${participantCount !== 1 ? 's' : ''}` :
                  meetingState === 'loading' ? 'Connecting...' :
                  meetingState === 'error' ? 'Connection Error' :
-                 'Voice Chat'}
+                 'Video Chat'}
               </h3>
             </div>
             <div className="flex items-center gap-2">
@@ -1228,7 +1101,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
                 className="text-gray-300 hover:text-white transition-colors p-2 rounded-lg"
                 title="Close"
               >
-                close
+                end
               </button>
             </div>
           </div>
@@ -1240,7 +1113,7 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
               <div className="absolute inset-0 flex items-center justify-center z-20 bg-black">
                 <div className="text-center text-white">
                   <div className="w-12 h-12 border-3 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                  <p className="text-lg">Connecting to voice chat...</p>
+                  <p className="text-lg">Connecting to video chat...</p>
                   <p className="text-sm text-gray-400 mt-2">Please allow camera and microphone access</p>
                 </div>
               </div>
@@ -1326,24 +1199,6 @@ export function VideoCallModal({ isOpen, onClose, roomUrl, chatId }) {
                   <MdVideocamOff className="w-6 h-6" />
                 ) : (
                   <MdVideocam className="w-6 h-6" />
-                )}
-              </button>
-
-              {/* Screen Share Button */}
-              <button
-                onClick={toggleScreenShare}
-                disabled={!callObject || meetingState !== 'joined'}
-                className={`p-3 rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hidden md:block ${
-                  isScreenSharing
-                    ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/25'
-                    : 'bg-gray-700 hover:bg-gray-600 text-white'
-                }`}
-                title={isScreenSharing ? 'Stop sharing' : 'Share screen'}
-              >
-                {isScreenSharing ? (
-                  <MdStopScreenShare className="w-6 h-6" />
-                ) : (
-                  <MdScreenShare className="w-6 h-6" />
                 )}
               </button>
 

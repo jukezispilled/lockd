@@ -24,13 +24,22 @@ export async function POST(request) {
     const body = await request.json();
     console.log('Request body:', body);
     
-    const { tokenName, tokenSym, tokenMint, creatorPublicKey } = body;
+    const { tokenName, tokenSym, tokenMint, creatorPublicKey, amount } = body;
 
     // Validate required fields
     if (!tokenName || !tokenSym || !tokenMint || !creatorPublicKey) {
       console.error('Missing required fields:', { tokenName, tokenSym, tokenMint, creatorPublicKey });
       return Response.json(
         { error: 'Token name, symbol, mint, and creator public key are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate amount if provided
+    if (amount !== undefined && (typeof amount !== 'number' || amount <= 0 || isNaN(amount))) {
+      console.error('Invalid amount provided:', { amount, type: typeof amount });
+      return Response.json(
+        { error: 'Amount must be a positive number if provided' },
         { status: 400 }
       );
     }
@@ -58,6 +67,12 @@ export async function POST(request) {
       isActive: true
     };
 
+    // Add amount to chatData if provided
+    if (amount !== undefined && amount > 0) {
+      chatData.amount = amount;
+      console.log('Amount included in chat data:', amount);
+    }
+
     console.log('Inserting chat data:', chatData);
 
     // Insert the chat document
@@ -65,11 +80,19 @@ export async function POST(request) {
     
     console.log('Insert result:', result);
 
-    return Response.json({
+    // Prepare response data
+    const responseData = {
       success: true,
       chatId: chatObjectId.toString(),
       chatName: chatData.name
-    });
+    };
+
+    // Include amount in response if it was provided
+    if (amount !== undefined && amount > 0) {
+      responseData.amount = amount;
+    }
+
+    return Response.json(responseData);
 
   } catch (error) {
     console.error('Detailed error in chat creation:', {

@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 // Import icons (you might need to install a library like 'react-icons' or use SVG directly)
-import { FiCopy, FiCheck, FiSearch, FiX } from 'react-icons/fi'; // Added FiSearch and FiX
+import { FiCopy, FiCheck, FiSearch, FiX } from 'react-icons/fi';
+import { IoIosLock } from "react-icons/io";
 
 // TokenImage component now receives imageUrl directly
 function TokenImage({ imageUrl, mintAddress }) { // Added mintAddress for alt text
@@ -25,8 +26,8 @@ function TokenImage({ imageUrl, mintAddress }) { // Added mintAddress for alt te
       <Image
         src={imageUrl}
         alt={`Image for token ${mintAddress}`}
-        width={132}
-        height={132}
+        width={116}
+        height={116}
         className=""
       />
     </motion.div>
@@ -197,7 +198,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.25 }}
-        className="flex justify-center items-center"
+        className="flex h-[80dvh] justify-center items-center text-white"
       >
         No squads found.
       </motion.div>
@@ -289,7 +290,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.25 }}
-                className="h-[225px] w-full max-w-[400px] md:w-[27%px] bg-black border border-black hover:border-[#333] transition duration-100 ease-in-out p-2 md:p-0 flex flex-col justify-between relative"
+                className="h-[200px] xl:h-[180px] w-full max-w-[400px] md:w-[27%px] bg-black border border-black hover:border-[#333] transition duration-100 ease-in-out p-1.5 md:p-0 flex flex-col justify-between relative"
                 onClick={() => handleChatClick(chat._id)}
               >
                 <div>
@@ -328,6 +329,17 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
                     {chat.description || ""}
                   </p>
                 </div>
+                
+                {/* Amount display in bottom left */}
+                {chat.amount && (
+                  <div className="absolute bottom-2 left-2 z-10 flex items-center gap-[1px]">
+                    <IoIosLock className="text-gray-400" size={16} />
+                    <p className="text-gray-300 text-sm">
+                      {chat.amount}
+                    </p>
+                  </div>
+                )}
+                
                 <div className='absolute bottom-2 right-2 z-10'>
                   {/* Only render TokenImage if tokenMint exists and image data is loaded */}
                   {chat.tokenMint && !loadingImages && tokenImages[chat.tokenMint] && (
@@ -335,7 +347,7 @@ export default function Squad({ refreshTrigger, isRefreshing }) {
                   )}
                   {/* Show loading state for images */}
                   {chat.tokenMint && loadingImages && (
-                     <div className="size-[132px] bg-gray-100 animate-pulse" />
+                     <div className="size-[116px] bg-gray-100 animate-pulse" />
                   )}
                    {chat.tokenMint && !loadingImages && !tokenImages[chat.tokenMint] && (
                      <div className="text-red-500 text-xs">Image not found.</div>

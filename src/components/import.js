@@ -10,17 +10,28 @@ const HELIUS_RPC_URL = process.env.NEXT_PUBLIC_HELIUS_API_KEY
   ? `https://mainnet.helius-rpc.com/?api-key=${process.env.NEXT_PUBLIC_HELIUS_API_KEY}`
   : ''; // Fallback for local development or if not set
 
-export default function ImportTokenForChat({ onImportSuccess, publicKey }) {
+export default function ImportTokenForChat({ onImportSuccess, publicKey, setGroupChat }) {
   const [tokenAddress, setTokenAddress] = useState('');
+  const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const { createGroupChat, isCreatingChat, chatCreationStatus, setChatCreationStatus } = useChatCreation();
 
-  const handleInputChange = (e) => {
+  const handleTokenAddressChange = (e) => {
     setTokenAddress(e.target.value);
     setError('');
     setSuccessMessage('');
+  };
+
+  const handleAmountChange = (e) => {
+    const value = e.target.value;
+    // Allow only numbers and decimal point
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      setAmount(value);
+      setError('');
+      setSuccessMessage('');
+    }
   };
 
   const fetchTokenMetadata = async (mintAddress) => {
@@ -80,6 +91,11 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey }) {
       return;
     }
 
+    if (!amount || parseFloat(amount) <= 0) {
+      setError('Please enter a valid amount.');
+      return;
+    }
+
     if (!publicKey) {
       setError('Please connect your wallet.');
       return;
@@ -99,21 +115,36 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey }) {
     try {
       const { name, symbol } = await fetchTokenMetadata(tokenAddress);
 
-      console.log('Fetched token data:', { name, symbol, mint: tokenAddress });
+      console.log('Fetched token data:', { name, symbol, mint: tokenAddress, amount });
 
       setChatCreationStatus('Creating squad...');
       const chatResult = await createGroupChat({
         name: name,
         symbol: symbol,
-        mint: tokenAddress
+        mint: tokenAddress,
+        amount: parseFloat(amount)
       }, publicKey);
 
       if (chatResult) {
         setSuccessMessage('Squad created successfully!');
+        
+        // Send the chat data to setGroupChat if provided
+        if (setGroupChat) {
+          setGroupChat({
+            name: name,
+            symbol: symbol,
+            mint: tokenAddress,
+            amount: parseFloat(amount),
+            chatId: chatResult.id || chatResult // Adjust based on your chatResult structure
+          });
+        }
+
         if (onImportSuccess) {
           onImportSuccess(chatResult);
         }
-        setTokenAddress(''); // Clear the input field
+        
+        setTokenAddress(''); // Clear the input fields
+        setAmount('');
       } else {
         setError('Failed to create squad for the imported token.');
       }
@@ -137,9 +168,24 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey }) {
           <input
             type="text"
             value={tokenAddress}
-            onChange={handleInputChange}
+            onChange={handleTokenAddressChange}
             placeholder="e.x. Hx...1a2b"
-            className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
+            className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white bg-black"
+            disabled={isLoading || isCreatingChat}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-white mb-2">
+            Amount*
+          </label>
+          <input
+            type="text"
+            value={amount}
+            onChange={handleAmountChange}
+            placeholder="0.0"
+            className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white bg-black"
             disabled={isLoading || isCreatingChat}
             required
           />
@@ -147,7 +193,7 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey }) {
 
         <button
           type="submit"
-          disabled={isLoading || isCreatingChat || !tokenAddress}
+          disabled={isLoading || isCreatingChat || !tokenAddress || !amount}
           className="w-full bg-black text-white rounded-sm border border-[#333] py-3 px-6 font-semibold disabled:cursor-not-allowed cursor-pointer"
         >
           {isLoading ? 'Fetching Token Data...' : isCreatingChat ? 'Setting up Chat...' : 'Create +'}
@@ -155,19 +201,19 @@ export default function ImportTokenForChat({ onImportSuccess, publicKey }) {
       </form>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 p-4 mt-4">
+        <div className="bg-red-50 border border-red-200 p-4 mt-4 rounded-sm">
           <p className="text-red-800">{error}</p>
         </div>
       )}
 
       {successMessage && (
-        <div className="bg-green-50 border border-green-200 p-4 mt-4">
+        <div className="bg-green-50 border border-green-200 p-4 mt-4 rounded-sm">
           <p className="text-green-800">{successMessage}</p>
         </div>
       )}
 
       {chatCreationStatus && !successMessage && !error && (
-        <div className="bg-blue-50 border border-blue-200 p-4 mt-4">
+        <div className="bg-blue-50 border border-blue-200 p-4 mt-4 rounded-sm">
           <p className="text-blue-800">{chatCreationStatus}</p>
         </div>
       )}

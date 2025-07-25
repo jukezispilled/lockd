@@ -9,7 +9,7 @@ import ImportTokenForChat from './import';
 import { motion, AnimatePresence } from 'framer-motion'; // Import motion and AnimatePresence
 
 // Token creation form component
-export default function Tokenz({ publicKey, connected, signTransaction, connection, onTokenCreationSuccess }) {
+export default function Tokenz({ publicKey, connected, signTransaction, connection, onTokenCreationSuccess, setGroupChat }) {
   const [formData, setFormData] = useState({
     name: '',
     symbol: '',
@@ -18,6 +18,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
     telegram: '',
     website: '',
     devBuyAmount: '0.005', // SOL amount for dev buy
+    chatAmount: '0', // Amount for chat/squad
     image: null // This will store the File object
   });
 
@@ -39,16 +40,28 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
 
   // Effect to re-evaluate form validity whenever formData changes
   useEffect(() => {
-    const { name, symbol, description, image } = formData;
-    setFormIsValid(!!name && !!symbol && !!description && !!image);
+    const { name, symbol, description, image, chatAmount } = formData;
+    setFormIsValid(!!name && !!symbol && !!description && !!image && !!chatAmount && parseFloat(chatAmount) > 0);
   }, [formData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    // Handle amount inputs with number validation
+    if (name === 'chatAmount') {
+      // Allow only numbers and decimal point
+      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+        setFormData(prev => ({
+          ...prev,
+          [name]: value
+        }));
+      }
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleFileSelection = (file) => {
@@ -211,17 +224,30 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
         console.log('About to create squad with tokenData:', {
             name: tokenData.name,
             symbol: tokenData.symbol,
-            mint: mintKeypair.publicKey.toString()
+            mint: mintKeypair.publicKey.toString(),
+            amount: parseFloat(tokenData.chatAmount)
         });
 
         const chatResult = await createGroupChat({
             name: tokenData.name,
             symbol: tokenData.symbol,
-            mint: mintKeypair.publicKey.toString()
+            mint: mintKeypair.publicKey.toString(),
+            amount: parseFloat(tokenData.chatAmount)
         }, publicKey);
         
         if (chatResult) {
             setCreatedChatData(chatResult);
+            
+            // Send the complete data to setGroupChat if provided
+            if (setGroupChat) {
+              setGroupChat({
+                name: tokenData.name,
+                symbol: tokenData.symbol,
+                mint: mintKeypair.publicKey.toString(),
+                amount: parseFloat(tokenData.chatAmount),
+                chatId: chatResult.id || chatResult // Adjust based on your chatResult structure
+              });
+            }
         }
 
         if (onTokenCreationSuccess) {
@@ -312,7 +338,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
     e.preventDefault();
     if (!formIsValid) { // Use the formIsValid state here
       console.error('Please fill in all required fields.');
-      setCreationStatus('Error: Please fill in all required fields (Name, Ticker, Description, Image).');
+      setCreationStatus('Error: Please fill in all required fields (Name, Ticker, Description, Image, Squad Amount).');
       return;
     }
     createToken(formData);
@@ -347,7 +373,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       value={formData.name}
                       onChange={handleInputChange}
                       placeholder="e.x. Anon"
-                      className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white bg-black"
                       disabled={isCreatingToken}
                       required
                     />
@@ -363,7 +389,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       value={formData.symbol}
                       onChange={handleInputChange}
                       placeholder="e.x. ANON"
-                      className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white bg-black"
                       disabled={isCreatingToken}
                       required
                       maxLength={10}
@@ -381,7 +407,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                     onChange={handleInputChange}
                     placeholder="Describe your token..."
                     rows={1}
-                    className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
+                    className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white bg-black"
                     disabled={isCreatingToken}
                     required
                   />
@@ -398,7 +424,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       value={formData.twitter}
                       onChange={handleInputChange}
                       placeholder="https://x.com/..."
-                      className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white bg-black"
                       disabled={isCreatingToken}
                     />
                   </div>
@@ -413,7 +439,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       value={formData.telegram}
                       onChange={handleInputChange}
                       placeholder="https://t.me/..."
-                      className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white bg-black"
                       disabled={isCreatingToken}
                     />
                   </div>
@@ -428,13 +454,13 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       value={formData.website}
                       onChange={handleInputChange}
                       placeholder="https://..."
-                      className="w-full p-3  rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3  rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white bg-black"
                       disabled={isCreatingToken}
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label htmlFor="token-image-upload" className="block text-sm font-medium text-white mb-2">
                       Image*
@@ -479,8 +505,24 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                       placeholder="0.1"
                       step="0.01"
                       min="0.005"
-                      className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white"
+                      className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white bg-black"
                       disabled={isCreatingToken}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-2">
+                      Squad Amount*
+                    </label>
+                    <input
+                      type="text"
+                      name="chatAmount"
+                      value={formData.chatAmount}
+                      onChange={handleInputChange}
+                      placeholder="0.0"
+                      className="w-full p-3 rounded-sm border border-[#333] focus:outline-none focus:ring-2 focus:ring-black text-white bg-black"
+                      disabled={isCreatingToken}
+                      required
                     />
                   </div>
                 </div>
@@ -488,10 +530,10 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
                 <button
                   type="submit"
                   disabled={isCreatingToken || isCreatingChat || !formIsValid} // Disabled when creating or if form is not valid
-                  className={`w-full py-3 px-6 font-semibold rounded-sm border border-[#333] ${
+                  className={`w-full py-3 px-6 font-semibold rounded-sm border border-[#333] transition-colors ${
                     isCreatingToken || isCreatingChat || !formIsValid
                       ? 'bg-black text-white cursor-not-allowed'
-                      : 'bg-black text-white cursor-pointer'
+                      : 'bg-black text-white cursor-pointer hover:bg-gray-900'
                   }`}
                 >
                   {isCreatingToken ? 'Creating Token...' : isCreatingChat ? 'Setting up Squad...' : 'Create +'}
@@ -516,6 +558,7 @@ export default function Tokenz({ publicKey, connected, signTransaction, connecti
             <ImportTokenForChat
               publicKey={publicKey}
               onImportSuccess={handleImportSuccess}
+              setGroupChat={setGroupChat}
             />
             <div
               className='flex justify-center mb-4 text-sm underline text-zinc-400 cursor-pointer invisible md:visible'

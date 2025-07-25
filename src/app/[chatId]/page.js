@@ -5,23 +5,30 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { MessageList } from '@/components/message/MessageList';
 import { MessageInput } from '@/components/message/MessageInput';
 import { ChatHeader } from '@/components/message/ChatHeader';
 import { VideoCallModal } from '@/components/VideoCallModal';
 import { useChatMessages } from '../hooks/useChatMessages';
-
 import { HiSpeakerphone } from "react-icons/hi";
 
 export default function ChatPage() {
   const { chatId } = useParams();
+  const { publicKey, connected } = useWallet();
+  
   const [chatData, setChatData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [tokenGateLoading, setTokenGateLoading] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false);
+  const [tokenBalance, setTokenBalance] = useState(0);
   const [showJumpButton, setShowJumpButton] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [roomUrl, setRoomUrl] = useState(null);
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
+  const [verificationAttempted, setVerificationAttempted] = useState(false);
   const messagesEndRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
@@ -32,6 +39,45 @@ export default function ChatPage() {
     error: messageError,
     refreshMessages
   } = useChatMessages(chatId);
+
+  // Verify token ownership
+  const verifyTokenOwnership = async (walletAddress) => {
+    if (!walletAddress || !chatData?.tokenMint || !chatData?.amount) {
+      return false;
+    }
+    
+    setTokenGateLoading(true);
+    
+    try {
+      const response = await fetch('/api/verify-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          walletAddress: walletAddress.toString(),
+          tokenMint: chatData.tokenMint,
+          requiredAmount: chatData.amount,
+          chatId: chatId
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Token verification failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setTokenBalance(data.balance || 0);
+      setHasAccess(data.hasAccess);
+      
+      return data.hasAccess;
+    } catch (err) {
+      setHasAccess(false);
+      return false;
+    } finally {
+      setTokenGateLoading(false);
+    }
+  };
 
   // Function to scroll to bottom
   const scrollToBottom = () => {
@@ -52,7 +98,6 @@ export default function ChatPage() {
   const handleJoinRoom = async () => {
     setIsCreatingRoom(true);
     try {
-      // Create or get existing room for this chat
       const response = await fetch(`/api/video-room/${chatId}`, {
         method: 'POST',
         headers: {
@@ -69,7 +114,6 @@ export default function ChatPage() {
       setShowVideoModal(true);
     } catch (err) {
       console.error('Error joining room:', err);
-      // You could add a toast notification here
     } finally {
       setIsCreatingRoom(false);
     }
@@ -103,21 +147,31 @@ export default function ChatPage() {
     }
   }, [chatId]);
 
+  // Verify token ownership when wallet connects or chat data loads
+  useEffect(() => {
+    if (connected && publicKey && chatData && !hasAccess && !verificationAttempted) {
+      setVerificationAttempted(true);
+      verifyTokenOwnership(publicKey);
+    }
+  }, [connected, publicKey, chatData, hasAccess, verificationAttempted]);
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (hasAccess) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, hasAccess]);
 
-  // Poll for new messages every 10 minutes
+  // Poll for new messages every 10 minutes (only if has access)
   useEffect(() => {
-    if (!chatId) return;
+    if (!chatId || !hasAccess) return;
 
     const interval = setInterval(() => {
       refreshMessages();
     }, 600000);
 
     return () => clearInterval(interval);
-  }, [chatId, refreshMessages]);
+  }, [chatId, refreshMessages, hasAccess]);
 
   if (loading) {
     return (
@@ -169,6 +223,84 @@ export default function ChatPage() {
     );
   }
 
+  // Token gate screen - show if not connected or doesn't have access
+  if (!connected || !hasAccess) {
+    return (
+      <div className="flex flex-col h-[100dvh] overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key="token-gate"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="bg-black flex items-center justify-center flex-1"
+          >
+            <div className="text-center max-w-md mx-auto p-6">
+              <div className="text-yellow-500 text-6xl mb-4">🔐</div>
+              
+              {!connected ? (
+                <>
+                  <p className="text-gray-300 mb-6">
+                    Connect your wallet
+                  </p>
+                  <WalletMultiButton className="!bg-purple-600 !rounded-sm" />
+                </>
+              ) : (
+                <>
+                  {tokenGateLoading ? (
+                    <div className="text-center">
+                      <div className="size-8 border-4 border-gray-300 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                      <p className="text-gray-300">Verifying...</p>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-gray-300 mb-2">
+                        Need to hold at least <span className="text-green-400 font-bold">{chatData?.amount || 0}</span> tokens
+                      </p>
+                      <p className="text-sm text-gray-500 mb-4">
+                        Token: {chatData?.tokenMint || 'Unknown'}
+                      </p>
+                      <p className="text-red-400 mb-4">
+                        Your balance: <span className="font-bold">{tokenBalance}</span>
+                      </p>
+                      
+                      <button
+                        onClick={() => {
+                          setVerificationAttempted(false);
+                          verifyTokenOwnership(publicKey);
+                        }}
+                        disabled={tokenGateLoading}
+                        className={`rounded-sm border text-white px-6 py-2 mb-4 ${
+                          tokenGateLoading 
+                            ? 'bg-gray-600 border-gray-500 cursor-not-allowed' 
+                            : 'bg-black border-[#333] cursor-pointer'
+                        }`}
+                      >
+                        {tokenGateLoading ? (
+                          <div className="flex items-center gap-2">
+                            <div className="size-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+                            Checking...
+                          </div>
+                        ) : (
+                          'Check Again'
+                        )}
+                      </button>
+                      <div className="mt-4">
+                        <WalletMultiButton className="!bg-purple-600 !rounded-sm" />
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    );
+  }
+
+  // Main chat interface (only shown if user has access)
   return (
     <div className="flex flex-col h-[100dvh] overflow-hidden">
       <AnimatePresence mode="wait">

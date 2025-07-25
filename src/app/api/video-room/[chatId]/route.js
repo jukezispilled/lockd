@@ -77,7 +77,7 @@ export async function POST(request, { params }) {
         enable_recording: false,
         start_video_off: false,
         start_audio_off: false,
-        max_participants: 50,
+        max_participants: 200,
         eject_at_room_exp: true,
         exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours from now
       },
